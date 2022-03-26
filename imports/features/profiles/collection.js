@@ -4,7 +4,7 @@ export default Class.create({
     name: "Profile",
     collection: ProfilesCollection,
     fields: {
-       fullname: {
+       username: {
         type: String,
         default: '',
         label: '用户名',
