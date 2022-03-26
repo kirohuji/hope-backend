@@ -2,5 +2,5 @@ import { Meteor } from "meteor/meteor";
 
 if (Meteor.isServer) {
   import "../imports/mock";
-  import "../imports/api";
+  import "../imports/features";
 }
