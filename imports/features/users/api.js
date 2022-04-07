@@ -1,6 +1,7 @@
 import Api from "../../api";
 import Model from './collection'
 import _ from 'lodash'
+import { Roles } from 'meteor/alanning:roles';
 Api.addCollection(Meteor.users, {
   routeOptions: { authRequired: false },
 });
@@ -21,6 +22,40 @@ Api.addRoute('users/pagination', {
         }
       }),
       total: Model.find().count()
+    }
+  }
+});
+Api.addRoute('users/search', {
+  post: function () {
+    return {
+      data: Meteor.users.find(this.bodyParams.selector || {}, this.bodyParams.options).fetch()
+    }
+  }
+});
+Api.addRoute('users/info', {
+  get: {
+    authRequired: true,
+    action: function () {
+      const roles = Meteor.roles.find({
+        _id: {
+          $in: Roles.getRolesForUser(this.userId, {
+            anyScope: true,
+          })
+        }
+      }, {
+        fields: {
+          _id: 1,
+          name: 1,
+          type: 1
+        }
+      }).fetch()
+      const permissions = roles.filter(item => item.type === "permission")
+      return {
+        user: _.omit(this.user, ["services"]),
+        profile: this.user.profile(),
+        roles: roles.filter(item => item.type !== 'permission'),
+        permissions: permissions.map(item => item._id)
+      }
     }
   }
 });

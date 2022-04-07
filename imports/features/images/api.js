@@ -1,17 +1,22 @@
 import Api from "../../api";
 import Images from './collection'
 import _ from 'lodash'
-Api.addRoute('images',{
+Api.addRoute('images/avatar',{
   post: function(){
     console.log(this.request)
-    return 1
-    // Images.insert({
-    //   file: 'data:image/png,base64str…',
-    //   isBase64: true, // <— Mandatory
-    //   fileName: 'pic.png' // <— Mandatory
-    // });
   }
 })
+// Api.addRoute('images',{
+//   post: function(){
+//     console.log(this.request)
+//     return 1
+//     // Images.insert({
+//     //   file: 'data:image/png,base64str…',
+//     //   isBase64: true, // <— Mandatory
+//     //   fileName: 'pic.png' // <— Mandatory
+//     // });
+//   }
+// })
 // Api.addRoute('images/model', {
 //   get: function () {
 //     return {

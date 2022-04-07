@@ -1,4 +1,7 @@
 import './users'
 import './profiles'
-import './images'
 import './models'
+import './tags'
+import './trees'
+import './roles'
+import './scopes'

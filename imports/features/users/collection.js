@@ -30,6 +30,15 @@ export default Class.create({
   name: "User",
   collection: Meteor.users,
   fields: {
+    avatar: {
+      type: String,
+      default: '',
+      label: '头像',
+      width: '60px',
+      table: {
+        use: 'avatar-upload',
+      }
+    },
     username: {
       type: String,
       default: '',
@@ -50,18 +59,18 @@ export default Class.create({
         update: false,
       }
     },
-    email: {
-      label: '电子邮件',
-      type: String,
-      form: {
-        use: 'input',
-        create: true,
-        update: false,
-      },
-      resolve(doc) {
-        return doc.emails[0].address;
-      }
-    },
+    // email: {
+    //   label: '电子邮件',
+    //   type: String,
+    //   form: {
+    //     use: 'input',
+    //     create: true,
+    //     update: false,
+    //   },
+    //   resolve(doc) {
+    //     return doc.emails[0].address;
+    //   }
+    // },
     emails: {
       type: [Object],
       hide: true,
