@@ -37,13 +37,18 @@ Api.addRoute('roles', { authRequired: false }, {
 })
 Api.addRoute("roles/:id", {
     delete: function () {
-        Roles.deleteRole(this.urlParams.id)
-        return true
+        try {
+            Roles.deleteRole(this.urlParams.id)
+            return true
+        } catch (e) {
+            return {
+                statusCode: 500
+            }
+        }
     },
 });
 Api.addRoute("roles/model", {
     get: function () {
-        console.log();
         return {
             fields: Model.schema.fields,
             fieldsNames: Model.schema.fieldsNames,
@@ -70,53 +75,86 @@ Api.addRoute("roles/pagination", {
 });
 Api.addRoute("roles/renameRole", {
     post: function () {
-        Roles.renameRole(this.bodyParams.oldName, this.bodyParams.newName)
-        return true;
+        try {
+            Roles.renameRole(this.bodyParams.oldName, this.bodyParams.newName)
+            return true;
+        } catch (e) {
+            return {
+                statusCode: 500
+            }
+        }
     },
 });
 Api.addRoute("roles/addUsersToRoles", {
     post: function () {
-        Roles.addUsersToRoles(this.bodyParams.users, this.bodyParams.roles, this.bodyParams.options)
-        return true;
+        try {
+            Roles.addUsersToRoles(this.bodyParams.users, this.bodyParams.roles, this.bodyParams.options)
+            return true;
+        } catch (e) {
+            return {
+                statusCode: 500
+            }
+        }
     },
 });
 
 Api.addRoute("roles/addRolesToParent", {
     post: function () {
-        Roles.addRolesToParent(this.bodyParams.rolesNames, this.bodyParams.parentName)
-        return true;
+        try {
+            Roles.addRolesToParent(this.bodyParams.rolesNames, this.bodyParams.parentName)
+            return true
+        } catch (e) {
+            return {
+                statusCode: 500
+            }
+        }
     },
 });
 Api.addRoute("roles/addRolesToParent", {
     post: function () {
-        Roles.addRolesToParent(this.bodyParams.rolesNames, this.bodyParams.parentName)
-        return true;
+        try {
+            Roles.addRolesToParent(this.bodyParams.rolesNames, this.bodyParams.parentName)
+            return true;
+        } catch (e) {
+            return {
+                statusCode: 500
+            }
+        }
     },
 });
 /** 根据角色获取用户列表,类似分页 */
 Api.addRoute("roles/getUsersInRole", {
     post: function () {
-        let ids
-        ids = Roles.getUserAssignmentsForRole(this.bodyParams.roles, this.bodyParams.options).fetch().map(a => a.user._id)
-        return {
-            data: Meteor.users.find({ _id: { $in: ids } }, ((this.bodyParams.options && this.bodyParams.options.queryOptions) || this.bodyParams.queryOptions) || {}).fetch(),
-            total: Meteor.users.find({ _id: { $in: ids } }).count(),
+        try {
+            let ids
+            ids = Roles.getUserAssignmentsForRole(this.bodyParams.roles, this.bodyParams.options).fetch().map(a => a.user._id)
+            return {
+                data: Meteor.users.find({ _id: { $in: ids } }, ((this.bodyParams.options && this.bodyParams.options.queryOptions) || this.bodyParams.queryOptions) || {}).fetch(),
+                total: Meteor.users.find({ _id: { $in: ids } }).count(),
+            }
+        } catch (e) {
+            return {
+                statusCode: 500
+            }
         }
     },
 });
 Api.addRoute("roles/addPermission", {
     post: function () {
-        let role = Meteor.roles.findOne({
-            _id: this.bodyParams.parentName
-        })
-        console.log('role',role)
-        let roles = role.children.map(item => item._id)
-        let remove = _.difference(roles, this.bodyParams.rolesNames)
-        console.log('remove',remove)
-        Roles.removeRolesFromParent(remove, this.bodyParams.parentName)
-        let add = _.difference(this.bodyParams.rolesNames, roles)
-        console.log('add',add)
-        Roles.addRolesToParent(add, this.bodyParams.parentName)
-        return true;
+        try {
+            let role = Meteor.roles.findOne({
+                _id: this.bodyParams.parentName
+            })
+            let roles = role.children.map(item => item._id)
+            let remove = _.difference(roles, this.bodyParams.rolesNames)
+            Roles.removeRolesFromParent(remove, this.bodyParams.parentName)
+            let add = _.difference(this.bodyParams.rolesNames, roles)
+            Roles.addRolesToParent(add, this.bodyParams.parentName)
+            return true
+        } catch (e) {
+            return {
+                statusCode: 500,
+            };
+        }
     }
 })
