@@ -2,7 +2,8 @@
   "name": "hope-backend",
   "private": true,
   "scripts": {
-    "start": "meteor run"
+    "start": "ROOT_URL=http://192.168.31.76:3000 meteor run --port=3000",
+    "dev": "meteor run --port=3000"
   },
   "dependencies": {
     "@babel/runtime": "^7.15.4",

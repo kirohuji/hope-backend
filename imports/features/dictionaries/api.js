@@ -1,11 +1,10 @@
 import Api from "../../api";
-import Model, { ScopeCollection } from './collection'
+import Model, { DictionaryCollection } from './collection'
 import _ from 'lodash'
 import { roleRequired } from "../../utils";
-Api.addCollection(ScopeCollection,
-    // roleRequired('scopes', '作用域(Scopes)')
-);
-Api.addRoute('scopes/model', {
+// Api.addCollection(DictionaryCollection, roleRequired('dictionaries', '字典(Dictionaries)'));
+Api.addCollection(DictionaryCollection);
+Api.addRoute('dictionaries/model', {
     get: function () {
         console.log()
         return {
@@ -14,7 +13,12 @@ Api.addRoute('scopes/model', {
         }
     }
 });
-Api.addRoute('scopes/pagination', {
+Api.addRoute('dictionaries/findOne', {
+    post: function () {
+        return DictionaryCollection.findOne(this.bodyParams.selector || {}, this.bodyParams.options)
+    }
+});
+Api.addRoute('dictionaries/pagination', {
     post: function () {
         return {
             data: Model.find(this.bodyParams.selector || {}, this.bodyParams.options).fetch(),

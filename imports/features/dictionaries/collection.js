@@ -1,8 +1,8 @@
 import { Class } from "meteor/jagi:astronomy";
-export const ScopeCollection = new Mongo.Collection('scopes')
+export const DictionaryCollection = new Mongo.Collection('dictionaries')
 export default Class.create({
-    name: "Scope",
-    collection: ScopeCollection,
+    name: "Dictionary",
+    collection: DictionaryCollection,
     fields: {
         value: {
             type: String,
@@ -28,6 +28,16 @@ export default Class.create({
                 update: true,
             }
         },
+        description: {
+            type: String,
+            default: '',
+            label: '名称',
+            form: {
+                use: 'input',
+                create: true,
+                update: true,
+            }
+        },
         type: {
             type: String,
             default: '',
@@ -38,14 +48,9 @@ export default Class.create({
                 update: true,
             }
         },
-        organization: {
+        json: {
             type: [Object],
             label: '组织权限',
-            default: []
-        },
-        resources: {
-            type: [Object],
-            label: '资源',
             default: []
         }
     }

@@ -63,4 +63,4 @@ export const getRolesForUser = (user, options) => {
     }
     return rev
   }, []))]
-},
+}

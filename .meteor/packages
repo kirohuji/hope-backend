@@ -21,9 +21,10 @@ jagi:astronomy
 alanning:roles
 accounts-base
 accounts-password
-maka:rest
 ostrio:files
 cultofcoders:grapher
 socialize:user-profile
 socialize:messaging
 socialize:friendships
+maka:rest
+fetch

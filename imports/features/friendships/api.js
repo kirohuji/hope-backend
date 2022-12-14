@@ -1,7 +1,8 @@
 import Api from "../../api";
 import _ from 'lodash'
-import { FriendsCollection } from 'meteor/socialize:friendships'
-
+import { Friend, FriendsCollection } from 'meteor/socialize:friendships'
+import { Request, RequestsCollection } from 'meteor/socialize:requestable';
+import { ProfilesCollection } from 'meteor/socialize:user-profile';
 Api.addRoute('friendships/friends', {
     post: {
         authRequired: true,
@@ -15,9 +16,8 @@ Api.addRoute('friendships/friendsAsUsers', {
     post: {
         authRequired: true,
         action: function () {
-            const friends = this.user.friends(this.bodyParams.options || { sort: { createdAt: -1 } }).fetch();
-            const ids = friends.map(friend => friend.friendId);
-            return Meteor.users.find({ _id: { $in: ids } }).fetch()
+            const ids= this.user.friendsAsUsers(this.bodyParams.options || { sort: { createdAt: -1 } }).map(item=> item._id)
+            return ProfilesCollection.find({ _id: { $in: ids } }).fetch()
         }
     }
 });
@@ -27,7 +27,8 @@ Api.addRoute('friendships/unfriend/:_id', {
         authRequired: true,
         action: function () {
             const friend = FriendsCollection.findOne({ userId: this.userId, friendId: this.urlParams._id });
-            return friend && friend.remove();
+            friend && friend.remove();
+            return true;
         }
     }
 });
@@ -46,7 +47,12 @@ Api.addRoute('friendships/friendRequests', {
         authRequired: true,
         action: function () {
             try {
-                return Meteor.users.findOne({ _id: this.userId }).friendRequests(this.bodyParams.options || {}).fetch()
+                return this.user.friendRequests(this.bodyParams.options || {}).map(item=> {
+                    return {
+                        ...item,
+                        ...ProfilesCollection.findOne({_id: item.requesterId})
+                    }
+                })
             } catch (e) {
                 return false
             }
@@ -55,11 +61,11 @@ Api.addRoute('friendships/friendRequests', {
 
 });
 Api.addRoute('friendships/numFriendRequests', {
-    post: {
+    get: {
         authRequired: true,
         action: function () {
             try {
-                return Meteor.users.findOne({ _id: this.userId }).friendRequests().count()
+                return this.user.friendRequests().count()
             } catch (e) {
                 return false
             }
@@ -67,3 +73,116 @@ Api.addRoute('friendships/numFriendRequests', {
     }
 
 });
+
+Api.addRoute('friendships/hasFriendshipRequestFrom/:_id', {
+    get: {
+        authRequired: true,
+        action: function () {
+            try {
+                return this.user.hasFriendshipRequestFrom({ _id: this.urlParams._id })
+            } catch (e) {
+                return false
+            }
+        }
+    }
+
+});
+
+/** 向一个用户申请好友 */
+Api.addRoute('friendships/requestFriendship/:_id', {
+    get: {
+        authRequired: true,
+        action: function () {
+            return RequestsCollection.insert(new Request({
+                ...Meteor.users.findOne({ _id: this.urlParams._id }).getLinkObject(),
+                type: 'friend'
+            }), {
+                extendAutoValueContext: {
+                    userId: this.userId
+                }
+            })
+        }
+    }
+});
+
+/** 改造 */
+Api.addRoute('friendships/cancelFriendshipRequest/:_id', {
+    get: {
+        authRequired: true,
+        action: function () {
+            try {
+                return this.user.cancelFriendshipRequest({ _id: this.urlParams._id })
+            } catch (e) {
+                return false
+            }
+        }
+    }
+});
+Api.addRoute('friendships/acceptFriendshipRequest/:_id', {
+    get: {
+        authRequired: true,
+        action: function () {
+            const request = RequestsCollection.findOne({
+                type: 'friend',
+                requesterId: this.urlParams._id,
+                linkedObjectId: this.userId,
+            });
+            /** 添加一条记录 */
+            const freindId = FriendsCollection.direct.insert(
+                new Friend({
+                    userId: this.userId,
+                    friendId: request.requesterId,
+                    createdAt: new Date()
+                }))
+            /** 互相添加 */
+            const user = Meteor.users.findOne({ _id: this.urlParams._id })
+            const friend = this.user
+
+            if (friend.hasFriendshipRequestFrom(user)) {
+                RequestsCollection.remove({ linkedObjectId: this.userId, requesterId: request.requesterId, type: 'friend' });
+                RequestsCollection.remove({ linkedObjectId: request.requesterId, requesterId: this.userId, type: 'friend' });
+                FriendsCollection.direct.insert({ userId: request.requesterId, friendId: this.userId, createdAt: new Date() });
+            }
+            return freindId
+        }
+    }
+});
+
+Api.addRoute('friendships/denyFriendshipRequest/:_id', {
+    get: {
+        authRequired: true,
+        action: function () {
+            try {
+                const request = RequestsCollection.findOne({
+                    type: 'friend',
+                    requesterId: this.urlParams._id,
+                    linkedObjectId: this.userId,
+                });
+                request && request.deny();
+                return true
+            } catch (e) {
+                return false
+            }
+        }
+    }
+});
+
+Api.addRoute('friendships/ignoreFriendshipRequest/:_id', {
+    get: {
+        authRequired: true,
+        action: function () {
+            try {
+                const request = RequestsCollection.findOne({
+                    type: 'friend',
+                    requesterId: this.urlParams._id,
+                    linkedObjectId: this.userId,
+                });
+                request && request.ignore();
+                return true
+            } catch (e) {
+                return false
+            }
+        }
+    }
+});
+

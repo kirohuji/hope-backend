@@ -11,22 +11,38 @@ let Api = new Restivus({
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Origin',
     'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-    "Access-Control-Allow-Credentials": true ,
+    "Access-Control-Allow-Credentials": true,
     'Content-Type': 'application/json',
     'Access-Control-Max-Age': '86400',
- },
+  },
   onLoggedIn: function () {
     console.log(this.user.username + " (" + this.userId + ") logged in");
-    // return {
-    //   ...Meteor.users.findOne({
-    //     id: this.userId
-    //   })
-    // }
-    // this.response.write('This is a manual response');
-    // this.done();
   },
   onLoggedOut: function () {
     console.log(this.user.username + " (" + this.userId + ") logged out");
   },
 });
 export default Api;
+
+export let PermissionController = new Restivus({
+  apipath: "api/",
+  version: "v2",
+  useDefaultAuth: true,
+  prettyJson: true,
+  enableCors: true,
+  // defaultOptionsEndpoint: mergeApiOption,
+  defaultHeaders: {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Origin',
+    'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+    "Access-Control-Allow-Credentials": true,
+    'Content-Type': 'application/json',
+    'Access-Control-Max-Age': '86400',
+  },
+  onLoggedIn: function () {
+    console.log(this.user.username + " (" + this.userId + ") logged in By api 2");
+  },
+  onLoggedOut: function () {
+    console.log(this.user.username + " (" + this.userId + ") logged out");
+  },
+});
