@@ -11,6 +11,8 @@ import './dictionaries'
 import './routes'
 import './questionnaires'
 import './rules'
+import './bpmns'
+import './books'
 import { PermissionController } from '../api'
 import controll from '../gateway'
 PermissionController.addRoute('*/*', { authRequired: true }, {

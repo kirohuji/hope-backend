@@ -33,7 +33,7 @@ Api.addRoute('users/pagination', {
           roles: roles
         }
       }),
-      total: Model.find().count()
+      total: Model.find(this.bodyParams.selector || {}, this.bodyParams.options).count()
     }
   }
 });
