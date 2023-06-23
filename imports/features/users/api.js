@@ -51,28 +51,20 @@ Api.addRoute('users/search', {
     }
   }
 });
-Api.addRoute('users/info/:_id', {
+Api.addRoute('users/search', {
+  post: function () {
+    return {
+      data: Meteor.users.find(this.bodyParams.selector || {}, this.bodyParams.options).fetch()
+    }
+  }
+});
+Api.addRoute('users/create/', {
   get: {
     authRequired: true,
     action: function () {
-      const roles = Meteor.roles.find({
-        _id: {
-          $in: Roles.getRolesForUser(this.urlParams._id, {
-            anyScope: true,
-          })
-        }
-      }).fetch()
-      // const roles = Roles.getRolesForUser(this.userId);
-      // console.log(roles)
-      const permissions = roles.filter(item => item.type === "permission")
-      const user = Meteor.users.findOne({ _id: this.urlParams._id })
-      return {
-        user: _.omit(user, ["services"]),
-        profile: user.profile(),
-        roles: roles.filter(item => item.type === 'role').map(item => item.key),
-        orgs: roles.filter(item => item.type === 'org').map(item => item.key),
-        permissions: permissions.map(item => item.label)
-      }
+      Meteor.users.insert({
+        
+      })
     }
   }
 });
@@ -98,6 +90,36 @@ Api.addRoute('users/info', {
       return {
         user: _.omit(this.user, ["services"]),
         profile: this.user.profile(),
+        roles: roles.filter(item => item.type !== 'permission'),
+        permissions: permissions.map(item => item),
+        test: true,
+      }
+    }
+  }
+});
+Api.addRoute('users/info/:_id', {
+  get: {
+    authRequired: true,
+    action: function () {
+      const user = Meteor.users.findOne({ _id: this.urlParams._id})
+      const roles = Meteor.roles.find({
+        _id: {
+          $in: Roles.getRolesForUser(this.urlParams._id, {
+            anyScope: true,
+          })
+        }
+      }, {
+        fields: {
+          _id: 1,
+          label: 1,
+          type: 1,
+          value: 1
+        }
+      }).fetch()
+      const permissions = roles.filter(item => item.type === "permission")
+      return {
+        user: _.omit(user, ["services"]),
+        profile: user.profile(),
         roles: roles.filter(item => item.type !== 'permission'),
         permissions: permissions.map(item => item),
         test: true,

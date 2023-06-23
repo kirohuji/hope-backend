@@ -22,3 +22,12 @@ Api.addRoute('scopes/pagination', {
         }
     }
 });
+
+Api.addRoute('scopes/current', {
+    get: function () {
+        return {
+            data: Model.find(this.bodyParams.selector || {}, this.bodyParams.options).fetch(),
+            total: Model.find().count()
+        }
+    }
+});

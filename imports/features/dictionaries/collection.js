@@ -1,5 +1,48 @@
 import { Class } from "meteor/jagi:astronomy";
 export const DictionaryCollection = new Mongo.Collection('dictionaries')
+export const DictionaryOptionCollection = new Mongo.Collection('dictionaries_options')
+
+export const DictionaryOption = Class.create({
+    name: "DictionaryOption",
+    collection: DictionaryOptionCollection,
+    fields: {
+        value: {
+            type: String,
+            default: '',
+        },
+        label: {
+            type: String,
+            default: '',
+        },
+        description: {
+            type: String,
+            default: '',
+        },
+        version: {
+            type: Number,
+            default: ''
+        },
+        type: {
+            type: String,
+            default: '',
+        },
+        sort: {
+            type: String,
+            default: '',
+        },
+        parentId: {
+            type: String,
+            default: '',
+        },
+        dictionaryId: {
+            type: String,
+            default: '',
+        }
+    }
+});
+
+
+
 export default Class.create({
     name: "Dictionary",
     collection: DictionaryCollection,
@@ -7,51 +50,27 @@ export default Class.create({
         value: {
             type: String,
             default: '',
-            label: ' 值',
-            form: {
-                use: 'input',
-                create: true,
-                update: true,
-            },
-            table: {
-                use: 'route',
-                to: 'contacts'
-            }
         },
         label: {
             type: String,
             default: '',
-            label: '名称',
-            form: {
-                use: 'input',
-                create: true,
-                update: true,
-            }
+        },
+        version: {
+            type: Number,
+            default: ''
         },
         description: {
             type: String,
             default: '',
-            label: '名称',
-            form: {
-                use: 'input',
-                create: true,
-                update: true,
-            }
         },
         type: {
             type: String,
             default: '',
-            label: '类型',
-            form: {
-                use: 'input',
-                create: true,
-                update: true,
-            }
         },
-        json: {
-            type: [Object],
-            label: '组织权限',
-            default: []
+        sort: {
+            type: String,
+            default: '',
         }
     }
 });
+

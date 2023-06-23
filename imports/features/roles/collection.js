@@ -39,36 +39,21 @@ export default Class.create({
     fields: {
         value: {
             type: Mongo.ObjectID,
-            label: '角色值',
-            form: {
-                use: 'input',
-                create: true,
-                update: true,
-            }
         },
         name: {
             type: String,
             default: '',
-            label: '角色名',
-            form: {
-                use: 'input',
-                create: true,
-                update: true,
-            }
+        },
+        label: {
+            type: String,
+            default: '',
         },
         type: {
             type: String,
             default: '',
-            label: '类型',
-            form: {
-                use: 'input',
-                create: true,
-                update: true,
-            }
         },
         children: {
             type: [Object],
-            label: '子节点',
         }
     }
 });

@@ -280,7 +280,7 @@ Api.addRoute("roles/addUsersToRoles", {
                         router: e.router
                     })
                     ruleAssignment.save()
-                    console.log('ruleRoles',ruleAssignment)
+                    console.log('ruleRoles', ruleAssignment)
                 })
             })
             return true;
@@ -434,22 +434,42 @@ Api.addRoute("roles/getUsersInNotRoleOnly", {
         try {
             let ids
             ids = getUserAssignmentsForRoleOnly(this.bodyParams.roles, this.bodyParams.options).fetch().map(a => a.user._id)
-            return {
-                data: Meteor.users.find(
-                    { _id: { $nin: ids } },
-                    ((this.bodyParams.options && this.bodyParams.options.queryOptions) || this.bodyParams.queryOptions) || {})
-                    .fetch()
-                    .map(item => {
-                        const profile = item.profile();
-                        return {
-                            displayName: profile.displayName || '',
-                            avatarUrl: profile.photoURL || '',
-                            phoneNumber: profile.phoneNumber || '',
-                            description: profile.about,
-                            ..._.omit(item, 'services'),
-                        }
-                    }),
-                total: Meteor.users.find({ _id: { $nin: ids } }).count(),
+            if (this.bodyParams.queryOptions && this.bodyParams.queryOptions.isShowJoinedUser === "on") {
+                return {
+                    data: Meteor.users.find(
+                        {},
+                        ((this.bodyParams.options && this.bodyParams.options.queryOptions) || this.bodyParams.queryOptions) || {})
+                        .fetch()
+                        .map(item => {
+                            const profile = item.profile();
+                            return {
+                                displayName: profile.displayName || '',
+                                avatarUrl: profile.photoURL || '',
+                                phoneNumber: profile.phoneNumber || '',
+                                description: profile.about,
+                                ..._.omit(item, 'services'),
+                            }
+                        }),
+                    total: Meteor.users.find({ _id: { $nin: ids } }).count(),
+                }
+            } else {
+                return {
+                    data: Meteor.users.find(
+                        { _id: { $nin: ids } },
+                        ((this.bodyParams.options && this.bodyParams.options.queryOptions) || this.bodyParams.queryOptions) || {})
+                        .fetch()
+                        .map(item => {
+                            const profile = item.profile();
+                            return {
+                                displayName: profile.displayName || '',
+                                avatarUrl: profile.photoURL || '',
+                                phoneNumber: profile.phoneNumber || '',
+                                description: profile.about,
+                                ..._.omit(item, 'services'),
+                            }
+                        }),
+                    total: Meteor.users.find({ _id: { $nin: ids } }).count(),
+                }
             }
         } catch (e) {
             return {
@@ -486,6 +506,27 @@ Api.addRoute("roles/get", {
         } || {}, this.bodyParams.options).fetch().map(item => {
             return {
                 ...item,
+                count: _.uniqBy(getUserAssignmentsForRoleOnly([item._id, ...Roles._getInheritedRoleNames(item)], this.bodyParams.selector).fetch().map(item => item.user), '_id').length
+            }
+        })
+    }
+});
+
+Api.addRoute("roles/getWithUser", {
+    post: function () {
+        return Meteor.roles.find({
+            ...this.bodyParams.selector,
+        } || {}, this.bodyParams.options).fetch().map(item => {
+            // console.log( Roles.getUserAssignmentsForRole(item._id, this.bodyParams.selector).fetch())
+            return {
+                ...item,
+                users: getUserAssignmentsForRoleOnly(item._id, this.bodyParams.selector).map(userAssign => {
+                    const user = Meteor.users.findOne({ _id: userAssign.user._id });
+                    return {
+                        account: _.omit(user, ["services"]),
+                        profile: user.profile()
+                    }
+                }),
                 count: _.uniqBy(getUserAssignmentsForRoleOnly([item._id, ...Roles._getInheritedRoleNames(item)], this.bodyParams.selector).fetch().map(item => item.user), '_id').length
             }
         })
