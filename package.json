@@ -2,7 +2,7 @@
   "name": "hope-backend",
   "private": true,
   "scripts": {
-    "start": "ROOT_URL=http://192.168.31.76:3000 meteor run --port=3000",
+    "start": "MONGO_URL=mongodb://meteor:meteor@124.221.67.248:27017/meteor meteor run --port=3000",
     "dev": "meteor run --port=3000"
   },
   "dependencies": {
@@ -10,6 +10,7 @@
     "@jsdevtools/rehype-toc": "^3.0.2",
     "lodash": "^4.17.21",
     "meteor-node-stubs": "^1.1.0",
+    "mime-db": "^1.52.0",
     "moment": "^2.29.4",
     "rehype-parse": "^8.0.4",
     "rehype-slug": "^5.1.0",

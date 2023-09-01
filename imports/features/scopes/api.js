@@ -17,14 +17,14 @@ Api.addRoute('scopes/model', {
 Api.addRoute('scopes/pagination', {
     post: function () {
         return {
-            data: Model.find(this.bodyParams.selector || {}, this.bodyParams.options).fetch(),
+            data: Model.find(this.bodyParams.selector || {}, this.bodyParams.options || {}).fetch(),
             total: Model.find().count()
         }
     }
 });
 
 Api.addRoute('scopes/current', {
-    get: function () {
+    post: function () {
         return {
             data: Model.find(this.bodyParams.selector || {}, this.bodyParams.options).fetch(),
             total: Model.find().count()

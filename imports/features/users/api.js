@@ -1,8 +1,10 @@
 import Api from "../../api";
 import Model from './collection'
+import ProfileModel from '../profiles/collection'
 import _ from 'lodash'
 import { Roles } from 'meteor/alanning:roles';
 import { roleRequired } from "../../utils";
+import { Accounts } from "meteor/accounts-base";
 Api.addCollection(Meteor.users,
   // roleRequired('users', '用户(Users)')
 );
@@ -16,10 +18,12 @@ Api.addRoute('users/model', {
 });
 Api.addRoute('users/pagination', {
   post: function () {
+    if(this.bodyParams.selector&&this.bodyParams.selector.status == "all"){
+      this.bodyParams.selector = _.pickBy(_.omit(this.bodyParams.selector, ["status"]))
+    }
     return {
-      data: Model.find(this.bodyParams.selector || {}, this.bodyParams.options).fetch().map(item => {
+      data: ProfileModel.find(this.bodyParams.selector || {}, this.bodyParams.options).fetch().map(item => {
         const user = Meteor.users.findOne({ _id: item._id })
-        const profile = user.profile()
         const roles = _.compact(Meteor.roles.find({
           _id: {
             $in: Roles.getRolesForUser(item._id, {
@@ -28,12 +32,12 @@ Api.addRoute('users/pagination', {
           }
         }).fetch().filter(item => item.type == 'role'))
         return {
+          ...user,
           ...item,
-          ...profile,
           roles: roles
         }
       }),
-      total: Model.find(this.bodyParams.selector || {}, this.bodyParams.options).count()
+      total: ProfileModel.find(this.bodyParams.selector || {}, this.bodyParams.options).count()
     }
   }
 });
@@ -58,13 +62,15 @@ Api.addRoute('users/search', {
     }
   }
 });
-Api.addRoute('users/create/', {
-  get: {
+Api.addRoute('users/register', {
+  post: {
     authRequired: true,
     action: function () {
-      Meteor.users.insert({
-        
-      })
+      id = Accounts.createUser({
+        ...this.bodyParams,
+        password: "123456",
+      });
+      return id
     }
   }
 });
@@ -83,6 +89,7 @@ Api.addRoute('users/info', {
           _id: 1,
           label: 1,
           type: 1,
+          scope:1,
           value: 1
         }
       }).fetch()

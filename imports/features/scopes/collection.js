@@ -7,46 +7,37 @@ export default Class.create({
         value: {
             type: String,
             default: '',
-            label: ' 值',
-            form: {
-                use: 'input',
-                create: true,
-                update: true,
-            },
-            table: {
-                use: 'route',
-                to: 'contacts'
-            }
         },
         label: {
             type: String,
             default: '',
-            label: '名称',
-            form: {
-                use: 'input',
-                create: true,
-                update: true,
-            }
+        },
+        logo: {
+            type: String,
+            default: '',
+        },
+        description: {
+            type: String,
+            default: '',
+        },
+        address: {
+            type: String,
+            default: '',
         },
         type: {
             type: String,
             default: '',
-            label: '类型',
-            form: {
-                use: 'input',
-                create: true,
-                update: true,
-            }
         },
         organization: {
             type: [Object],
-            label: '组织权限',
             default: []
         },
         resources: {
             type: [Object],
-            label: '资源',
             default: []
+        },
+        publish: {
+            type: Boolean
         }
     }
 });
