@@ -1,13 +1,12 @@
 import Api from "../../api";
 import Model from './collection'
 import ProfileModel from '../profiles/collection'
+import { ProfilesCollection } from 'meteor/socialize:user-profile';
 import _ from 'lodash'
 import { Roles } from 'meteor/alanning:roles';
 import { roleRequired } from "../../utils";
 import { Accounts } from "meteor/accounts-base";
-Api.addCollection(Meteor.users,
-  // roleRequired('users', '用户(Users)')
-);
+Api.addCollection(Meteor.users);
 Api.addRoute('users/model', {
   get: function () {
     return {
@@ -18,8 +17,14 @@ Api.addRoute('users/model', {
 });
 Api.addRoute('users/pagination', {
   post: function () {
-    if(this.bodyParams.selector&&this.bodyParams.selector.status == "all"){
-      this.bodyParams.selector = _.pickBy(_.omit(this.bodyParams.selector, ["status"]))
+    if (this.bodyParams.selector && this.bodyParams.selector.available == "all") {
+      this.bodyParams.selector = _.pickBy(_.omit(this.bodyParams.selector, ["available"]))
+    }
+    if (this.bodyParams.selector && this.bodyParams.selector.username) {
+      this.bodyParams.selector.username = {
+        $regex: this.bodyParams.selector.username,
+        $options: "i"
+      }
     }
     return {
       data: ProfileModel.find(this.bodyParams.selector || {}, this.bodyParams.options).fetch().map(item => {
@@ -46,6 +51,14 @@ Api.addRoute('users/findOne', {
     return {
       data: Meteor.users.findOne(this.bodyParams.selector || {}, this.bodyParams.options)
     }
+  }
+});
+Api.addRoute('users/delete/:_id', {
+  delete: function () {
+    ProfilesCollection.remove({ _id: this.urlParams._id });
+    return Meteor.users.direct.remove({
+      _id: this.urlParams._id
+    })
   }
 });
 Api.addRoute('users/search', {
@@ -89,7 +102,7 @@ Api.addRoute('users/info', {
           _id: 1,
           label: 1,
           type: 1,
-          scope:1,
+          scope: 1,
           value: 1
         }
       }).fetch()
@@ -108,7 +121,7 @@ Api.addRoute('users/info/:_id', {
   get: {
     authRequired: true,
     action: function () {
-      const user = Meteor.users.findOne({ _id: this.urlParams._id})
+      const user = Meteor.users.findOne({ _id: this.urlParams._id })
       const roles = Meteor.roles.find({
         _id: {
           $in: Roles.getRolesForUser(this.urlParams._id, {
@@ -181,3 +194,40 @@ Api.addRoute('users/test', {
     }
   }
 });
+
+Api.addRoute('users/changePassword', {
+  post: {
+    authRequired: true,
+    action: function () {
+      // Meteor.loginWithPassword({
+      //   id: this.userId
+      // },this.bodyParams.oldPassword,(e)=>{
+      //   if(!e){
+      Accounts.setPassword(this.userId, this.bodyParams.newPassword);
+      return true;
+      //   return true;
+      // }else{
+      //   return false;
+      // }
+      // })
+    }
+  }
+})
+
+// import { userConnected, sessionConnected, userDisconnected, sessionDisconnected } from './user-presence.js';
+
+// Meteor.publish(null, function userPresenceSessionConnected() {
+//   console.log("this.userId",this.userId)
+//   console.log("this.connection",this.connection)
+//   console.log("this.connection.id",this.connection.id)
+//     // if (this.userId && this.connection && this.connection.id) {
+//     //     userConnected(this.connection.id, this.userId, ServerPresence.serverId(), this.connection);
+//     //     sessionConnected(this.connection, this.userId);
+
+//     //     this.onStop(() => {
+//     //         userDisconnected(this.connection.id, this.userId, this.connection);
+//     //         sessionDisconnected(this.connection, this.userId);
+//     //     });
+//     // }
+//     this.ready();
+// }, { is_auto: true });

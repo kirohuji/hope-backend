@@ -79,9 +79,33 @@ export default Class.create({
             type: String,
             default: '',
         },
+        cover: {
+            type: String,
+            default: '',
+        },
         type: {
             type: String,
             default: '',
         },
+        published: {
+            type: Boolean,
+            default: true,
+        }
+    },
+    behaviors: {
+        timestamp: {
+            hasCreatedField: true,
+            createdFieldName: 'createdAt',
+            hasUpdatedField: true,
+            updatedFieldName: 'updatedAt'
+        },
+        softremove: {
+            // The field name with a flag for marking a document as removed.
+            removedFieldName: 'removed',
+            // A flag indicating if a "removedAt" field should be present in a document.
+            hasRemovedAtField: true,
+            // The field name storing the removal date.
+            removedAtFieldName: 'removedAt'
+          }
     }
 });

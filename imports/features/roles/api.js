@@ -2,6 +2,7 @@ import Api from "../../api";
 import { Meteor } from "meteor/meteor";
 import { Roles } from 'meteor/alanning:roles';
 import { RuleCollection } from '../rules/collection'
+import { ProfilesCollection } from 'meteor/socialize:user-profile';
 import Model, { RuleRole, RuleRoleCollection, RuleAssignment } from "./collection";
 import { roleRequired } from "../../utils";
 import _ from "lodash";
@@ -177,6 +178,25 @@ Api.addRoute("roles/renameRole", {
         }
     },
 });
+Api.addRoute("roles/changeLeader", {
+    post: function () {
+        try {
+            const role = Meteor.roles.findOne({
+                _id: this.bodyParams._id
+            })
+            return Meteor.roles.update({
+                _id: this.bodyParams._id
+            }, {
+                ...role,
+                ...this.bodyParams
+            });
+        } catch (e) {
+            return {
+                statusCode: 500
+            }
+        }
+    },
+});
 Api.addRoute("roles/removeUsersFromRoles", {
     post: function () {
         try {
@@ -224,23 +244,23 @@ Api.addRoute("roles/getInheritedRoleNames", {
         return currentRolesNames
     },
 });
-function  _getInheritedRoleNames(role) {
+function _getInheritedRoleNames (role) {
     const inheritedRoles = new Set()
     const nestedRoles = new Set([])
     const _init_roles = Meteor.roles.find({ _id: { $in: role.children.map(r => r._id) } }, { fields: { children: 1 } }).fetch();
     _init_roles.forEach(r2 => {
         nestedRoles.add(r2)
-      })
+    })
     nestedRoles.forEach(r => {
-      const roles = Meteor.roles.find({ _id: { $in: r.children.map(r => r._id) } }, { fields: { children: 1 } }).fetch()
-      roles.forEach(r2 => {
-        inheritedRoles.add(r2._id)
-        nestedRoles.add(r2)
-      })
+        const roles = Meteor.roles.find({ _id: { $in: r.children.map(r => r._id) } }, { fields: { children: 1 } }).fetch()
+        roles.forEach(r2 => {
+            inheritedRoles.add(r2._id)
+            nestedRoles.add(r2)
+        })
     })
 
     return [...inheritedRoles]
-  }
+}
 Api.addRoute("roles/getInheritedRoleNamesOnly", {
     post: function () {
         try {
@@ -578,18 +598,25 @@ Api.addRoute("roles/getWithUser", {
         return Meteor.roles.find({
             ...this.bodyParams.selector,
         } || {}, this.bodyParams.options).fetch().map(item => {
-            // console.log( Roles.getUserAssignmentsForRole(item._id, this.bodyParams.selector).fetch())
+            // let users = getUserAssignmentsForRoleOnly(item._id, this.bodyParams.selector).map(userAssign => {
+            //     const user = Meteor.users.findOne({ _id: userAssign.user._id });
+            //     return {
+            //         account: _.omit(user, ["services"]),
+            //         profile: user?.profile()
+            //     }
+            // })
+            // const leader = _.find(users,["account._id",item.leader_id]);
+            const leader = ProfilesCollection.findOne({
+                _id: item.leader_id
+            })
             return {
                 ...item,
-                users: getUserAssignmentsForRoleOnly(item._id, this.bodyParams.selector).map(userAssign => {
-                    const user = Meteor.users.findOne({ _id: userAssign.user._id });
-                    console.log('user',userAssign)
-                    return {
-                        account: _.omit(user, ["services"]),
-                        profile: user.profile()
-                    }
-                }),
-                count: _.uniqBy(getUserAssignmentsForRoleOnly([item._id, ...Roles._getInheritedRoleNames(item)], this.bodyParams.selector).fetch().map(item => item.user), '_id').length
+                users: [],
+                leader: {
+                    _id: leader?._id,
+                    username: leader?.username
+                },
+                // count: _.uniqBy(getUserAssignmentsForRoleOnly([item._id, ...Roles._getInheritedRoleNames(item)], this.bodyParams.selector).fetch().map(item => item.user), '_id').length
             }
         })
     }
@@ -701,20 +728,20 @@ Api.addRoute("roles/getRoleWithUser", {
                     scope: this.bodyParams.scope,
                 });
                 // console.log(roles)
-                if(roles.indexOf('admin')!=-1){
+                if (roles.indexOf('admin') != -1) {
                     return Meteor.roles
-                    .find({
-                        scope: this.bodyParams.scope,
-                        type: this.bodyParams.type || 'permission'
-                    })
-                    .fetch()
-                }else{
+                        .find({
+                            scope: this.bodyParams.scope,
+                            type: this.bodyParams.type || 'permission'
+                        })
+                        .fetch()
+                } else {
                     return Meteor.roles
-                    .find({
-                        _id: { $in: roles },
-                        type: this.bodyParams.type || 'permission'
-                    } || {}, this.bodyParams.options)
-                    .fetch()
+                        .find({
+                            _id: { $in: roles },
+                            type: this.bodyParams.type || 'permission'
+                        } || {}, this.bodyParams.options)
+                        .fetch()
                 }
             } catch (e) {
                 console.log(e)
@@ -732,15 +759,15 @@ Api.addRoute("roles/getMaxRole", {
         action: function () {
             try {
                 let roles = this.bodyParams.roles;
-                if(roles&&roles.length){
+                if (roles && roles.length) {
                     let maxRole = roles[0];
-                    for(let i = 0;i<roles.length;i++){
-                        if(!Roles.isParentOf(maxRole,roles[i])){
-                            maxRole=roles[i]
+                    for (let i = 0; i < roles.length; i++) {
+                        if (!Roles.isParentOf(maxRole, roles[i])) {
+                            maxRole = roles[i]
                         }
                     }
-                    return Meteor.roles.findOne({ _id: maxRole})
-                }else{
+                    return Meteor.roles.findOne({ _id: maxRole })
+                } else {
                     return {}
                 }
             } catch (e) {
@@ -752,8 +779,6 @@ Api.addRoute("roles/getMaxRole", {
         },
     }
 });
-
-// Api.addRoute("roles/getChildrenRoleNames", {
 //     post: function () {
 //         try {
 //             const role = Meteor.roles.findOne({ _id: this.bodyParams._id })

@@ -9,10 +9,33 @@ import {
 } from 'meteor/socialize:messaging';
 import { CollectionHooks } from 'meteor/matb33:collection-hooks'
 import { ProfilesCollection } from 'meteor/socialize:user-profile';
+import { publishComposite } from 'meteor/reywood:publish-composite';
+import { User } from 'meteor/socialize:user-model';
 
+
+Message.attachSchema({
+    contentType: {
+        type: String,
+        required: false,
+    }
+})
+Conversation.attachSchema({
+    isRemove: {
+        type: Boolean,
+        required: false,
+    }
+})
 
 /** 会话信息 */
 Api.addRoute('messaging/conversations/:_id', {
+    delete: {
+        authRequired: true,
+        action: function () {
+            return ConversationsCollection.remove({
+                _id: this.urlParams._id
+            })
+        }
+    },
     get: {
         authRequired: true,
         action: function () {
@@ -21,7 +44,7 @@ Api.addRoute('messaging/conversations/:_id', {
                 ...conversation,
                 messages: [],
                 unreadCount: 0,
-                type: conversation._participants.length > 2 ? 'GROUP' : 'ONE_TO_ONE',
+                type: conversation?._participants.length > 2 ? 'GROUP' : 'ONE_TO_ONE',
                 participants: ProfilesCollection.find({ _id: { $in: conversation._participants } }).fetch()
             }
         }
@@ -65,7 +88,7 @@ Api.addRoute('messaging/findExistingConversationWithUsers', {
         action: function () {
             this.bodyParams.users.push(this.userId)
             const conversation = ConversationsCollection.findOne({ _participants: { $size: this.bodyParams.users.length, $all: this.bodyParams.users } });
-            return conversation._id
+            return conversation ? conversation._id : 0
         }
     }
 });
@@ -96,11 +119,14 @@ Api.addRoute('messaging/conversations/:_id/messages', {
     post: {
         authRequired: true,
         action: function () {
+            // let conversationId = ConversationsCollection.findOne({ _id: this.urlParams._id });
             return ConversationsCollection.findOne({ _id: this.urlParams._id }).messages(this.bodyParams.options || {}).map(item => {
                 return {
                     ...item,
                     attachments: [],
-                    contentType: 'text',
+                    body: item.body,
+                    contentType: item.contentType || "text",
+                    // contentType: 'text',
                     senderId: item.userId
                 }
             })
@@ -109,12 +135,40 @@ Api.addRoute('messaging/conversations/:_id/messages', {
 });
 
 
+
 /** 获取当前会话的最后一条消息 */
 Api.addRoute('messaging/conversations/:_id/lastMessage', {
     get: {
         authRequired: true,
         action: function () {
             return ConversationsCollection.findOne({ _id: this.urlParams._id }).lastMessage()
+        }
+    }
+});
+
+/** 获取当前会话的最后一条消息 */
+Api.addRoute('messaging/conversations/:_id/lastMessage/:lastId', {
+    get: {
+        authRequired: true,
+        action: function () {
+            let message = MessagesCollection.findOne({
+                _id: this.urlParams.lastId
+            })
+            return MessagesCollection.find({
+                conversationId: this.urlParams._id,
+                createdAt: {
+                    $gte: message.createdAt
+                }
+            }).map(item => {
+                return {
+                    ...item,
+                    attachments: [],
+                    body: item.body,
+                    contentType: item.contentType || "text",
+                    // contentType: 'text',
+                    senderId: item.userId
+                }
+            })
         }
     }
 });
@@ -131,6 +185,7 @@ Api.addRoute('messaging/conversations/:_id/sendMessage', {
                 .insert(new Message({
                     body: this.bodyParams.body,
                     conversationId: this.urlParams._id,
+                    contentType: this.bodyParams.contentType,
                     inFlight: true
                 }), {
                     extendAutoValueContext: {
@@ -221,6 +276,17 @@ Api.addRoute('messaging/conversations/room', {
     post: {
         authRequired: true,
         action: function () {
+            const conversation = ConversationsCollection.findOne({ _participants: this.bodyParams.participants });
+            if (conversation) {
+                ConversationsCollection.update({
+                    _id: conversation._id
+                }, {
+                    $set: {
+                        isRemove: false
+                    },
+                })
+                return conversation
+            }
             CollectionHooks.defaultUserId = this.userId
             let convo = new Conversation().save()
             const users = Meteor.users.find({ _id: { $in: this.bodyParams.participants } }).fetch()
@@ -277,7 +343,7 @@ Api.addRoute('messaging/users/conversations', {
             return this.user.conversations().fetch().map(item => {
                 return {
                     ...item,
-                    messages: [],
+                    messages: [ConversationsCollection.findOne({ _id: item._id }).lastMessage()],
                     unreadCount: 0,
                     type: item._participants.length > 2 ? 'GROUP' : 'ONE_TO_ONE',
                     participants: ProfilesCollection.find({ _id: { $in: item._participants } }).fetch()
@@ -314,4 +380,92 @@ Api.addRoute('messaging/conversations/:_id/isParticipatingIn/:_userId', {
             return Meteor.users.findOne({ _id: this.urlParams._userId }).isParticipatingIn(this.urlParams._id)
         }
     }
+});
+
+/** 未读会话 */
+Api.addRoute('messaging/conversations/delete/:_id', {
+    post: {
+        authRequired: true,
+        action: function () {
+            console.log('1')
+            return ConversationsCollection.update({
+                _id: this.urlParams._id
+            }, {
+                $set: {
+                    isRemove: true
+                },
+            })
+        }
+    }
+});
+
+
+
+const optionsArgumentCheck = {
+    limit: Match.Optional(Number),
+    skip: Match.Optional(Number),
+    sort: Match.Optional(Object),
+};
+
+Meteor.publish('socialize.messagesFor2', function publishMessageFor (conversationId, userId, date, options = { limit: 5, sort: { createdAt: -1 } }) {
+    // check(conversationId, String);
+    // check(options, optionsArgumentCheck);
+    if (conversationId) {
+        const user = Meteor.users.findOne({
+            _id: userId
+        })
+        if (user?.isParticipatingIn(conversationId)) {
+            return MessagesCollection.find({
+                conversationId: conversationId,
+                createdAt: {
+                    $gte: date
+                }
+            }, options)
+        }
+    }
+});
+
+
+publishComposite('socialize.conversations2', function publishConversations (userId, options = { limit: 10, sort: { updatedAt: -1 } }) {
+    check(options, optionsArgumentCheck);
+    if (!userId) {
+        return this.ready();
+    }
+
+    return {
+        find () {
+            return ParticipantsCollection.find({ userId: userId, deleted: { $exists: false } }, options);
+        },
+        children: [
+            {
+                find (participant) {
+                    return ConversationsCollection.find({ _id: participant.conversationId })
+                },
+                children: [
+                    {
+                        find (conversation) {
+                            return conversation.participants();
+                        },
+                        children: [
+                            {
+                                find (participant) {
+                                    return Meteor.users.find({ _id: participant.userId }, { fields: User.fieldsToPublish });
+                                },
+                            },
+                            {
+                                find (participant) {
+                                    return ProfilesCollection.find({ _id: participant.userId }, { fields: User.fieldsToPublish });
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        find (conversation) {
+                            return conversation.messages({ limit: 1, sort: { createdAt: -1 } });
+                        },
+                    },
+                ],
+            },
+        ],
+    };
 });

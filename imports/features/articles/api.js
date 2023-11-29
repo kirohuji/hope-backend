@@ -1,8 +1,14 @@
 import Api from "../../api";
-import Model, { ArticleCollection, BookArticleCollection, ArticleCommentCollection } from './collection'
+import Model, { ArticleCollection, BookArticleCollection, ArticleCommentCollection, ArticleUserCollection  } from './collection'
 import _ from 'lodash'
-Api.addCollection(ArticleCollection,{
+import moment from "moment";
+import Constructor from "../base/api"
+Api.addCollection(ArticleCollection, {
     path: 'articles'
+});
+// Constructor("articles", Model)
+Api.addCollection(ArticleUserCollection, {
+    path: 'articles/users'
 });
 
 Api.addRoute('articles/users/current', {
@@ -21,8 +27,7 @@ Api.addRoute('articles/users/current', {
 Api.addRoute('articles/pagination', {
     post: function () {
         return {
-            data: ArticleCollection.find(this.bodyParams.selector || {}, this.bodyParams.options).map(item => {
-                // const profile = Meteor.users.findOne({ _id: item.author_id }).profile()
+            data: ArticleCollection.find( _.pickBy(this.bodyParams.selector) || {}, this.bodyParams.options).map(item => {
                 return {
                     ...item,
                     // author: {
@@ -42,6 +47,25 @@ Api.addRoute('books/:_id/article', {
         action: function () {
             return BookArticleCollection.insert({
                 book_id: this.urlParams._id,
+                ...this.bodyParams,
+                author: {
+                    name: this.user.username,
+                    avatarUrl: this.user.profile().photoURL
+                },
+                date: this.bodyParams.date && moment(this.bodyParams.date).format('YYYY/MM//DD')
+            })
+        }
+    }
+});
+
+Api.addRoute('books/:_id/article/update', {
+    post: {
+        authRequired: true,
+        action: function () {
+            return BookArticleCollection.update({
+                book_id: this.urlParams._id,
+                article_id: this.bodyParams.article_id
+            }, {
                 ...this.bodyParams,
                 author: {
                     name: this.user.username,
@@ -83,3 +107,47 @@ Api.addRoute('articles/comments/users/current', {
         }
     }
 })
+
+Api.addRoute('articles/users/current/:_id', {
+    get: {
+        authRequired: true,
+        action: function() {
+            const artcleUser = ArticleUserCollection.findOne({
+                article_id: this.urlParams._id,
+                user_id: this.userId
+            })
+            return artcleUser || {
+                article_id: this.urlParams._id,
+                user_id: this.userId,
+                answers: []
+            }
+        },
+    }
+})
+
+// Api.addRoute('articles/users/current', {
+//     post: {
+//         authRequired: true,
+//         action: function () {
+//             console.log(this.bodyParams)
+//             if(this.bodyParams._id){
+//                 return ArticleUserCollection.upsert({
+//                     _id: this.bodyParams._id,
+//                 },{
+//                     article_id: this.bodyParams.article_id,
+//                     user_id: this.userId,
+//                     answers: this.bodyParams.answers,
+//                 })
+//             } else {
+//                 return ArticleUserCollection.insert({
+//                     article_id: this.bodyParams.article_id,
+//                     user_id: this.userId,
+//                     answers: this.bodyParams.answers,
+//                     comments: this.bodyParams.hasComments && [],
+//                     ...this.bodyParams
+//                 })
+//             }
+//         }
+//     }
+// })
+

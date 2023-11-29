@@ -16,8 +16,9 @@ Api.addRoute('friendships/friendsAsUsers', {
     post: {
         authRequired: true,
         action: function () {
-            const ids= this.user.friendsAsUsers(this.bodyParams.options || { sort: { createdAt: -1 } }).map(item=> item._id)
-            return ProfilesCollection.find({ _id: { $in: ids } }).fetch()
+            const ids = this.user.friendsAsUsers(this.bodyParams.options || { sort: { createdAt: -1 } }).map(item => item._id)
+            const ids2 = Meteor.users.find({ _id: { $nin: [this.user._id] } }).map(item => item._id)
+            return ProfilesCollection.find({ _id: { $in: _.uniq([...ids, ...ids2]) } }).fetch()
         }
     }
 });
@@ -47,10 +48,10 @@ Api.addRoute('friendships/friendRequests', {
         authRequired: true,
         action: function () {
             try {
-                return this.user.friendRequests(this.bodyParams.options || {}).map(item=> {
+                return this.user.friendRequests(this.bodyParams.options || {}).map(item => {
                     return {
                         ...item,
-                        ...ProfilesCollection.findOne({_id: item.requesterId})
+                        ...ProfilesCollection.findOne({ _id: item.requesterId })
                     }
                 })
             } catch (e) {

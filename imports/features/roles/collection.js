@@ -54,6 +54,10 @@ export default Class.create({
         },
         children: {
             type: [Object],
-        }
+        },
+        leader: {
+            type: String,
+            default: '',
+        },
     }
 });

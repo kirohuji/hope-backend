@@ -2,6 +2,7 @@ import { Class } from "meteor/jagi:astronomy";
 
 export const ArticleCollection = new Mongo.Collection('articles');
 export const ArticleCommentCollection = new Mongo.Collection('articles_comments');
+export const ArticleUserCollection = new Mongo.Collection('articles_users');
 export const ArticleFavoriteCollection = new Mongo.Collection('articles_favorites');
 export const BookArticleCollection = new Mongo.Collection('books_articles')
 export const ArticleFavorite = Class.create({
@@ -22,13 +23,22 @@ export const ArticleComment = Class.create({
         reply_comment_id: Mongo.ObjectID,
     }
 })
+export const ArticleUser = Class.create({
+    name: "ArticleUser",
+    collection: ArticleUserCollection,
+    fields: {
+        article_id: Mongo.ObjectID,
+        user_id: Mongo.ObjectID,
+        answers: [String],
+    }
+})
 export default Class.create({
     name: "Article",
     collection: ArticleCollection,
     fields: {
         scope: Mongo.ObjectID,
         author_id: Mongo.ObjectID,
-        public: String,
+        published: String,
         createdAt: String,
         body: String,
         coverUrl: String,
@@ -37,6 +47,12 @@ export default Class.create({
         title: String,
         view: Number,
         share: Number,
+        date: Date,
+        description: String,
+        content: String,
+        mataKeywords: String,
+        metaDescription: String,
+        questions: [Object]
     }
 })
 

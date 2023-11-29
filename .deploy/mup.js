@@ -2,14 +2,23 @@ module.exports = {
   servers: {
     one: {
       // TODO: set host address, username, and authentication method
-      host: '124.221.67.248',
+      host: '85.31.235.82',
       username: 'root',
       // pem: './path/to/pem'
-      password: 'Zyd1362848650'
+      password: 'Zyd1362848650#'
       // or neither for authenticate from ssh-agent
     }
   },
-
+  // proxy: {
+  //   domains: 'lourd.top',
+  //   ssl: {
+  //     forceSSL: true,
+  //     // Enable let's encrypt to create free certificates.
+  //     // The email is used by Let's Encrypt to notify you when the
+  //     // certificates are close to expiring.
+  //     letsEncryptEmail: 'z1309014381@gmail.com'
+  //   }
+  // },
   app: {
     // TODO: change app name and path
     name: 'hope-backend',
@@ -37,7 +46,7 @@ module.exports = {
     },
 
     docker: {
-      image: 'test',
+      image: 'zodern/meteor:root',
       useBuildKit: true,
       prepareBundle: true,
       buildInstructions: [

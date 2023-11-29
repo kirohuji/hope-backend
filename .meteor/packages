@@ -29,3 +29,8 @@ socialize:friendships
 maka:rest
 fetch
 jagi:astronomy-timestamp-behavior
+check
+socialize:user-presence
+socialize:server-presence
+jagi:astronomy-softremove-behavior
+nourharidy:ssl

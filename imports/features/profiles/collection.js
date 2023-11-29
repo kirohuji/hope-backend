@@ -58,10 +58,18 @@ Profile.attachSchema({
     type: String,
     required: false,
   },
+  available: {
+    type: String,
+    required: false,
+  },
+  baptized: {
+    type: String,
+    required: false,
+  },
   scope: {
     type: String,
     required: false,
-  }
+  },
 })
 export default Class.create({
   name: "Profile",
@@ -122,9 +130,21 @@ export default Class.create({
       type: String,
       required: false,
     },
+    available: {
+      type: String,
+      required: false,
+    },
     scope: {
       type: String,
       required: false,
     },
+  }
+});
+
+Meteor.users.after.remove(function afterRemoveUser(userId) {
+  console.log('userId',  this.userId)
+  console.log('userId',  userId)
+  if(userId){
+    ProfilesCollection.remove({ _id: userId });
   }
 });
