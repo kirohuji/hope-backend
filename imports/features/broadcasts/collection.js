@@ -87,6 +87,10 @@ export default Class.create({
     type: {
       type: String,
       default: '',
+    },
+    createdBy: {
+      type: String,
+      default: ''
     }
   },
   behaviors: {
@@ -94,7 +98,7 @@ export default Class.create({
       hasCreatedField: true,
       createdFieldName: 'createdAt',
       hasUpdatedField: true,
-      updatedFieldName: 'updatedAt'
+      updatedFieldName: 'updatedAt',
     }
   }
 });

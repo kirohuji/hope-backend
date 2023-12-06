@@ -8,13 +8,6 @@ Api.addRoute('notifications/current', {
     get: {
         authRequired: true,
         action: function () {
-            // const notifications = NotificationUserCollection.find({
-            //     user_id: this.user_id
-            // }).map(notification => {
-            //     return NotificationtCollection.findOne({
-            //         _id: notification.notification_id
-            //     })
-            // })
             const notifications =  NotificationtCollection.find({
                 target_id: this.user_id
             })
@@ -54,9 +47,10 @@ Api.addRoute('notifications/current/:_id', {
         }
     }
 });
-Meteor.publish('notifications', function (_id) {
+
+Meteor.publish('notifications', function () {
     return NotificationtCollection.find({
-        target_id: _id,
+        target_id: this.userId,
         isRemove: false,
     })
 });

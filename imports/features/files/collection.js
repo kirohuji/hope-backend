@@ -1,7 +1,7 @@
 import { Class } from "meteor/jagi:astronomy";
+import { ProfilesCollection } from 'meteor/socialize:user-profile';
 export const FileCollection = new Mongo.Collection('files')
 export const FileUserCollection = new Mongo.Collection('files_users')
-
 
 export const FileUser = Class.create({
     name: "FileUser",

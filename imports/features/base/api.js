@@ -79,7 +79,7 @@ const unsupported415 = (body = 'Unsupported') => {
   };
 };
 
-const serverError500 = (body = 'Server Error') => {
+export const serverError500 = (body = 'Server Error') => {
   return {
     statusCode: 500,
     status: 'fail',
@@ -101,7 +101,10 @@ export default function Constructor (route, Model) {
       authRequired: true,
       action: function () {
         try {
-          let model = new Model(this.bodyParams)
+          let model = new Model({
+            ...this.bodyParams,
+            createdBy: this.userId
+          })
           model.save();
           return success201(model);
         } catch (e) {
