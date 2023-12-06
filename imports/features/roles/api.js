@@ -1,15 +1,10 @@
 import Api from "../../api";
 import { Meteor } from "meteor/meteor";
 import { Roles } from 'meteor/alanning:roles';
-import { RuleCollection } from '../rules/collection'
 import { ProfilesCollection } from 'meteor/socialize:user-profile';
-import Model, { RuleRole, RuleRoleCollection, RuleAssignment } from "./collection";
-import { roleRequired } from "../../utils";
+import Model, { RuleRole, RuleAssignment } from "./collection";
 import _ from "lodash";
-Api.addCollection(
-    Meteor.roles,
-    // roleRequired('roles', '角色管理(roles)')
-);
+Api.addCollection(Meteor.roles,);
 
 Api.addRoute("roles/permissions", {
     get: function () {
@@ -143,26 +138,6 @@ Api.addRoute("roles/pagination", {
                 } || {}, this.bodyParams.options)
                 .fetch(),
             total: Meteor.roles.find().count()
-        };
-    },
-});
-Api.addRoute("roles/rules_roles/pagination", {
-    post: function () {
-        return {
-            data: RuleRoleCollection
-                .find({
-                    ...this.bodyParams.selector,
-                    // type: 'role'
-                } || {}, this.bodyParams.options)
-                .fetch().map(item => {
-                    return {
-                        ...item,
-                        ...RuleCollection.findOne({
-                            value: item.rule_value
-                        })
-                    }
-                }),
-            total: RuleRoleCollection.find().count()
         };
     },
 });

@@ -1,7 +1,4 @@
 import { fetch } from "meteor/fetch"
-import { Meteor } from "meteor/meteor";
-import { Roles } from 'meteor/alanning:roles';
-import Model, { RuleCollection } from '../features/rules/collection'
 import _ from 'lodash'
 export default async function mergeApiOption () {
     const newUrl = this.request.originalUrl.replace('v2', 'v1');

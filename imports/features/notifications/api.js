@@ -48,6 +48,7 @@ Api.addRoute('notifications/current/:_id', {
     }
 });
 
+// 发布
 Meteor.publish('notifications', function () {
     return NotificationtCollection.find({
         target_id: this.userId,
