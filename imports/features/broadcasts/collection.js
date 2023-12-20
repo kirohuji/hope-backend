@@ -1,30 +1,33 @@
 import { Class } from "meteor/jagi:astronomy";
-export const BroadcastCollection = new Mongo.Collection('broadcasts')
-export const BroadcastUserCollection = new Mongo.Collection('broadcasts_users')
+export const BroadcastCollection = new Mongo.Collection("broadcasts");
+export const BroadcastUserCollection = new Mongo.Collection("broadcasts_users");
 
 export const BroadcastUser = Class.create({
   name: "BroadcastUser",
   collection: BroadcastUserCollection,
   fields: {
-    user_id: Mongo.ObjectID,
-    broadcast_id: Mongo.ObjectID,
-    status: String
+    user_id: String,
+    broadcast_id: String,
+    status: {
+      type: String,
+      default: "signOut",
+    },
   },
 });
 
 // 有效期限
 const Available = Class.create({
-  name: 'Available',
+  name: "Available",
   /* No collection attribute */
   fields: {
     startDate: {
-      type: String
+      type: String,
     },
     endDate: {
-      type: String
-    }
-  }
-})
+      type: String,
+    },
+  },
+});
 
 export default Class.create({
   name: "Broadcast",
@@ -32,12 +35,12 @@ export default Class.create({
   fields: {
     value: {
       type: String,
-      default: '',
+      default: "",
     },
     label: {
       type: String,
-      default: '',
-      label: '名称',
+      default: "",
+      label: "名称",
     },
     // // 参与者
     // participants: {
@@ -56,49 +59,53 @@ export default Class.create({
     // },
     // 负责人
     leaders: {
-      type: [Object],
+      type: [String],
       default: [],
     },
     // 有效期限
     available: {
       type: Available,
-      default: '',
+      default: "",
     },
     // 照片集
     images: {
       type: [Object],
-      default: '',
+      default: "",
     },
     // 内容
     content: {
       type: String,
-      default: '',
+      default: "",
     },
     // 时间长度
     durations: {
       type: String,
-      default: '',
+      default: "",
     },
     // 目的地
     destination: {
       type: String,
-      default: '',
+      default: "",
     },
     type: {
       type: String,
-      default: '',
+      default: "",
     },
     createdBy: {
       type: String,
-      default: ''
-    }
+      default: "",
+    },
+    modifiedDate: {
+      type: String,
+      default: "",
+    },
   },
   behaviors: {
     timestamp: {
       hasCreatedField: true,
-      createdFieldName: 'createdAt',
+      createdFieldName: "createdAt",
       hasUpdatedField: true,
-      updatedFieldName: 'updatedAt',
-    }
-  }
+      updatedFieldName: "updatedAt",
+    },
+  },
 });

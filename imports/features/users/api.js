@@ -2,26 +2,29 @@ import _ from 'lodash'
 import Api from "../../api";
 import Constructor from "../base/api"
 import Model from './collection'
-import { pagination, register, removeUser, info, infoByCurrent, changePassword } from './service';
+import { pagination, paginationByProfile, register, removeUser, info, infoByCurrent, changePassword } from './service';
 import { serverError500 } from "../base/api";
 
 Api.addCollection(Meteor.users);
 
 Constructor("users", Model)
 
-Api.addRoute('users/model', {
-  get: function () {
-    return {
-      fields: Model.schema.fields,
-      fieldsNames: Model.schema.fieldsNames
-    }
-  }
-});
-
 Api.addRoute('users/pagination', {
   post: function () {
     try {
       return pagination(this.bodyParams);
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message
+      })
+    }
+  }
+});
+Api.addRoute('users/profiles/pagination', {
+  post: function () {
+    try {
+      return paginationByProfile(this.bodyParams);
     } catch (e) {
       return serverError500({
         code: 500,

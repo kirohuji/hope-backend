@@ -120,3 +120,17 @@ export function changePassword({
   Accounts.setPassword(userId,newPassword);
   return true;
 }
+
+// 分页查询数据
+export function paginationByProfile (bodyParams) {
+  if (bodyParams.selector && bodyParams.selector.username) {
+    bodyParams.selector.username = {
+      $regex: bodyParams.selector.username,
+      $options: "i"
+    }
+  }
+  return {
+    data: ProfilesCollection.find(bodyParams.selector || {}, bodyParams.options).fetch(),
+    total: ProfilesCollection.find(bodyParams.selector || {}, bodyParams.options).count()
+  }
+}

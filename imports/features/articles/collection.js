@@ -36,23 +36,62 @@ export default Class.create({
     name: "Article",
     collection: ArticleCollection,
     fields: {
-        scope: Mongo.ObjectID,
-        author_id: Mongo.ObjectID,
-        published: String,
-        createdAt: String,
-        body: String,
-        coverUrl: String,
-        descritpion: String,
-        tags: [String],
-        title: String,
-        view: Number,
-        share: Number,
-        date: Date,
-        description: String,
-        content: String,
-        mataKeywords: String,
-        metaDescription: String,
-        questions: [Object]
+        createdBy: {
+            type: String,
+            default: ''
+        },
+        published: {
+            type: Boolean,
+            default: false,
+        },
+        coverUrl: {
+            type: String,
+            default: ''
+        },
+        descritpion:{
+            type: String,
+            default: ''
+        },
+        tags: {
+            type: [String],
+            default: ''
+        },
+        title: {
+            type: String,
+            default: ''
+        },
+        view: {
+            type: Number,
+            default: ''
+        },
+        share:{
+            type: Number,
+            default: ''
+        },
+        date:  {
+            type: String,
+            default: ''
+        },
+        description: {
+            type: String,
+            default: ''
+        },
+        content: {
+            type: String,
+            default: ''
+        },
+        mataKeywords: {
+            type: String,
+            default: ''
+        },
+        metaDescription: {
+            type: String,
+            default: ''
+        },
+        questions: {
+            type:  [Object],
+            default: []
+        }
     }
 })
 

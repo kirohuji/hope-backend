@@ -1,5 +1,4 @@
 import Model, { FileCollection, FileUserCollection } from './collection';
-import { ProfilesCollection } from 'meteor/socialize:user-profile';
 import { currentByUserId, createFile, removeFile, updateFile, accpetShareFile, inviteEmails, denyShareFile} from './service';
 import Api from "../../api";
 import { serverError500 } from "../base/api";

@@ -1,11 +1,27 @@
-
+import { ProfilesCollection } from 'meteor/socialize:user-profile';
 import BroadcastCollection, { BroadcastUserCollection } from './collection'
 import _ from 'lodash'
 
 // 分页查询数据
 export function pagination (bodyParams) {
   return {
-    data: BroadcastCollection.find(_.pickBy(bodyParams.selector) || {}, bodyParams.options).fetch(),
+    data: BroadcastCollection.find(_.pickBy(bodyParams.selector) || {}, bodyParams.options).fetch().map(item => {
+      return {
+        ...item,
+        leaders: item.leaders ? Meteor.users.find({
+          _id: {
+            $in: item.leaders
+          },
+        },
+          {
+            fields: {
+              photoURL: 1,
+              username: 1,
+              phoneNumber: 1
+            }
+          }).fetch() : []
+      }
+    }),
     total: BroadcastCollection.find().count()
   }
 }
@@ -70,5 +86,27 @@ export function removeUser ({
   return BroadcastUserCollection.remove({
     broadcast_id,
     user_id
+  })
+}
+
+// 发布
+export function publish (broadcast_id) {
+  return BroadcastCollection.update({
+    _id: broadcast_id,
+  }, {
+    $set: {
+      published: true
+    }
+  })
+}
+
+// 发布
+export function unPublish (broadcast_id) {
+  return BroadcastCollection.update({
+    _id: broadcast_id,
+  }, {
+    $set: {
+      published: false
+    }
   })
 }

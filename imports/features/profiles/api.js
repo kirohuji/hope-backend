@@ -6,11 +6,11 @@ Api.addCollection(ProfilesCollection, {
   path: 'profiles',
   routeOptions: { authRequired: false },
 });
-// Api.addRoute('profiles/pagination', {
-//   post: function () {
-//     return {
-//       data: Model.find(this.bodyParams.selector || {}, this.bodyParams.options).fetch(),
-//       total: Model.find().count()
-//     }
-//   }
-// });
+Api.addRoute('profiles/pagination', {
+  post: function () {
+    return {
+      data: Model.find(this.bodyParams.selector || {}, this.bodyParams.options).fetch(),
+      total: Model.find().count()
+    }
+  }
+});

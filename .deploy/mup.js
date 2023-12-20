@@ -39,7 +39,7 @@ module.exports = {
     env: {
       // TODO: Change to your app's url
       // If you are using ssl, it needs to start with https://
-      ROOT_URL: 'http://124.221.67.248:5000',
+      ROOT_URL: 'http://85.31.235.82:5000',
       MONGO_URL: 'mongodb://meteor:meteor@124.221.67.248:27017/meteor',
       // MONGO_URL: 'mongodb://mongodb/meteor',
       // MONGO_OPLOG_URL: 'mongodb://mongodb/local',

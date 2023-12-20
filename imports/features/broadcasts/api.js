@@ -1,11 +1,10 @@
-import Model, { BroadcastCollection, BroadcastUserCollection } from './collection'
-import { ProfilesCollection } from 'meteor/socialize:user-profile';
+import Model, { BroadcastUser, BroadcastCollection, BroadcastUserCollection } from './collection'
 import _ from 'lodash'
 import moment from "moment";
 import Api from "../../api";
 import Constructor from "../base/api"
 import { serverError500 } from "../base/api";
-import { pagination, count, users, signIn, signOut, removeUser } from './service';
+import { pagination, count, users, signIn, signOut, removeUser, publish, unPublish } from './service';
 
 Api.addCollection(BroadcastCollection);
 
@@ -15,14 +14,7 @@ Api.addCollection(BroadcastUserCollection, {
   path: 'broadcasts/users'
 });
 
-Api.addRoute('broadcasts/model', {
-  get: function () {
-    return {
-      fields: Model.schema.fields,
-      fieldsNames: Model.schema.fieldsNames
-    }
-  }
-});
+Constructor("broadcasts/users", BroadcastUser)
 
 // 废弃
 Api.addRoute('broadcasts/book', {
@@ -113,6 +105,32 @@ Api.addRoute('broadcasts/:_id/users/:_userId', {
         broadcast_id: this.urlParams._id,
         user_id: this.urlParams._userId
       });
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message
+      })
+    }                                                                          
+  }
+});
+
+Api.addRoute('broadcasts/:_id/publish', {
+  post: function () {
+    try {
+      return publish(this.urlParams._id);
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message
+      })
+    }                                                                          
+  }
+});
+
+Api.addRoute('broadcasts/:_id/unpublish', {
+  post: function () {
+    try {
+      return unPublish(this.urlParams._id);
     } catch (e) {
       return serverError500({
         code: 500,

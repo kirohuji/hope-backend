@@ -96,6 +96,16 @@ const tooManyRequests429 = (body = 'Too Many Requests') => {
 };
 
 export default function Constructor (route, Model) {
+
+  Api.addRoute(`${route}/model`, {
+    get: function () {
+      return {
+        fields: Model.schema.fields,
+        fieldsNames: Model.schema.fieldsNames
+      }
+    }
+  });
+
   Api.addRoute(route, {
     post: {
       authRequired: true,
@@ -125,6 +135,7 @@ export default function Constructor (route, Model) {
       }
     }
   });
+
   Api.addRoute(`${route}/:_id`, {
     get: {
       authRequired: true,
@@ -141,11 +152,14 @@ export default function Constructor (route, Model) {
       authRequired: true,
       action: function () {
         try {
-          Model.update({ _id: this.urlParams.id },  this.bodyParams);
+          Model.update({ _id: this.urlParams.id }, this.bodyParams);
           let model = Model.findOne(this.urlParams.id)
           return success200(model);
         } catch (e) {
-          return badRequest400('Not Updated');
+          return badRequest400({
+            code: 400,
+            message: e.message
+          });
         }
       }
     },
@@ -153,13 +167,16 @@ export default function Constructor (route, Model) {
       authRequired: true,
       action: function () {
         try {
-          Model.update({ _id: this.urlParams.id },  {
+          Model.update({ _id: this.urlParams.id }, {
             $set: this.bodyParams
           });
           let model = Model.findOne(this.urlParams.id)
           return success200(model);
         } catch (e) {
-          return badRequest400('Not Updated');
+          return badRequest400({
+            code: 400,
+            message: e.message
+          });
         }
       }
     },
@@ -171,11 +188,12 @@ export default function Constructor (route, Model) {
           model.remove()
           return success200(model);
         } catch (e) {
-          return badRequest400('Not Updated');
+          return badRequest400({
+            code: 400,
+            message: e.message
+          });
         }
       }
     },
   });
-
-
 }
