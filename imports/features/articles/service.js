@@ -1,30 +1,102 @@
-
-import Model, { ArticleCollection, BookArticleCollection, ArticleCommentCollection, ArticleUserCollection } from './collection';
-import _ from 'lodash';
+import Model, {
+  ArticleCollection,
+  BookArticleCollection,
+  ArticleCommentCollection,
+  ArticleUserCollection,
+} from "./collection";
+import _ from "lodash";
 // 分页查询数据
-export function pagination (bodyParams) {
+export function pagination(bodyParams) {
   if (bodyParams.selector.book_id) {
     let book_id = bodyParams.selector.book_id;
     let articlesId = BookArticleCollection.find({
-      book_id: book_id
-    }).fetch().map(item => item.article_id)
-    console.log('articlesId',articlesId)
-    bodyParams.selector.book_id = '';
-    let curror = ArticleCollection.find({
-      ..._.pickBy(bodyParams.selector),
-      _id: {
-        $in: articlesId
-      }
-    } || {}, bodyParams.options);
+      book_id: book_id,
+    })
+      .fetch()
+      .map((item) => item.article_id);
+    console.log("articlesId", articlesId);
+    bodyParams.selector.book_id = "";
+    let curror = ArticleCollection.find(
+      {
+        ..._.pickBy(bodyParams.selector),
+        _id: {
+          $in: articlesId,
+        },
+      } || {},
+      bodyParams.options
+    );
     return {
       data: curror.fetch(),
-      total: curror.count()
-    }
+      total: curror.count(),
+    };
   } else {
-    let curror = ArticleCollection.find(_.pickBy(bodyParams.selector) || {}, bodyParams.options);
+    let curror = ArticleCollection.find(
+      _.pickBy(bodyParams.selector) || {},
+      bodyParams.options
+    );
     return {
       data: curror.fetch(),
-      total: curror.count()
-    }
+      total: curror.count(),
+    };
+  }
+}
+
+// 书籍和文章的关联
+export function associateBookAndArticle({ book_id, bodyParams, user }) {
+  return BookArticleCollection.insert({
+    book_id: book_id,
+    ...bodyParams,
+    author: {
+      name: user.username,
+      avatarUrl: user.profile().photoURL,
+    },
+    date: bodyParams.date && moment(bodyParams.date).format("YYYY/MM//DD"),
+  });
+}
+
+// 书籍和文章的关联
+export function associateBookAndArticleByUpdate({ book_id, article_id, bodyParams, user }) {
+  return BookArticleCollection.update({
+    book_id: book_id, 
+    article_id: article_id
+  }, {
+    ...bodyParams,
+    author: {
+      name: user.username,
+      avatarUrl: user.profile().photoURL
+    },
+    date: bodyParams.date && moment(bodyParams.date).format('YYYY/MM//DD')
+  })
+}
+
+
+// 添加答案
+export function addAnswer({
+  articleUserId,
+  article_id,
+  userId,
+  answers,
+  hasComments,
+  bodyParams,
+}) {
+  if (articleUserId) {
+    return ArticleUserCollection.upsert(
+      {
+        _id: articleUserId
+      },
+      {
+        article_id: article_id,
+        user_id: userId,
+        answers: answers,
+      }
+    );
+  } else {
+    return ArticleUserCollection.insert({
+      article_id: article_id,
+      user_id: userId,
+      answers: answers,
+      comments: hasComments && [],
+      ...bodyParams,
+    });
   }
 }

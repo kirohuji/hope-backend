@@ -4,7 +4,7 @@ import _ from 'lodash'
 import moment from "moment";
 import Constructor from "../base/api"
 import { serverError500 } from "../base/api";
-import { pagination } from './service';
+import { pagination, addAnswer, associateBookAndArticle, associateBookAndArticleByUpdate } from './service';
 
 Api.addCollection(ArticleCollection, {
   path: 'articles'
@@ -32,15 +32,18 @@ Api.addRoute('books/:_id/article', {
   post: {
     authRequired: true,
     action: function () {
-      return BookArticleCollection.insert({
-        book_id: this.urlParams._id,
-        ...this.bodyParams,
-        author: {
-          name: this.user.username,
-          avatarUrl: this.user.profile().photoURL
-        },
-        date: this.bodyParams.date && moment(this.bodyParams.date).format('YYYY/MM//DD')
-      })
+      try {
+        return associateBookAndArticle({
+          book_id: this.urlParams._id,
+          bodyParams: this.bodyParams,
+          user: this.user
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message
+        })
+      }
     }
   }
 });
@@ -49,17 +52,19 @@ Api.addRoute('books/:_id/article/update', {
   post: {
     authRequired: true,
     action: function () {
-      return BookArticleCollection.update({
-        book_id: this.urlParams._id,
-        article_id: this.bodyParams.article_id
-      }, {
-        ...this.bodyParams,
-        author: {
-          name: this.user.username,
-          avatarUrl: this.user.profile().photoURL
-        },
-        date: this.bodyParams.date && moment(this.bodyParams.date).format('YYYY/MM//DD')
-      })
+      try {
+        return associateBookAndArticleByUpdate({
+          book_id: this.urlParams._id,
+          article_id: this.bodyParams.article_id,
+          bodyParams: this.bodyParams,
+          user: this.user
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message
+        })
+      }
     }
   }
 });
@@ -112,29 +117,26 @@ Api.addRoute('articles/users/current/:_id', {
   }
 })
 
-// Api.addRoute('articles/users/current', {
-//     post: {
-//         authRequired: true,
-//         action: function () {
-//             console.log(this.bodyParams)
-//             if(this.bodyParams._id){
-//                 return ArticleUserCollection.upsert({
-//                     _id: this.bodyParams._id,
-//                 },{
-//                     article_id: this.bodyParams.article_id,
-//                     user_id: this.userId,
-//                     answers: this.bodyParams.answers,
-//                 })
-//             } else {
-//                 return ArticleUserCollection.insert({
-//                     article_id: this.bodyParams.article_id,
-//                     user_id: this.userId,
-//                     answers: this.bodyParams.answers,
-//                     comments: this.bodyParams.hasComments && [],
-//                     ...this.bodyParams
-//                 })
-//             }
-//         }
-//     }
-// })
+Api.addRoute('articles/users/current', {
+    post: {
+        authRequired: true,
+        action: function () {
+          try {
+            return addAnswer({
+              articleUserId: this.bodyParams._id,
+              article_id:  this.bodyParams.article_id,
+              userId: this.userId,
+              answers: this.bodyParams.answers,
+              hasComments:  this.bodyParams.hasComments,
+              bodyParams: this.bodyParams
+            });
+          } catch (e) {
+            return serverError500({
+              code: 500,
+              message: e.message
+            })
+          }
+        }
+    }
+})
 

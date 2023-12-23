@@ -55,7 +55,7 @@ export function publish(book_id) {
   );
 }
 
-// 发布
+// 取消发布
 export function unPublish(book_id) {
   return BookCollection.update(
     {
@@ -65,6 +65,47 @@ export function unPublish(book_id) {
       $set: {
         published: false,
       },
+    }
+  );
+}
+
+// 关联书籍和用户
+export function associateBookAndUser({ userId, bookId }) {
+  BookUserCollection.remove({
+    user_id: userId,
+  });
+  return BookUserCollection.upsert(
+    {
+      user_id: userId,
+      book_id: bookId,
+    },
+    {
+      user_id: userId,
+      book_id: bookId,
+    }
+  );
+}
+
+// 修改状态
+export function updateStatus({ userId, bookId, status }) {
+  BookUserCollection.update(
+    {
+      user_id: userId,
+    },
+    {
+      $set: { status: "none" },
+    },
+    {
+      multi: true,
+    }
+  );
+  return BookUserCollection.update(
+    {
+      user_id: userId,
+      book_id: bookId
+    },
+    {
+      $set: { status, },
     }
   );
 }

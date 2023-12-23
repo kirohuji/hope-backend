@@ -1,4 +1,5 @@
 import Api from "../../api";
+import { ProfilesCollection } from 'meteor/socialize:user-profile';
 const continue100 = (body = 'No Content') => {
   return {
     statusCode: 100,
@@ -142,6 +143,12 @@ export default function Constructor (route, Model) {
       action: function () {
         try {
           let model = Model.findOne(this.urlParams.id)
+          if(model.createdBy){
+            const profile = ProfilesCollection.findOne({
+              _id: model.createdBy
+            })
+            model.createdUser=profile;
+          }
           return success200(model);
         } catch (e) {
           return success205('No Content');
