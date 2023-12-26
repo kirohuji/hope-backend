@@ -26,9 +26,6 @@ export default Class.create({
   name: "User",
   collection: Meteor.users,
   fields: {
-    avatar: {
-      type: String,
-    },
     username: {
       type: String,
     },

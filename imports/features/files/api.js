@@ -3,6 +3,14 @@ import { currentByUserId, createFile, removeFile, updateFile, accpetShareFile, i
 import Api from "../../api";
 import { serverError500 } from "../base/api";
 import _ from 'lodash'
+
+// const Storage = new FilesCollection({
+//   collectionName: 'storage',
+//   allowClientCode: true,
+//   downloadRoute: '/images/',
+//   storagePath: 'storage/',
+// });
+
 Api.addCollection(FileCollection);
 
 Api.addRoute('files/current', {
@@ -139,3 +147,14 @@ Api.addRoute('files/current/type/mp3', {
         }
     },
 });
+
+// Api.addRoute('files/storage/upload', {
+//   post: {
+//       authRequired: true,
+//       action: function () {
+//         console.log('123')
+//         const file = this.request;
+//         console.log(file)
+//       }
+//   }
+// })

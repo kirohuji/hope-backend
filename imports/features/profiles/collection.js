@@ -70,6 +70,10 @@ Profile.attachSchema({
     type: String,
     required: false,
   },
+  realName: {
+    type: String,
+    required: false,
+  },
 })
 export default Class.create({
   name: "Profile",
@@ -135,6 +139,10 @@ export default Class.create({
       required: false,
     },
     scope: {
+      type: String,
+      required: false,
+    },
+    realName: {
       type: String,
       required: false,
     },

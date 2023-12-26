@@ -46,6 +46,25 @@ Api.addRoute('users/delete/:_id', {
   }
 });
 
+Api.addRoute('users/deleteMany', {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        this.bodyParams._ids.forEach(_id => {
+          return removeUser(_id);
+        });
+        return true
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message
+        })
+      }
+    }
+  }
+});
+
 Api.addRoute('users/register', {
   post: {
     authRequired: true,

@@ -4,7 +4,7 @@ import Model, { RuleRole, RuleAssignment } from "./collection";
 import Api from "../../api";
 import { serverError500 } from "../base/api";
 import _ from "lodash";
-import { getRolesByCurrentUser, getRolesTreeByCurrentUser, permissionTree } from './service'
+import { getRolesByCurrentUser, getRolesTreeByCurrentUser, permissionTree, getUsersInNotRoleOnly } from './service'
 Api.addCollection(Meteor.roles);
 
 Api.addRoute("roles/permissions", {
@@ -507,49 +507,16 @@ Api.addRoute("roles/getUsersInNotRole", {
 Api.addRoute("roles/getUsersInNotRoleOnly", {
   post: function () {
     try {
-      let ids
-      ids = getUserAssignmentsForRoleOnly(this.bodyParams.roles, this.bodyParams.options).fetch().map(a => a.user._id)
-      if (this.bodyParams.queryOptions && this.bodyParams.queryOptions.isShowJoinedUser === "on") {
-        return {
-          data: Meteor.users.find(
-            {},
-            ((this.bodyParams.options && this.bodyParams.options.queryOptions) || this.bodyParams.queryOptions) || {})
-            .fetch()
-            .map(item => {
-              const profile = item.profile();
-              return {
-                displayName: profile.displayName || '',
-                avatarUrl: profile.photoURL || '',
-                phoneNumber: profile.phoneNumber || '',
-                description: profile.about,
-                ..._.omit(item, 'services'),
-              }
-            }),
-          total: Meteor.users.find({ _id: { $nin: ids } }).count(),
-        }
-      } else {
-        return {
-          data: Meteor.users.find(
-            { _id: { $nin: ids } },
-            ((this.bodyParams.options && this.bodyParams.options.queryOptions) || this.bodyParams.queryOptions) || {})
-            .fetch()
-            .map(item => {
-              const profile = item.profile();
-              return {
-                displayName: profile.displayName || '',
-                avatarUrl: profile.photoURL || '',
-                phoneNumber: profile.phoneNumber || '',
-                description: profile.about,
-                ..._.omit(item, 'services'),
-              }
-            }),
-          total: Meteor.users.find({ _id: { $nin: ids } }).count(),
-        }
-      }
+      return getUsersInNotRoleOnly({
+        roles: this.bodyParams.roles,
+        options: this.bodyParams.options,
+        queryOptions: this.bodyParams.queryOptions
+      });
     } catch (e) {
-      return {
-        statusCode: 500
-      }
+      return serverError500({
+        code: 500,
+        message: e.message
+      })
     }
   },
 });

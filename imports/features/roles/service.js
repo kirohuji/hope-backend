@@ -4,7 +4,7 @@ import { ScopeCollection } from '../scopes/collection'
 import { Roles } from 'meteor/alanning:roles';
 import _ from 'lodash';
 
-function getUserAssignmentsForRoleOnly (roles, options) {
+function getUserAssignmentsForRoleOnly(roles, options) {
   options = Roles._normalizeOptions(options)
 
   options = Object.assign({
@@ -18,7 +18,7 @@ function getUserAssignmentsForRoleOnly (roles, options) {
   return _getUsersInRoleCursorOnly(roles, options, options.queryOptions)
 }
 
-function _getUsersInRoleCursorOnly (roles, options, filter) {
+function _getUsersInRoleCursorOnly(roles, options, filter) {
   var selector
 
   options = Roles._normalizeOptions(options)
@@ -52,7 +52,7 @@ function _getUsersInRoleCursorOnly (roles, options, filter) {
   return Meteor.roleAssignment.find(selector, filter)
 }
 
-function getTreeByAll (data) {
+function getTreeByAll(data) {
   const list = data.map(item => ({
     name: item.label,
     group: item.scope,
@@ -69,7 +69,7 @@ function getTreeByAll (data) {
   return root;
 }
 
-function serverArray (list, parent, data) {
+function serverArray(list, parent, data) {
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < list.length; i++) {
     if (list[i] && list[i].value) {
@@ -91,12 +91,12 @@ function serverArray (list, parent, data) {
       delete parent.children[i];
     }
   }
-  if(parent && parent.children && _.compact(parent.children).length ===0){
+  if (parent && parent.children && _.compact(parent.children).length === 0) {
     delete parent.children
   }
 }
 
-function getTree (data) {
+function getTree(data) {
   const root = data.filter((item) => item.isScope).map(item => ({
     ...item,
     children: data.filter(d => d.root && !d.isScope)
@@ -105,7 +105,7 @@ function getTree (data) {
   return root;
 }
 
-function getRolesForUser (user, options) {
+function getRolesForUser(user, options) {
   let id
 
   options = Roles._normalizeOptions(options)
@@ -197,7 +197,7 @@ function getRolesForUser (user, options) {
 
 }
 
-function getItemInfo ({
+function getItemInfo({
   scope,
   item
 }) {
@@ -229,10 +229,10 @@ function getItemInfo ({
 }
 
 
-function getTreeNoRoot (data) {
+function getTreeNoRoot(data) {
   let root = data
   const tree = [];
-  function serverArrayNoRoot (list, parent) {
+  function serverArrayNoRoot(list, parent) {
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < list.length; i++) {
       const item = _.find(data, ['_id', list[i]._id]);
@@ -259,7 +259,7 @@ function getTreeNoRoot (data) {
 }
 
 // 获取角色列表
-export function getRolesByCurrentUser ({
+export function getRolesByCurrentUser({
   selector,
   options,
 }) {
@@ -285,7 +285,7 @@ export function getRolesByCurrentUser ({
 }
 
 // 获取角色列表(树形结构)
-export function getRolesTreeByCurrentUser ({
+export function getRolesTreeByCurrentUser({
   selector,
   options,
   userId
@@ -327,7 +327,7 @@ export function getRolesTreeByCurrentUser ({
       type: selector.type
     });
     let rolesWithUser = roles.map(item => getItemInfo({ scope: selector.scope, item }))
-    console.log('rolesWithUser',roles)
+    console.log('rolesWithUser', roles)
     let tree = getTree(rolesWithUser)
     return tree;
   }
@@ -338,12 +338,43 @@ export function permissionTree({
   options
 }) {
   let permissions = Meteor.roles
-  .find({
-    ...selector,
-    type: 'permission'
-  } || {}, options)
-  .fetch()
+    .find({
+      ...selector,
+      type: 'permission'
+    } || {}, options)
+    .fetch()
   // console.log('permissions',permissions)
   let tree = getTreeNoRoot(permissions)
   return tree;
+}
+
+export function getUsersInNotRoleOnly({
+  roles,
+  options,
+  queryOptions
+}) {
+  let ids
+  ids = getUserAssignmentsForRoleOnly(roles, options).fetch().map(a => a.user._id);
+  let users = Meteor.users.find(
+    { _id: { $nin: ids } },
+  )
+    // ((options && options.queryOptions) || queryOptions) || {})
+  return {
+    data: _.compact(users.map(user=> {
+      if(user) {
+        const profile = user.profile();
+        if(profile){
+          return {
+            displayName: profile.displayName || '',
+            avatarUrl: profile.photoURL || '',
+            phoneNumber: profile.phoneNumber || '',
+            description: profile.about,
+            // ...profile,
+            ..._.omit(user, 'services'),
+          }
+        }
+      }
+    })),
+    total: users.count(),
+  }
 }

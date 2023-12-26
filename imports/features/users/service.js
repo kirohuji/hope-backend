@@ -15,23 +15,31 @@ export function pagination (bodyParams) {
       $options: "i"
     }
   }
+  let data =  ProfileModel.find(bodyParams.selector || {}, bodyParams.options);
   return {
-    data: ProfileModel.find(bodyParams.selector || {}, bodyParams.options).fetch().map(item => {
-      const user = Meteor.users.findOne({ _id: item._id })
-      const roles = _.compact(Meteor.roles.find({
-        _id: {
-          $in: Roles.getRolesForUser(item._id, {
-            scope: bodyParams?.options.scope,
-          })
-        }
-      }).fetch().filter(item => item.type == 'role'))
-      return {
-        ...user,
-        ...item,
-        roles: roles
-      }
-    }),
-    total: ProfileModel.find(bodyParams.selector || {}, bodyParams.options).count()
+    data: data.fetch(),
+    // data: data.fetch().map(item => {
+    //   // const user = Meteor.users.findOne({ _id: item._id }, {
+    //   //   fields: {
+    //   //     username: 1,
+    //   //     emails: 1,
+    //   //     status: 1
+    //   //   }
+    //   // })
+    //   // const roles = _.compact(Meteor.roles.find({
+    //   //   _id: {
+    //   //     $in: Roles.getRolesForUser(item._id, {
+    //   //       scope: bodyParams?.options.scope,
+    //   //     })
+    //   //   }
+    //   // }).fetch().filter(item => item.type == 'role'))
+    //   return {
+    //     ...user,
+    //     ...item,
+    //     // roles: roles
+    //   }
+    // }),
+    total: ProfileModel.find(bodyParams.selector || {}).count()
   }
 }
 

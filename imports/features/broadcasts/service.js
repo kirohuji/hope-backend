@@ -4,8 +4,9 @@ import _ from 'lodash'
 
 // 分页查询数据
 export function pagination (bodyParams) {
+  let data = BroadcastCollection.find(_.pickBy(bodyParams.selector) || {}, bodyParams.options);
   return {
-    data: BroadcastCollection.find(_.pickBy(bodyParams.selector) || {}, bodyParams.options).fetch().map(item => {
+    data: data.fetch().map(item => {
       return {
         ...item,
         leaders: item.leaders ? Meteor.users.find({
@@ -22,7 +23,7 @@ export function pagination (bodyParams) {
           }).fetch() : []
       }
     }),
-    total: BroadcastCollection.find().count()
+    total: data.count()
   }
 }
 

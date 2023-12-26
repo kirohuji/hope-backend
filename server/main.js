@@ -5,6 +5,7 @@ if (Meteor.isServer) {
 
   import "../imports/mock";
   import "../imports/features";
+  import "../imports/file-server";
   // const isProduction = process.env.NODE_ENV !== 'development';
 
   // if (!isProduction) {
