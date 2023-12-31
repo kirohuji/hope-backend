@@ -1,9 +1,9 @@
 module.exports = {
   servers: {
     one: {
-      host: "85.31.235.82",
+      host: "5.188.230.8",
       username: "root",
-      password: "Zyd1362848650#",
+      password: "s8qTc3Q4WE47",
     },
   },
   proxy: {
@@ -28,6 +28,10 @@ module.exports = {
     },
   },
   app: {
+    volumes: {
+      '/avatars':'/avatars',
+      '/storage':'/storage/'
+    },
     name: "hope-backend",
     path: "../",
     servers: {
@@ -42,7 +46,7 @@ module.exports = {
     },
     env: {
       ROOT_URL: "https://www.lourd.online",
-      MONGO_URL: "mongodb://meteor:meteor@124.221.67.248:27017/meteor",
+      MONGO_URL: "mongodb://meteor:meteor@5.188.230.8:27017/meteor",
     },
     docker: {
       image: "zodern/meteor:root",

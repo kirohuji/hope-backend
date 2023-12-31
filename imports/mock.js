@@ -22,7 +22,7 @@ users.forEach(function (user) {
       user.roles.forEach(function (role) {
         Roles.createRole(role, { unlessExists: true });
       });
-      // Need _id of existing user record so this call must come after `Accounts.createUser`.
+
       Roles.addUsersToRoles(id, user.roles);
     }
   }

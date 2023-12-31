@@ -1,5 +1,5 @@
 import { ProfilesCollection } from 'meteor/socialize:user-profile';
-import BroadcastCollection, { BroadcastUserCollection } from './collection'
+import BroadcastCollection, { BroadcastUser, BroadcastUserCollection } from './collection'
 import _ from 'lodash'
 
 // 分页查询数据
@@ -34,19 +34,29 @@ export function count (broadcast_id) {
 
 // 获取当前数据下所有的用户
 export function users (broadcast_id) {
-  return BroadcastUserCollection.find({
+  return _.compact(BroadcastUserCollection.find({
     broadcast_id: broadcast_id
   }).map(broadcastUser => {
     const user = ProfilesCollection.findOne({
       _id: broadcastUser.user_id
+    }, {
+      fields: {
+        realName: 1,
+        email: 1,
+        displayName: 1,
+        usename: 1,
+        photoURL: 1
+      }
     })
-    return {
-      broadcast_id,
-      user_id: user._id,
-      status: broadcastUser.status,
-      profile: user
+    if(user){
+      return {
+        broadcast_id,
+        user_id: user._id,
+        status: broadcastUser.status,
+        profile: user
+      }
     }
-  })
+  }))
 }
 
 // 签到
@@ -110,4 +120,55 @@ export function unPublish (broadcast_id) {
       published: false
     }
   })
+}
+
+export function addUsers ({
+  broadcast_id,
+  users_id,
+  currentUserId
+}) {
+  if(Array.isArray(users_id) && users_id.length > 0){
+    return _.compact(users_id.map(user_id=> {
+      const broadcastUser = BroadcastUserCollection.findOne({
+        broadcast_id,
+        user_id,
+      })
+      if(!broadcastUser){
+        let model = new BroadcastUser({
+          broadcast_id,
+          user_id,
+          createdBy: currentUserId
+        })
+        model.save();
+        const user = ProfilesCollection.findOne({
+          _id: model.user_id
+        }, {
+          fields: {
+            realName: 1,
+            email: 1,
+            displayName: 1,
+            usename: 1,
+            photoURL: 1
+          }
+        })
+        if(user){
+          return {
+            broadcast_id,
+            user_id: user._id,
+            status: model.status,
+            profile: user
+          }
+        }
+      }
+    }))
+  } else {
+    return [];
+  }
+  // return BroadcastCollection.update({
+  //   _id: broadcast_id,
+  // }, {
+  //   $set: {
+  //     published: false
+  //   }
+  // })
 }

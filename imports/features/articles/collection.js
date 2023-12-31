@@ -30,6 +30,8 @@ export const ArticleUser = Class.create({
         article_id: Mongo.ObjectID,
         user_id: Mongo.ObjectID,
         answers: [String],
+        completedDate: String,
+
     }
 })
 export default Class.create({

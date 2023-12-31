@@ -88,7 +88,7 @@ export default Class.create({
       default: "",
     },
     type: {
-      type: String,
+      type: [String],
       default: "",
     },
     published: {

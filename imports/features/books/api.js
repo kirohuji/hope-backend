@@ -1,5 +1,6 @@
 import moment from "moment";
 import Api from "../../api";
+import { ProfilesCollection } from 'meteor/socialize:user-profile';
 import Model, {
   BookCollection,
   BookPostCollection,
@@ -15,7 +16,7 @@ import {
 import _ from "lodash";
 import Constructor from "../base/api";
 import { serverError500 } from "../base/api";
-import { findOne, pagination, publish, unPublish, associateBookAndUser, updateStatus } from "./service";
+import { findOne, pagination, publish, unPublish, associateBookAndUser, updateStatus, play, getCurrentReadBook, select } from "./service";
 Api.addCollection(BookPostCollection, {
   path: "books/posts",
 });
@@ -109,21 +110,13 @@ Api.addRoute("books/users/current", {
   get: {
     authRequired: true,
     action: function () {
-      let bookUser = BookUserCollection.find({
-        user_id: this.userId,
-      });
-      if (bookUser) {
-        return bookUser.map((item) => {
-          console.log("bookUser", item);
-          return {
-            ...BookCollection.findOne({
-              _id: item.book_id,
-            }),
-            currentStatus: item.status,
-          };
+      try {
+        return getCurrentReadBook(this.userId);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
         });
-      } else {
-        return [];
       }
     },
   },
@@ -181,10 +174,12 @@ Api.addRoute("books/users/current/:bookId", {
       });
       if (bookUser) {
         return bookUser.map((item) => {
+          let book = BookCollection.findOne({
+            _id: item.book_id,
+          })
           return {
-            ...BookCollection.findOne({
-              _id: item.book_id,
-            }),
+            ...book,
+            createdUser: ProfilesCollection.findOne({ _id: book.createdBy }, { fields: { realName:1, displayName: 1 }}),
             currentStatus: item.status,
           };
         });
@@ -211,11 +206,22 @@ Api.addRoute("books/users/current/:bookId/summarize", {
         let selector = {
           article_id: { $in: total.map((i) => i.article_id) },
           user_id: this.userId,
-          $where: "this.answers.length>0",
+          completedDate: {
+            $exists: true 
+          }
+          // $where: "this.answers.length>0",
         };
+        let articleUser =  ArticleUserCollection.find(selector);
+        const completeArticle = ArticleCollection.find({
+          _id: {
+            $in: articleUser.fetch().map(item=> item.article_id)
+          }
+        }).fetch().map(item=> moment(item.date).format("YYYY/MM//DD"))
+
         return {
           total: total.count(),
-          inProcess: ArticleUserCollection.find(selector).count(),
+          inProcess: articleUser.count(),
+          days: completeArticle || [],
         };
       } else {
         return {
@@ -232,66 +238,15 @@ Api.addRoute("books/users/current/play", {
     authRequired: true,
     action: function () {
       try {
-        let bookUser = BookUserCollection.findOne({
-          user_id: this.userId,
-          status: "active",
+        return play({
+          userId: this.userId,
+          date: this.bodyParams.date,
         });
-        let book = BookCollection.findOne(
-          {
-            _id: bookUser.book_id,
-          },
-          {
-            fields: {
-              label: 1,
-              cover: 1,
-            },
-          }
-        );
-        let bookArticle = BookArticleCollection.findOne({
-          book_id: bookUser?.book_id,
-          date:
-            this.bodyParams.date &&
-            moment(this.bodyParams.date).format("YYYY/MM//DD"),
-        });
-        const article = ArticleCollection.findOne(
-          {
-            _id: bookArticle.article_id,
-          },
-          {
-            fields: {
-              title: 1,
-              description: 1,
-              date: 1,
-            },
-          }
-        );
-        const articleList = BookArticleCollection.find({
-          book_id: bookUser?.book_id,
-        }).map((i) =>
-          ArticleCollection.findOne(
-            {
-              _id: i.article_id,
-            },
-            {
-              fields: {
-                title: 1,
-                description: 1,
-                date: 1,
-              },
-            }
-          )
-        );
-        return {
-          book,
-          article,
-          list: articleList,
-        };
       } catch (e) {
-        return {
-          book: null,
-          article: null,
-          list: [],
-        };
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
       }
     },
   },
@@ -337,4 +292,25 @@ Api.addRoute("books/:bookId/unpublish", {
       });
     }
   },
+});
+
+Api.addRoute("books/:bookId/select", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        return select({
+          book_id: this.urlParams.bookId,
+          article_id: this.bodyParams.article_id,
+          userId: this.userId,
+          status: "active"
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  }
 });

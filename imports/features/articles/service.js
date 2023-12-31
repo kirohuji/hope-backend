@@ -86,6 +86,7 @@ export function addAnswer({
         _id: articleUserId
       },
       {
+        completedDate: moment(new Date()).format('YYYY/MM/DD'),
         article_id: article_id,
         user_id: userId,
         answers: answers,
@@ -98,6 +99,7 @@ export function addAnswer({
       answers: answers,
       comments: hasComments && [],
       ...bodyParams,
+      completedDate: moment(new Date()).format('YYYY/MM/DD'),
     });
   }
 }

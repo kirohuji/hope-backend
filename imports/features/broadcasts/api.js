@@ -4,7 +4,7 @@ import moment from "moment";
 import Api from "../../api";
 import Constructor from "../base/api"
 import { serverError500 } from "../base/api";
-import { pagination, count, users, signIn, signOut, removeUser, publish, unPublish } from './service';
+import { pagination, count, users, signIn, signOut, removeUser, publish, unPublish, addUsers } from './service';
 
 Api.addCollection(BroadcastCollection);
 
@@ -131,6 +131,22 @@ Api.addRoute('broadcasts/:_id/unpublish', {
   post: function () {
     try {
       return unPublish(this.urlParams._id);
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message
+      })
+    }                                                                          
+  }
+});
+Api.addRoute('broadcasts/addUsers', {
+  post: function () {
+    try {
+      return addUsers({
+        broadcast_id: this.bodyParams.broadcast_id,
+        users_id: this.bodyParams.users_id,
+        currentUserId: this.userId,
+      });
     } catch (e) {
       return serverError500({
         code: 500,
