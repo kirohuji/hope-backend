@@ -1,6 +1,6 @@
 import moment from "moment";
 import Api from "../../api";
-import { ProfilesCollection } from 'meteor/socialize:user-profile';
+import { ProfilesCollection } from "meteor/socialize:user-profile";
 import Model, {
   BookCollection,
   BookPostCollection,
@@ -16,7 +16,17 @@ import {
 import _ from "lodash";
 import Constructor from "../base/api";
 import { serverError500 } from "../base/api";
-import { findOne, pagination, publish, unPublish, associateBookAndUser, updateStatus, play, getCurrentReadBook, select } from "./service";
+import {
+  findOne,
+  pagination,
+  publish,
+  unPublish,
+  associateBookAndUser,
+  updateStatus,
+  play,
+  getCurrentReadBook,
+  select,
+} from "./service";
 Api.addCollection(BookPostCollection, {
   path: "books/posts",
 });
@@ -143,7 +153,7 @@ Api.addRoute("books/users/current", {
         return updateStatus({
           userId: this.userId,
           bookId: this.bodyParams.book_id,
-          status: this.bodyParams.status
+          status: this.bodyParams.status,
         });
       } catch (e) {
         return serverError500({
@@ -176,10 +186,13 @@ Api.addRoute("books/users/current/:bookId", {
         return bookUser.map((item) => {
           let book = BookCollection.findOne({
             _id: item.book_id,
-          })
+          });
           return {
             ...book,
-            createdUser: ProfilesCollection.findOne({ _id: book.createdBy }, { fields: { realName:1, displayName: 1 }}),
+            createdUser: ProfilesCollection.findOne(
+              { _id: book.createdBy },
+              { fields: { realName: 1, displayName: 1 } }
+            ),
             currentStatus: item.status,
           };
         });
@@ -199,30 +212,48 @@ Api.addRoute("books/users/current/:bookId/summarize", {
         book_id: this.urlParams.bookId,
       });
       if (bookUser) {
-        const total = BookArticleCollection.find({
-          book_id: this.urlParams.bookId,
-        });
-
-        let selector = {
-          article_id: { $in: total.map((i) => i.article_id) },
-          user_id: this.userId,
-          completedDate: {
-            $exists: true 
+        book = BookCollection.findOne(
+          { _id: this.urlParams.bookId },
+          {
+            fields: {
+              label: 1,
+              cover: 1,
+            },
           }
-          // $where: "this.answers.length>0",
-        };
-        let articleUser =  ArticleUserCollection.find(selector);
-        const completeArticle = ArticleCollection.find({
-          _id: {
-            $in: articleUser.fetch().map(item=> item.article_id)
-          }
-        }).fetch().map(item=> moment(item.date).format("YYYY/MM//DD"))
+        );
+        if (book) {
+          const total = BookArticleCollection.find({
+            book_id: this.urlParams.bookId,
+          });
 
-        return {
-          total: total.count(),
-          inProcess: articleUser.count(),
-          days: completeArticle || [],
-        };
+          let selector = {
+            article_id: { $in: total.map((i) => i.article_id) },
+            user_id: this.userId,
+            completedDate: {
+              $exists: true,
+            },
+            // $where: "this.answers.length>0",
+          };
+          let articleUser = ArticleUserCollection.find(selector);
+          const completeArticle = ArticleCollection.find({
+            _id: {
+              $in: articleUser.fetch().map((item) => item.article_id),
+            },
+          })
+            .fetch()
+            .map((item) => moment(item.date).format("YYYY/MM//DD"));
+
+          return {
+            total: total.count(),
+            inProcess: articleUser.count(),
+            days: completeArticle || [],
+          };
+        } else {
+          return {
+            total: 0,
+            inProcess: 0,
+          };
+        }
       } else {
         return {
           total: 0,
@@ -303,7 +334,7 @@ Api.addRoute("books/:bookId/select", {
           book_id: this.urlParams.bookId,
           article_id: this.bodyParams.article_id,
           userId: this.userId,
-          status: "active"
+          status: "active",
         });
       } catch (e) {
         return serverError500({
@@ -312,5 +343,5 @@ Api.addRoute("books/:bookId/select", {
         });
       }
     },
-  }
+  },
 });

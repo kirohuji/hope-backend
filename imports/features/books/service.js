@@ -131,55 +131,65 @@ export function play({ userId, date }) {
         },
       }
     );
-    if (bookUser.select_article_id) {
-      article = ArticleCollection.findOne(
-        { _id: bookUser.select_article_id },
-        {
-          fields: {
-            title: 1,
-            description: 1,
-            date: 1,
-          },
-        }
-      );
-    } else {
-      bookArticle = BookArticleCollection.findOne({
-        book_id: bookUser?.book_id,
-        date: date && moment(date).format("YYYY/MM//DD"),
-      });
-      article = ArticleCollection.findOne(
-        { _id: bookArticle.article_id },
-        {
-          fields: {
-            title: 1,
-            description: 1,
-            date: 1,
-          },
-        }
-      );
-    }
-    articleList = BookArticleCollection.find({
-      book_id: bookUser?.book_id,
-    }).map((i) =>
-      ArticleCollection.findOne(
-        {
-          _id: i.article_id,
-        },
-        {
-          fields: {
-            title: 1,
-            description: 1,
-            date: 1,
-          },
-        }
-      )
-    );
     console.log("select_article_id", bookUser);
-    return {
-      book,
-      article,
-      list: articleList,
-    };
+    if (book) {
+      if (bookUser.select_article_id) {
+        article = ArticleCollection.findOne(
+          { _id: bookUser.select_article_id },
+          {
+            fields: {
+              title: 1,
+              description: 1,
+              date: 1,
+            },
+          }
+        );
+      } else {
+        bookArticle = BookArticleCollection.findOne({
+          book_id: bookUser?.book_id,
+          date: date
+            ? moment(date).format("YYYY/MM//DD")
+            : moment(new Date()).format("YYYY/MM//DD"),
+        });
+        console.log("bookArticle", bookArticle);
+        article = ArticleCollection.findOne(
+          { _id: bookArticle.article_id },
+          {
+            fields: {
+              title: 1,
+              description: 1,
+              date: 1,
+            },
+          }
+        );
+      }
+      console.log("article", article);
+      articleList = BookArticleCollection.find({
+        book_id: bookUser?.book_id,
+      }).map((i) =>
+        ArticleCollection.findOne(
+          {
+            _id: i.article_id,
+          },
+          {
+            fields: {
+              title: 1,
+              description: 1,
+              date: 1,
+            },
+          }
+        )
+      );
+      return {
+        book,
+        article,
+        list: _.compact(articleList),
+      };
+    } else {
+      return false;
+    }
+  } else {
+    return false;
   }
 }
 
@@ -188,19 +198,25 @@ export function getCurrentReadBook(userId) {
     user_id: userId,
   });
   if (bookUser) {
-    return bookUser.map((item) => {
-      let book = BookCollection.findOne({
-        _id: item.book_id,
-      });
-      return {
-        ...book,
-        createdUser: ProfilesCollection.findOne(
-          { _id: book.createdBy },
-          { realName: 1, displayName: 1 }
-        ),
-        currentStatus: item.status,
-      };
-    });
+    return _.compact(
+      bookUser.map((item) => {
+        let book = BookCollection.findOne({
+          _id: item.book_id,
+        });
+        if (book) {
+          return {
+            ...book,
+            createdUser: ProfilesCollection.findOne(
+              { _id: book.createdBy },
+              { realName: 1, displayName: 1 }
+            ),
+            currentStatus: item.status,
+          };
+        } else {
+          return null;
+        }
+      })
+    );
   } else {
     return {};
   }
