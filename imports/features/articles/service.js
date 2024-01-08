@@ -17,9 +17,11 @@ export function pagination(bodyParams) {
       .map((item) => item.article_id);
     console.log("articlesId", articlesId);
     bodyParams.selector.book_id = "";
+    console.log("_.pickBy(bodyParams.selector)", _.pickBy(bodyParams.selector));
     let curror = ArticleCollection.find(
       {
         ..._.pickBy(bodyParams.selector),
+        published: bodyParams.selector.published,
         _id: {
           $in: articlesId,
         },
@@ -28,7 +30,14 @@ export function pagination(bodyParams) {
     );
     return {
       data: curror.fetch(),
-      total: curror.count(),
+      total: ArticleCollection.find(
+        {
+          ..._.pickBy(bodyParams.selector),
+          _id: {
+            $in: articlesId,
+          },
+        } || {}
+      ).count(),
     };
   } else {
     let curror = ArticleCollection.find(
@@ -37,7 +46,9 @@ export function pagination(bodyParams) {
     );
     return {
       data: curror.fetch(),
-      total: curror.count(),
+      total: ArticleCollection.find(
+        _.pickBy(bodyParams.selector) || {}
+      ).count(),
     };
   }
 }

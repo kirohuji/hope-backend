@@ -164,11 +164,18 @@ export function play({ userId, date }) {
         );
       }
       console.log("article", article);
-      articleList = BookArticleCollection.find({
-        book_id: bookUser?.book_id,
-      }).map((i) =>
+      // 优化
+      articleList = BookArticleCollection.find(
+        {
+          book_id: bookUser?.book_id,
+        },
+        {
+          sort: { date: -1 },
+        }
+      ).map((i) =>
         ArticleCollection.findOne(
           {
+            published: true,
             _id: i.article_id,
           },
           {

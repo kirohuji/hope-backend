@@ -236,6 +236,7 @@ Api.addRoute("books/users/current/:bookId/summarize", {
           };
           let articleUser = ArticleUserCollection.find(selector);
           const completeArticle = ArticleCollection.find({
+            published: true,
             _id: {
               $in: articleUser.fetch().map((item) => item.article_id),
             },

@@ -156,8 +156,19 @@ export function info(_id) {
 }
 
 // 修改密码
-export function changePassword({ userId, newPassword }) {
-  return Accounts.setPassword(userId, newPassword);
+export async function changePassword({ user, password, newPassword }) {
+  let result = Accounts._checkPassword(user, password);
+  if (result.userId) {
+    Accounts.setPassword(result.userId, newPassword);
+    return true;
+  } else {
+    throw result.error;
+  }
+  // let user = Meteor.users.findOne({
+  //   _id: "pThW5Mvd49EuKasdC",
+  // });
+  // Accounts.setPassword(user._id, newPassword);
+  // return true;
 }
 
 // 分页查询数据

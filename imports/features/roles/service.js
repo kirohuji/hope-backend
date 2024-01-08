@@ -321,7 +321,17 @@ export function getRolesByCurrentUser({ selector, options }) {
     let ids = getUserAssignmentsForRoleOnly(item._id, { scope: selector.scope })
       .fetch()
       .map((a) => a.user._id);
-    let users = ProfilesCollection.find({ _id: { $in: ids } }).fetch();
+    let users = ProfilesCollection.find(
+      { _id: { $in: ids } },
+      {
+        fields: {
+          _id: 1,
+          username: 1,
+          realName: 1,
+          displayName: 1,
+        },
+      }
+    ).fetch();
     return {
       ...item,
       users: users,

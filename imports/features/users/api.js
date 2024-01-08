@@ -147,7 +147,8 @@ Api.addRoute("users/changePassword", {
     action: function () {
       try {
         return changePassword({
-          userId: this.userId,
+          user: this.user,
+          password: this.bodyParams.oldPassword,
           newPassword: this.bodyParams.newPassword,
         });
       } catch (e) {
