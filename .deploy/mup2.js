@@ -29,7 +29,7 @@ module.exports = {
   },
   app: {
     volumes: {
-      "/avatars": "/avatars/",
+      "/avatars": "/avatars",
       "/storage": "/storage/",
     },
     name: "hope-backend",
@@ -53,15 +53,12 @@ module.exports = {
       useBuildKit: true,
       prepareBundle: true,
       buildInstructions: [
-        "RUN npm config set proxy null",
-        "RUN npm config set https-proxy null",
         "RUN npm config set registry https://registry.npm.taobao.org",
-        "RUN npm config set strict-ssl false",
-        "RUN npm config set disturl https://npm.taobao.org/mirrors/node/",
-        "RUN npm config set phantomjs_cdnurl https://npm.taobao.org/mirrors/phantomjs/",
-        // 'USER root',
-        // "RUN curl -o- https://ghproxy.com/https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash",
-        // "RUN nvm | bash",
+        // "RUN npm config set disturl https://npm.taobao.org/mirrors/node/",
+        // "RUN npm config set phantomjs_cdnurl https://npm.taobao.org/mirrors/phantomjs/",
+        // // 'USER root',
+        // 'RUN curl -o- https://ghproxy.com/https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash',
+        // 'RUN nvm | bash',
         // // 'USER app'
         // 'USER root',
         // 'RUN apt-get update && apt-get install -y imagemagick graphicsmagick',

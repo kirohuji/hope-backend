@@ -100,7 +100,7 @@ Api.addRoute("roles/updateRolesToParent", {
           Meteor.roles
             .find({
               _id: {
-                $in: role.children.map((item) => item._id),
+                $in: role?.children.map((item) => item._id) || [],
               },
             })
             .map((item) => item.type == "permission" && item._id)
@@ -345,7 +345,7 @@ function _getInheritedRoleNames(role) {
   nestedRoles.forEach((r) => {
     const roles = Meteor.roles
       .find(
-        { _id: { $in: r.children.map((r) => r._id) } },
+        { _id: { $in: r.children?.map((r) => r._id) || [] } },
         { fields: { children: 1 } }
       )
       .fetch();

@@ -3,6 +3,7 @@ import "./profiles";
 import "./tags";
 import "./roles";
 import "./scopes";
+import "./versions";
 import "./friendships";
 import "./messaging";
 import "./dictionaries";

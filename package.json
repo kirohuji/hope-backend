@@ -2,7 +2,7 @@
   "name": "hope-backend",
   "private": true,
   "scripts": {
-    "start": "MONGO_URL=mongodb://meteor:meteor@5.188.230.8/meteor meteor run --port=3000",
+    "start": "MONGO_URL=mongodb://meteor:meteor@124.221.67.248/meteor meteor run --port=3000",
     "dev": "meteor run --port=3000"
   },
   "dependencies": {

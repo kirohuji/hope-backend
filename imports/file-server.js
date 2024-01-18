@@ -5,7 +5,10 @@ import { ProfilesCollection } from "meteor/socialize:user-profile";
 import * as XLSX from "xlsx/xlsx.mjs";
 import * as fs from "fs";
 import { pinyin } from "pinyin-pro";
+import { DDP } from "meteor/ddp-client";
 import _ from "lodash";
+
+import { ArticleCollection } from "./features/articles/collection";
 
 export const Avatars = new FilesCollection({
   collectionName: "avatars",
@@ -13,6 +16,52 @@ export const Avatars = new FilesCollection({
   downloadRoute: "/images/",
   storagePath: "/avatars/",
 });
+
+export const Storage = new FilesCollection({
+  collectionName: "storage",
+  allowClientCode: true,
+  downloadRoute: "/storage/images/",
+  storagePath: "/storage/",
+});
+
+function insertUpdate(collection, doc) {
+  console.log("开始图片迁移2");
+  if (!collection.findOne(doc._id)) {
+    console.log(`[${collection._name}]: insert ${collection.insert(doc)}`);
+  } else {
+    const docId = doc._id;
+    delete doc._id;
+    const updated = collection.update(docId, { $set: doc });
+    console.log(`[${collection._name}]: update ${docId} ${updated}`);
+  }
+}
+
+let remoteConnection; // use to connect to P via DDP
+
+/**
+ * Call the methods on the remote application and insert/update the received documents
+ */
+function synchronize(trackerComputation) {
+  console.log("开始图片迁移");
+  // skip if not yet connected
+  if (!remoteConnection.status().connected) return;
+
+  console.log(remoteConnection.status());
+  remoteConnection.call("getAvatars", (err, filesDocuments) => {
+    // handle err
+    filesDocuments.forEach((filesDoc) =>
+      insertUpdate(Avatars.collection, filesDoc)
+    );
+  });
+  remoteConnection.call("getStorages", (err, filesDocuments) => {
+    // handle err
+    filesDocuments.forEach((filesDoc) =>
+      insertUpdate(Storage.collection, filesDoc)
+    );
+  });
+  // stop the tracker because we don't need to watch the connection anymore
+  trackerComputation.stop();
+}
 
 XLSX.set_fs(fs);
 const property = new Map([
@@ -25,6 +74,77 @@ const property = new Map([
   ["地址", "address"],
 ]);
 
+function createUserV1({ usernameWithAge, mapUser, profile }) {
+  let _id = Accounts.createUser({
+    username: usernameWithAge,
+    email: `${usernameWithAge}@lourd.online`,
+    password: "123456",
+  });
+  Accounts.addEmail(_id, `${mapUser.phoneNumber}@lourd.online`, false);
+  ProfilesCollection.update(
+    { _id: _id },
+    {
+      $set: {
+        realName: mapUser.username,
+        email: `${usernameWithAge}@lourd.online`,
+        ..._.pick(mapUser, [
+          "displayName",
+          "phoneNumber",
+          "age",
+          "gender",
+          "photoUrl",
+          "country",
+          "isPublic",
+          "state",
+          "city",
+          "address",
+          "about",
+          "baptized",
+        ]),
+        available: "banned",
+        scope: profile?.scope,
+      },
+    }
+  );
+}
+
+function createUserV2({ usernameWithAge, mapUser, profile }) {
+  let _id = Accounts.createUser({
+    username: `${usernameWithAge}${String(mapUser.phoneNumber).slice(-4)}`,
+    email: `${usernameWithAge}${String(mapUser.phoneNumber).slice(
+      -4
+    )}@lourd.online`,
+    password: "123456",
+  });
+  ProfilesCollection.update(
+    { _id: _id },
+    {
+      $set: {
+        realName: mapUser.username,
+        email: `${usernameWithAge}${String(mapUser.phoneNumber).slice(
+          -4
+        )}@lourd.online`,
+        ..._.pick(mapUser, [
+          "displayName",
+          "phoneNumber",
+          "age",
+          "gender",
+          "photoUrl",
+          "country",
+          "isPublic",
+          "state",
+          "city",
+          "address",
+          "about",
+          "baptized",
+        ]),
+        available: "banned",
+        scope: profile?.scope,
+      },
+    }
+  );
+  Accounts.addEmail(_id, `${mapUser.phoneNumber}@lourd.online`, false);
+}
 async function userProcess(users, profile) {
   return Promise.all(
     users.map(async function (user) {
@@ -41,74 +161,128 @@ async function userProcess(users, profile) {
         pattern: "first",
         toneType: "none",
       }).replace(/\s/g, "");
-      console.log("username", username);
       let usernameWithAge = `${username}${mapUser.age}`;
 
       let current = Meteor.users.findOne({ username: usernameWithAge });
       let _id = current?._id;
       if (!_id) {
-        _id = Accounts.createUser({
-          username: usernameWithAge,
-          email: `${usernameWithAge}@lourd.online`,
-          password: "123456",
+        createUserV1({
+          usernameWithAge,
+          mapUser,
+          profile,
         });
-        ProfilesCollection.update(
-          { _id: _id },
-          {
-            $set: {
-              realName: mapUser.username,
-              email: `${usernameWithAge}@lourd.online`,
-              ..._.pick(mapUser, [
-                "displayName",
-                "phoneNumber",
-                "age",
-                "gender",
-                "photoUrl",
-                "country",
-                "isPublic",
-                "state",
-                "city",
-                "address",
-                "about",
-                "baptized",
-              ]),
-              available: "banned",
-              scope: profile?.scope,
-            },
-          }
-        );
         return true;
       } else {
-        ProfilesCollection.update(
-          { _id: _id },
-          {
-            $set: {
-              realName: mapUser.username,
-              email: `${usernameWithAge}@lourd.online`,
-              ..._.pick(mapUser, [
-                "displayName",
-                "phoneNumber",
-                "age",
-                "gender",
-                "photoUrl",
-                "country",
-                "isPublic",
-                "state",
-                "city",
-                "address",
-                "about",
-                "baptized",
-              ]),
-              scope: profile?.scope,
-            },
+        let currentProfile = current.profile();
+        if (
+          currentProfile.realName === mapUser.username &&
+          currentProfile.phoneNumber === mapUser.phoneNumber
+        ) {
+          updateUserV1({ _id, usernameWithAge, mapUser, profile });
+        } else {
+          let current2 = Meteor.users.findOne({
+            username: `${usernameWithAge}${String(mapUser.phoneNumber).slice(
+              -4
+            )}`,
+          });
+          let _id = current2?._id;
+          if (!_id) {
+            createUserV2({
+              usernameWithAge,
+              mapUser,
+              profile,
+            });
+          } else {
+            let currentProfile = current2.profile();
+            if (
+              currentProfile.realName === mapUser.username &&
+              currentProfile.phoneNumber === mapUser.phoneNumber
+            ) {
+              updateUserV2({ _id, usernameWithAge, mapUser, profile });
+            }
           }
-        );
+          return true;
+        }
       }
       return true;
     })
   );
 }
 
+async function userProcess2(users, profile) {
+  return Promise.all(
+    users.map(async function (user) {
+      let mapUser = {};
+      Object.keys(user).map((key) => {
+        mapUser[property.get(key)] = user[key];
+      });
+      if (mapUser.gender === "男") {
+        mapUser.gender = "male";
+      } else {
+        mapUser.gender = "female";
+      }
+      let username = pinyin(mapUser.username, {
+        pattern: "first",
+        toneType: "none",
+      }).replace(/\s/g, "");
+      let usernameWithAge = `${username}${mapUser.age}`;
+      let current = Meteor.users.findOne({
+        emails: {
+          $elemMatch: { address: `${mapUser.phoneNumber}@lourd.online` },
+        },
+      });
+      console.log("current", current?.username);
+      // 存在则更新
+      if (current) {
+        ProfilesCollection.update(
+          { _id: current._id },
+          {
+            $set: {
+              realName: mapUser.username,
+              email: current.emails[0],
+              ..._.pick(mapUser, [
+                "displayName",
+                "age",
+                "gender",
+                "country",
+                "isPublic",
+                "state",
+                "city",
+                "address",
+                "about",
+                "baptized",
+              ]),
+              scope: profile?.scope,
+            },
+          }
+        );
+        Accounts.addEmail(
+          current._id,
+          `${mapUser.phoneNumber}@lourd.online`,
+          false
+        );
+      } else {
+        console.log("插入");
+        let usernameWithAgeUser = Meteor.users.findOne({
+          username: usernameWithAge,
+        });
+        if (!usernameWithAgeUser) {
+          createUserV1({
+            usernameWithAge,
+            mapUser,
+            profile,
+          });
+        } else {
+          createUserV2({
+            usernameWithAge,
+            mapUser,
+            profile,
+          });
+        }
+      }
+    })
+  );
+}
 function isExcel(file) {
   return /\.(xlsx|xls|csv)$/.test(file);
 }
@@ -118,7 +292,7 @@ async function excelProcess(file, profile) {
   const workSheets = Sheets[SheetNames[0]];
   const data = XLSX.utils.sheet_to_row_object_array(workSheets);
   if (Array.isArray(data)) {
-    await userProcess(data, profile);
+    await userProcess2(data, profile);
   }
 }
 
@@ -130,21 +304,55 @@ function UUID() {
   });
 }
 
-export const Storage = new FilesCollection({
-  collectionName: "storage",
-  allowClientCode: true,
-  downloadRoute: "/storage/images/",
-  storagePath: "/storage/",
-});
-
 if (Meteor.isServer) {
+  // const url = "wss://www.lourd.online"; // get url of P, for example via process.env or Meteor.settings
+  // remoteConnection = DDP.connect(url);
+
+  // // use Tracker to run the sync when the remoteConnection is "connected"
+  // const synchronizeTracker = Meteor.bindEnvironment(synchronize);
+  // Tracker.autorun(synchronizeTracker);
+
+  // ArticleCollection.find({
+  //   coverUrl: { $exists: true, $regex: "www.lourd.online" },
+  // }).map((item) => {
+  //   var str = item.coverUrl;
+  //   var newStr = str.replace("www.lourd.online", "www.lourd.top");
+  //   ArticleCollection.update(
+  //     {
+  //       _id: item._id,
+  //     },
+  //     {
+  //       $set: {
+  //         coverUrl: newStr,
+  //       },
+  //     }
+  //   );
+  // });
+
+  // ProfilesCollection.find({
+  //   photoURL: { $exists: true, $regex: "www.lourd.online" },
+  // }).map((item) => {
+  //   var str = item.photoURL;
+  //   var newStr = str.replace("www.lourd.online", "www.lourd.top");
+  //   ArticleCollection.update(
+  //     {
+  //       _id: item._id,
+  //     },
+  //     {
+  //       $set: {
+  //         photoURL: newStr,
+  //       },
+  //     }
+  //   );
+  // });
+
   const _multer = require("multer");
   const _fs = require("fs");
   const _multerInstanceConfig = { dest: "/tmp" }; // Temp dir for multer
   const _multerInstance = _multer(_multerInstanceConfig);
   Picker.middleware(_multerInstance.single("file"));
 
-  Picker.route("/storage/link:_id", function (params, req, res, next) {
+  Picker.route("/storage/link/:_id", function (params, req, res, next) {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({
@@ -154,6 +362,28 @@ if (Meteor.isServer) {
       })
     );
   });
+
+  // Picker.route("/storage/file/link/:_id", function (params, req, res, next) {
+  //   res.writeHead(200, { "Content-Type": "application/json" });
+  //   res.end(
+  //     JSON.stringify({
+  //       link: Storage.findOne({
+  //         "meta.uuid": params._id,
+  //       }).link(),
+  //     })
+  //   );
+  // });
+
+  // Picker.route("/storage/avatar/link/:_id", function (params, req, res, next) {
+  //   res.writeHead(200, { "Content-Type": "application/json" });
+  //   res.end(
+  //     JSON.stringify({
+  //       link: Storage.findOne({
+  //         "meta.userId": params._id,
+  //       }).link(),
+  //     })
+  //   );
+  // });
 
   Picker.route("/storage/upload", function (params, req, res, next) {
     console.log("收到");
@@ -329,6 +559,12 @@ if (Meteor.isServer) {
                         }).link(),
                       })
                     );
+                    // res.end(
+                    //   JSON.stringify({
+                    //     code: 200,
+                    //     link: user._id,
+                    //   })
+                    // );
                   }
                 }
               );
@@ -338,4 +574,13 @@ if (Meteor.isServer) {
       }
     }
   });
+  function getAvatars() {
+    return Avatars.collection.find().fetch();
+  }
+
+  function getStorages() {
+    return Storage.find().fetch();
+  }
+
+  Meteor.methods({ getAvatars, getStorages });
 }

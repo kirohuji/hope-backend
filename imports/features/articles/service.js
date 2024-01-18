@@ -8,11 +8,10 @@ import _ from "lodash";
 import moment from "moment";
 // 分页查询数据
 export function pagination(bodyParams) {
+  console.log("bodyParams", bodyParams);
   if (bodyParams.selector.book_id) {
     let book_id = bodyParams.selector.book_id;
-    let articlesId = BookArticleCollection.find({
-      book_id: book_id,
-    })
+    let articlesId = BookArticleCollection.find({})
       .fetch()
       .map((item) => item.article_id);
     console.log("articlesId", articlesId);
@@ -20,8 +19,7 @@ export function pagination(bodyParams) {
     console.log("_.pickBy(bodyParams.selector)", _.pickBy(bodyParams.selector));
     let curror = ArticleCollection.find(
       {
-        ..._.pickBy(bodyParams.selector),
-        published: bodyParams.selector.published,
+        ..._.pickBy(bodyParams.selector, (value) => value !== ""),
         _id: {
           $in: articlesId,
         },
@@ -32,7 +30,7 @@ export function pagination(bodyParams) {
       data: curror.fetch(),
       total: ArticleCollection.find(
         {
-          ..._.pickBy(bodyParams.selector),
+          ..._.pickBy(bodyParams.selector, (value) => value !== ""),
           _id: {
             $in: articlesId,
           },
