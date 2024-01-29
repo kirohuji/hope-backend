@@ -52,11 +52,23 @@ export function isObserving({ user, _id }) {
 }
 
 // 根据用户获取会话
-export function findExistingConversationWithUsers({ userId, bodyParams }) {
+export function findExistingConversationWithUsers({ userId, users }) {
   users.push(userId);
   const conversation = ConversationsCollection.findOne({
     _participants: { $size: users.length, $all: users },
   });
+  if (conversation) {
+    ConversationsCollection.update(
+      {
+        _id: conversation._id,
+      },
+      {
+        $set: {
+          isRemove: false,
+        },
+      }
+    );
+  }
   return conversation ? conversation._id : -1;
 }
 
