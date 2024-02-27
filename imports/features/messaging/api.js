@@ -28,6 +28,7 @@ import {
   addParticipants,
   addParticipant,
   removeParticipant,
+  removeParticipants,
   participants,
   participantsAsUsers,
   conversationByParticipantId,
@@ -291,6 +292,20 @@ Api.addRoute("messaging/users/conversations", {
       }
     },
   },
+  post: {
+    authRequired: true,
+    action: function () {
+      console.log("gadsa");
+      try {
+        return getConversationsByCurrentUser(this.user, this.bodyParams.ids);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
 });
 
 Api.addRoute("messaging/conversations/:_id/updateReadState/:_status", {
@@ -318,6 +333,25 @@ Api.addRoute("messaging/conversations/:_id/addParticipants", {
     action: function () {
       try {
         return addParticipants({
+          conversationId: this.urlParams._id,
+          participants: this.bodyParams.participants,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("messaging/conversations/:_id/removeParticipants", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        return removeParticipants({
           conversationId: this.urlParams._id,
           participants: this.bodyParams.participants,
         });
@@ -547,10 +581,8 @@ Meteor.publish(
     conversationId,
     userId,
     date,
-    options = { limit: 5, sort: { createdAt: -1 } }
+    options = { limit: 100, sort: { createdAt: -1 } }
   ) {
-    // check(conversationId, String);
-    // check(options, optionsArgumentCheck);
     if (conversationId) {
       const user = Meteor.users.findOne({
         _id: userId,
@@ -591,66 +623,44 @@ Meteor.publish("socialize.unreadCount", function publishMessageFor(userId) {
   }
 });
 
-publishComposite(
-  "socialize.conversations2",
-  function publishConversations(
-    userId,
-    options = { limit: 30, sort: { updatedAt: -1 } }
-  ) {
-    check(options, optionsArgumentCheck);
-    if (!userId) {
-      return this.ready();
-    }
-
-    return {
-      find() {
-        return ParticipantsCollection.find(
-          { userId: userId, deleted: { $exists: false } },
-          options
-        );
-      },
-      children: [
-        {
-          find(participant) {
-            return ConversationsCollection.find({
-              _id: participant.conversationId,
-            });
-          },
-          children: [
-            {
-              find(conversation) {
-                return conversation.participants();
-              },
-              children: [
-                {
-                  find(participant) {
-                    return Meteor.users.find(
-                      { _id: participant.userId },
-                      { fields: User.fieldsToPublish }
-                    );
-                  },
-                },
-                {
-                  find(participant) {
-                    return ProfilesCollection.find(
-                      { _id: participant.userId },
-                      { fields: User.fieldsToPublish }
-                    );
-                  },
-                },
-              ],
-            },
-            {
-              find(conversation) {
-                return conversation.messages({
-                  limit: 1,
-                  sort: { createdAt: -1 },
-                });
-              },
-            },
-          ],
-        },
-      ],
-    };
+Meteor.publish("newMessagesConversations", function (date) {
+  if (!this.userId) {
+    return this.ready();
   }
-);
+
+  let updatedConversationId = null; // 存储更新的会话ID
+
+  const observer = MessagesCollection.find({
+    createdAt: {
+      $gte: date,
+    },
+  }).observeChanges({
+    added: (id, fields) => {
+      // 仅在更新的会话ID为空时，才将其设置为第一个新增消息所属的会话ID
+      if (!updatedConversationId) {
+        updatedConversationId = fields.conversationId;
+      }
+      // 否则，如果更新的会话ID已经存在，则不作处理
+    },
+  });
+
+  this.onStop(() => {
+    observer.stop();
+  });
+
+  // 如果存在更新的会话ID，则返回该会话的发布，否则返回所有会话的发布
+  if (updatedConversationId) {
+    return ConversationsCollection.find({
+      _id: updatedConversationId,
+      _participants: {
+        $in: [this.userId],
+      },
+    });
+  } else {
+    return ConversationsCollection.find({
+      _participants: {
+        $in: [this.userId],
+      },
+    });
+  }
+});

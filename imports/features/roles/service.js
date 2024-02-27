@@ -329,6 +329,7 @@ export function getRolesByCurrentUser({ selector, options }) {
           username: 1,
           realName: 1,
           displayName: 1,
+          photoURL: 1,
         },
       }
     ).fetch();

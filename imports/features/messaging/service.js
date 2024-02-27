@@ -91,6 +91,7 @@ export function messages({ userId, conversationId, bodyParams }) {
   let update = MessagesCollection.update(
     {
       conversationId,
+      readedIds: { $ne: userId },
     },
     {
       $addToSet: {
@@ -99,7 +100,7 @@ export function messages({ userId, conversationId, bodyParams }) {
     },
     { multi: true }
   );
-  console.log("update", userId);
+  console.log("messages update", update);
   return ConversationsCollection.findOne({ _id: conversationId })
     .messages(bodyParams.options || {})
     .map((item) => {
@@ -133,11 +134,12 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
       $gte: message.createdAt,
     },
   }).map((msg) => msg._id);
-  MessagesCollection.update(
+  let update = MessagesCollection.update(
     {
       _id: {
         $in: messagesIds,
       },
+      readedIds: { $ne: userId },
     },
     {
       $addToSet: {
@@ -146,6 +148,7 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
     },
     { multi: true }
   );
+  console.log("update", update);
   return MessagesCollection.find({
     conversationId,
     createdAt: {
@@ -164,11 +167,13 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
 
 // 发送消息
 export function sendMessage({ conversationId, userId, bodyParams }) {
+  console.log("更新");
   return MessagesCollection.insert(
     new Message({
       conversationId,
       body: bodyParams.body,
       readedIds: [userId],
+      sendingMessageId: bodyParams.sendingMessageId,
       contentType: bodyParams.contentType,
       inFlight: true,
     }),
@@ -206,9 +211,43 @@ export function createNewConversations({ participants, userId }) {
 }
 
 // 根据当前用户获取所有的会话
-export function getConversationsByCurrentUser(user) {
+export function getConversationsByCurrentUser(user, ids) {
+  console.log("ids", ids);
+  if (ids) {
+    return ConversationsCollection.find({
+      _id: { $in: ids },
+    })
+      .fetch()
+      .map((item) => {
+        return {
+          ...item,
+          messages: [
+            ConversationsCollection.findOne({ _id: item._id }).lastMessage(),
+          ],
+          unreadCount: MessagesCollection.find({
+            conversationId: item._id,
+            readedIds: {
+              $nin: [user._id],
+            },
+          }).count(),
+          type: item._participants.length > 2 ? "GROUP" : "ONE_TO_ONE",
+          participants: ProfilesCollection.find(
+            { _id: { $in: item._participants } },
+            {
+              fields: {
+                _id: 1,
+                photoURL: 1,
+                username: 1,
+                displayName: 1,
+                realName: 1,
+              },
+            }
+          ).fetch(),
+        };
+      });
+  }
   return user
-    .conversations()
+    .conversations({ _id: { $in: ids } })
     .fetch()
     .map((item) => {
       return {
@@ -256,18 +295,32 @@ export function addParticipants({ conversationId, participants }) {
 
 // 根据会话 id添加参与者
 export function addParticipant({ conversationId, participant }) {
-  const user = Meteor.users.find({ _id: participant }).fetch();
-  return ConversationsCollection.findOne({
+  const user = Meteor.users.findOne({ _id: participant?._id || participant });
+  ConversationsCollection.findOne({
     _id: conversationId,
   }).addParticipant(user);
+  return true;
 }
 
 // 根据会话 id删除参与者
 export function removeParticipant({ conversationId, participant }) {
-  const user = Meteor.users.find({ _id: participant }).fetch();
-  return ConversationsCollection.findOne({
+  const user = Meteor.users.findOne({ _id: participant?._id || participant });
+  ConversationsCollection.findOne({
     _id: conversationId,
   }).removeParticipant(user);
+  return true;
+}
+
+// 根据会话 id删除一组参与者
+export function removeParticipants({ conversationId, participants }) {
+  const query = {
+    conversationId,
+    userId: {
+      $in: participants,
+    },
+  };
+  const modifier = { $set: { deleted: true, read: true } };
+  return ParticipantsCollection.update(query, modifier);
 }
 
 // 根据会话 id 获取所有的参与者

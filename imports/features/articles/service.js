@@ -8,15 +8,12 @@ import _ from "lodash";
 import moment from "moment";
 // 分页查询数据
 export function pagination(bodyParams) {
-  console.log("bodyParams", bodyParams);
-  if (bodyParams.selector.book_id) {
-    let book_id = bodyParams.selector.book_id;
+  let book_id = bodyParams.selector.book_id;
+  if (book_id) {
     let articlesId = BookArticleCollection.find({})
       .fetch()
       .map((item) => item.article_id);
-    console.log("articlesId", articlesId);
     bodyParams.selector.book_id = "";
-    console.log("_.pickBy(bodyParams.selector)", _.pickBy(bodyParams.selector));
     let curror = ArticleCollection.find(
       {
         ..._.pickBy(bodyParams.selector, (value) => value !== ""),

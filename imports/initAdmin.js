@@ -10,7 +10,6 @@ users.forEach(function (user) {
     })
   ) {
     let id;
-
     id = Accounts.createUser({
       username: user.name,
       email: user.email,
@@ -22,7 +21,6 @@ users.forEach(function (user) {
       user.roles.forEach(function (role) {
         Roles.createRole(role, { unlessExists: true });
       });
-
       Roles.addUsersToRoles(id, user.roles);
     }
   }

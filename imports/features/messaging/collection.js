@@ -20,6 +20,10 @@ Message.attachSchema({
     type: String,
     required: false,
   },
+  sendingMessageId: {
+    type: String,
+    required: false,
+  },
   readedIds: {
     type: Array,
     optional: true,

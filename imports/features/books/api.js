@@ -1,13 +1,7 @@
 import moment from "moment";
 import Api from "../../api";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
-import Model, {
-  BookCollection,
-  BookPostCollection,
-  BookPostQuestionCollection,
-  BookPost,
-  BookUserCollection,
-} from "./collection";
+import Model, { BookCollection, BookUserCollection } from "./collection";
 import {
   BookArticleCollection,
   ArticleCollection,
@@ -17,7 +11,6 @@ import _ from "lodash";
 import Constructor from "../base/api";
 import { serverError500 } from "../base/api";
 import {
-  findOne,
   pagination,
   publish,
   unPublish,
@@ -27,9 +20,6 @@ import {
   getCurrentReadBook,
   select,
 } from "./service";
-Api.addCollection(BookPostCollection, {
-  path: "books/posts",
-});
 
 Api.addCollection(BookUserCollection, {
   path: "books/users",

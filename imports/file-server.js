@@ -363,30 +363,7 @@ if (Meteor.isServer) {
     );
   });
 
-  // Picker.route("/storage/file/link/:_id", function (params, req, res, next) {
-  //   res.writeHead(200, { "Content-Type": "application/json" });
-  //   res.end(
-  //     JSON.stringify({
-  //       link: Storage.findOne({
-  //         "meta.uuid": params._id,
-  //       }).link(),
-  //     })
-  //   );
-  // });
-
-  // Picker.route("/storage/avatar/link/:_id", function (params, req, res, next) {
-  //   res.writeHead(200, { "Content-Type": "application/json" });
-  //   res.end(
-  //     JSON.stringify({
-  //       link: Storage.findOne({
-  //         "meta.userId": params._id,
-  //       }).link(),
-  //     })
-  //   );
-  // });
-
   Picker.route("/storage/upload", function (params, req, res, next) {
-    console.log("收到");
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Credential", "true");
     res.setHeader(
