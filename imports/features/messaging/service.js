@@ -7,6 +7,7 @@ import {
 } from "meteor/socialize:messaging";
 
 import { ProfilesCollection } from "meteor/socialize:user-profile";
+import _ from "lodash";
 
 // 删除会话
 export function removeConversations(conversationId) {
@@ -54,8 +55,9 @@ export function isObserving({ user, _id }) {
 // 根据用户获取会话
 export function findExistingConversationWithUsers({ userId, users }) {
   users.push(userId);
+  let currentUsers = _.uniq(users);
   const conversation = ConversationsCollection.findOne({
-    _participants: { $size: users.length, $all: users },
+    _participants: { $size: currentUsers.length, $all: currentUsers },
   });
   if (conversation) {
     ConversationsCollection.update(

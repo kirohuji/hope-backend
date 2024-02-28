@@ -9,6 +9,30 @@ import { DDP } from "meteor/ddp-client";
 import _ from "lodash";
 
 import { ArticleCollection } from "./features/articles/collection";
+import {
+  FileCollection,
+  FileUserCollection,
+} from "./features/files/collection";
+
+let TOTALLIMIT = 150000000;
+async function getUserTotalSize(userId) {
+  let fileIds = FileUserCollection.find({
+    user_id: userId,
+  }).map((fileUser) => fileUser.file_id);
+  const pipeline = [
+    { $match: { _id: { $in: fileIds } } }, // 匹配指定用户的文件
+    { $group: { _id: null, totalSize: { $sum: "$size" } } }, // 计算总和
+  ];
+
+  const result = await FileCollection.rawCollection()
+    .aggregate(pipeline)
+    .toArray();
+  if (result.length > 0) {
+    return result[0].totalSize;
+  } else {
+    return 0; // 如果找不到文件，返回0
+  }
+}
 
 export const Avatars = new FilesCollection({
   collectionName: "avatars",
@@ -363,7 +387,7 @@ if (Meteor.isServer) {
     );
   });
 
-  Picker.route("/storage/upload", function (params, req, res, next) {
+  Picker.route("/storage/upload", async function (params, req, res, next) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Credential", "true");
     res.setHeader(
@@ -384,6 +408,17 @@ if (Meteor.isServer) {
         "services.resume.loginTokens.hashedToken": hashedToken,
       });
       if (user) {
+        let totalSize = await getUserTotalSize(user._id);
+        if (totalSize > TOTALLIMIT) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              code: 400,
+              message: "文件无法上传,已经超过限制!",
+            })
+          );
+          return;
+        }
         _fs.stat(req.file.path, function (_statError, _statData) {
           const _addFileMeta = {
             meta: {

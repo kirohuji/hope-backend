@@ -1,12 +1,30 @@
-import Model, { FileCollection, FileUserCollection } from './collection';
-import { ProfilesCollection } from 'meteor/socialize:user-profile';
-import _ from 'lodash';
+import Model, { FileCollection, FileUserCollection } from "./collection";
+import { ProfilesCollection } from "meteor/socialize:user-profile";
+import _ from "lodash";
 
+let TOTALLIMIT = 150000000;
+async function getUserTotalSize(userId) {
+  let fileIds = FileUserCollection.find({
+    user_id: userId,
+  }).map((fileUser) => fileUser.file_id);
+  const pipeline = [
+    { $match: { _id: { $in: fileIds } } }, // 匹配指定用户的文件
+    { $group: { _id: null, totalSize: { $sum: "$size" } } }, // 计算总和
+  ];
+
+  const result = await FileCollection.rawCollection()
+    .aggregate(pipeline)
+    .toArray();
+  if (result.length > 0) {
+    return result[0].totalSize;
+  } else {
+    return 0; // 如果找不到文件，返回0
+  }
+}
 // 创建文件
-export function createFile ({
-  bodyParams,
-  userId
-}) {
+export async function createFile({ bodyParams, userId }) {
+  // let totalSize = await getUserTotalSize(userId);
+  // if (totalSize < TOTALLIMIT) {
   let _id = FileCollection.insert({
     ...bodyParams,
   });
@@ -14,102 +32,118 @@ export function createFile ({
     return FileUserCollection.insert({
       file_id: _id,
       user_id: userId,
-      isMain: true
-    })
+      isMain: true,
+    });
   } else {
-    throw new Error('文件创建失败');
+    throw new Error("文件创建失败");
   }
+  // } else {
+  //   throw new Error("超过限制");
+  // }
 }
 
 // 删除文件
-export function removeFile (_id) {
+export function removeFile(_id) {
   FileCollection.remove({
-    _id: _id
+    _id: _id,
   });
   return FileUserCollection.remove({
-    file_id: _id
+    file_id: _id,
   });
 }
 
 // 更新文件
-export function updateFile ({
-  bodyParams,
-  _id
-}) {
-  return FileCollection.update({
-    _id: _id
-  }, bodyParams);
+export function updateFile({ bodyParams, _id }) {
+  return FileCollection.update(
+    {
+      _id: _id,
+    },
+    bodyParams
+  );
 }
 
 // 根据当前用户获取所有的数据
 // 待优化
-export function currentByUserId (userId) {
-  let files = FileUserCollection.find({
+export async function currentByUserId(userId) {
+  let totalSize = await getUserTotalSize(userId);
+  let fileUsers = FileUserCollection.find({
     user_id: userId,
   }).fetch();
-  return files.map(item => {
-    let file = Model.findOne({ _id: item.file_id })
+  let files = fileUsers.map((item) => {
+    let file = Model.findOne({ _id: item.file_id });
     let users = FileUserCollection.find({
       file_id: file._id,
-    }).fetch()
-    let shared = ProfilesCollection.find({
-      _id: {
-        $in: users.map(user => user.user_id)
+    }).fetch();
+    let shared = ProfilesCollection.find(
+      {
+        _id: {
+          $in: users.map((user) => user.user_id),
+        },
+      },
+      {
+        fields: {
+          photoURL: 1,
+          username: 1,
+        },
       }
-    }, {
-      fields: {
-        photoURL: 1,
-        username: 1
-      }
-    }).fetch()
+    ).fetch();
     file.shared = shared;
     return file;
-  })
+  });
+  console.log(totalSize);
+  return {
+    files: files,
+    overview: {
+      used: totalSize,
+    },
+  };
 }
 
-
 // 接受文件共享
-export function accpetShareFile ({
-  userId,
-  bodyParams
-}) {
+export function accpetShareFile({ userId, bodyParams }) {
   const user = ProfilesCollection.findOne({
-    _id: userId
-  })
+    _id: userId,
+  });
 
-  let isUpdate = Meteor.notifications.update({
-    _id: bodyParams.id
-  }, {
-    $set: {
-      isRemove: true,
+  let isUpdate = Meteor.notifications.update(
+    {
+      _id: bodyParams.id,
+    },
+    {
+      $set: {
+        isRemove: true,
+      },
     }
-  })
-  console.log('isUpdate', isUpdate)
-  if (!isUpdate) throw new Error('接受文件失败,请重试')
+  );
+  console.log("isUpdate", isUpdate);
+  if (!isUpdate) throw new Error("接受文件失败,请重试");
 
   let newFileUser = FileUserCollection.findOne({
     file_id: bodyParams.file_id,
     user_id: userId,
-    isMain: false
-  })
+    isMain: false,
+  });
   if (newFileUser) {
-    FileUserCollection.update({
-      _id: newFileUser._id
-    }, {
-      file_id: bodyParams.file_id,
-      user_id: userId,
-      isMain: false
-    })
+    FileUserCollection.update(
+      {
+        _id: newFileUser._id,
+      },
+      {
+        file_id: bodyParams.file_id,
+        user_id: userId,
+        isMain: false,
+      }
+    );
   } else {
     FileUserCollection.insert({
       file_id: bodyParams.file_id,
       user_id: userId,
-      isMain: false
-    })
+      isMain: false,
+    });
   }
   return Meteor.notifications.insert({
     file_id: bodyParams.file_id,
-    type: 'chat',
+    type: "chat",
     title: `<p><strong>${user.displayName}</strong> 接受了你的文件共享 <strong><a href='#'>文件管理</a></strong></p>`,
     isUnRead: true,
     isRemove: false,
@@ -121,24 +155,24 @@ export function accpetShareFile ({
 }
 
 // 拒绝文件共享
-export function denyShareFile ({
-  userId,
-  bodyParams
-}) {
+export function denyShareFile({ userId, bodyParams }) {
   const user = ProfilesCollection.findOne({
-    _id: userId
-  })
-  let isUpdate = Meteor.notifications.update({
-    _id: bodyParams._id || bodyParams.id
-  }, {
-    $set: {
-      isRemove: true,
+    _id: userId,
+  });
+  let isUpdate = Meteor.notifications.update(
+    {
+      _id: bodyParams._id || bodyParams.id,
+    },
+    {
+      $set: {
+        isRemove: true,
+      },
     }
-  })
-  if (!!isUpdate) throw new Error('拒绝文件失败,请重试')
+  );
+  if (!!isUpdate) throw new Error("拒绝文件失败,请重试");
   return Meteor.notifications.insert({
     file_id: bodyParams.file_id,
-    type: 'chat',
+    type: "chat",
     title: `<p><strong>${user.displayName}</strong> 拒绝接受你的文件共享 <strong><a href='#'>文件管理</a></strong></p>`,
     isUnRead: true,
     publisher_id: bodyParams.target_id,
@@ -150,18 +184,15 @@ export function denyShareFile ({
 }
 
 // 邀请好友
-export function inviteEmails ({
-  userId,
-  bodyParams
-}) {
+export function inviteEmails({ userId, bodyParams }) {
   let inviteEmails = bodyParams.inviteEmails;
-  inviteEmails.forEach(inviteEmail => {
+  inviteEmails.forEach((inviteEmail) => {
     const user = ProfilesCollection.findOne({
-      username: inviteEmail.username
-    })
+      username: inviteEmail.username,
+    });
     Meteor.notifications.insert({
       file_id: bodyParams.fileId,
-      type: 'share',
+      type: "share",
       title: `<p><strong>${user.displayName}</strong> 共享一个文件 <strong><a href='#'>文件管理</a></strong></p>`,
       isUnRead: true,
       publisher_id: userId,
