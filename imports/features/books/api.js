@@ -91,7 +91,6 @@ Api.addRoute("books/users/current/signIn/:_id", {
         }
       );
       if (signIn) {
-        console.log("成功");
         Meteor.notifications.insert({
           type: "training",
           title: "<p>签到成功</p>",

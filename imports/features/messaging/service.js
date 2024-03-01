@@ -90,30 +90,38 @@ export function isReadOnly(conversationId) {
 
 // 获取会话的消息
 export function messages({ userId, conversationId, bodyParams }) {
-  let update = MessagesCollection.update(
-    {
-      conversationId,
-      readedIds: { $ne: userId },
-    },
-    {
-      $addToSet: {
-        readedIds: userId,
-      },
-    },
-    { multi: true }
-  );
-  console.log("messages update", update);
+  // let update = MessagesCollection.update(
+  //   {
+  //     conversationId,
+  //     readedIds: { $ne: userId },
+  //   },
+  //   {
+  //     $addToSet: {
+  //       readedIds: userId,
+  //     },
+  //   },
+  //   { multi: true }
+  // );
+  // console.log("messages update", update);
   return ConversationsCollection.findOne({ _id: conversationId })
     .messages(bodyParams.options || {})
     .map((item) => {
       return {
         ...item,
-        attachments: [],
+        // attachments: [],
         body: item.body,
         contentType: item.contentType || "text",
         senderId: item.userId,
       };
     });
+}
+
+// 获取会话的消息
+export function attachments({ conversationId }) {
+  return MessagesCollection.find({
+    conversationId,
+    attachments: { $exists: true },
+  }).map((item) => item.attachments);
 }
 
 // 获取当前会话的最后一条消息
@@ -169,11 +177,12 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
 
 // 发送消息
 export function sendMessage({ conversationId, userId, bodyParams }) {
-  console.log("更新");
+  console.log("更新", bodyParams);
   return MessagesCollection.insert(
     new Message({
       conversationId,
       body: bodyParams.body,
+      attachments: bodyParams.attachments,
       readedIds: [userId],
       sendingMessageId: bodyParams.sendingMessageId,
       contentType: bodyParams.contentType,

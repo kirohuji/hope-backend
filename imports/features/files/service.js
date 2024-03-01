@@ -115,11 +115,10 @@ export function accpetShareFile({ userId, bodyParams }) {
       },
     }
   );
-  console.log("isUpdate", isUpdate);
   if (!isUpdate) throw new Error("接受文件失败,请重试");
 
   let newFileUser = FileUserCollection.findOne({
-    file_id: bodyParams.file_id,
+    file_id: bodyParams.fileId || bodyParams.file_id,
     user_id: userId,
     isMain: false,
   });
@@ -129,22 +128,22 @@ export function accpetShareFile({ userId, bodyParams }) {
         _id: newFileUser._id,
       },
       {
-        file_id: bodyParams.file_id,
+        file_id: bodyParams.fileId || bodyParams.file_id,
         user_id: userId,
         isMain: false,
       }
     );
   } else {
     FileUserCollection.insert({
-      file_id: bodyParams.file_id,
+      file_id: bodyParams.fileId || bodyParams.file_id,
       user_id: userId,
       isMain: false,
     });
   }
   return Meteor.notifications.insert({
-    file_id: bodyParams.file_id,
+    file_id: bodyParams.fileId || bodyParams.file_id,
     type: "chat",
-    title: `<p><strong>${user.displayName}</strong> 接受了你的文件共享 <strong><a href='#'>文件管理</a></strong></p>`,
+    title: `<p><strong>${`${user.displayName}(${user.realName})`}</strong> 接受了你的文件共享 <strong><a href='#'>文件管理</a></strong></p>`,
     isUnRead: true,
     isRemove: false,
     publisher_id: userId,
@@ -171,9 +170,9 @@ export function denyShareFile({ userId, bodyParams }) {
   );
   if (!!isUpdate) throw new Error("拒绝文件失败,请重试");
   return Meteor.notifications.insert({
-    file_id: bodyParams.file_id,
+    file_id: bodyParams.fileId || bodyParams.file_id,
     type: "chat",
-    title: `<p><strong>${user.displayName}</strong> 拒绝接受你的文件共享 <strong><a href='#'>文件管理</a></strong></p>`,
+    title: `<p><strong>${`${user.displayName}(${user.realName})`}</strong> 拒绝接受你的文件共享 <strong><a href='#'>文件管理</a></strong></p>`,
     isUnRead: true,
     publisher_id: bodyParams.target_id,
     isRemove: false,
@@ -184,19 +183,20 @@ export function denyShareFile({ userId, bodyParams }) {
 }
 
 // 邀请好友
-export function inviteEmails({ userId, bodyParams }) {
+export function inviteEmails({ user, bodyParams }) {
   let inviteEmails = bodyParams.inviteEmails;
+  const profile = ProfilesCollection.findOne({ _id: user._id });
   inviteEmails.forEach((inviteEmail) => {
-    const user = ProfilesCollection.findOne({
+    const targetUser = ProfilesCollection.findOne({
       username: inviteEmail.username,
     });
     Meteor.notifications.insert({
-      file_id: bodyParams.fileId,
-      type: "share",
-      title: `<p><strong>${user.displayName}</strong> 共享一个文件 <strong><a href='#'>文件管理</a></strong></p>`,
+      file_id: bodyParams.fileId, // 文件 id
+      type: "share", // 分享类型
+      title: `<p><strong>${`${profile.displayName}(${profile.realName})`}</strong> 共享一个文件 <strong><a href='#'>文件管理</a></strong></p>`,
       isUnRead: true,
-      publisher_id: userId,
-      target_id: user._id,
+      publisher_id: user._id,
+      target_id: targetUser._id,
       createdAt: new Date(),
       isRemove: false,
       category: "File",

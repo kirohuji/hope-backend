@@ -1,4 +1,11 @@
 import { Meteor } from "meteor/meteor";
+import { WebApp } from "meteor/webapp";
+import { ArticleCollection } from "./features/articles/collection";
+import {
+  FileCollection,
+  FileUserCollection,
+} from "./features/files/collection";
+import { FilesCollection } from "meteor/ostrio:files";
 import { Accounts } from "meteor/accounts-base";
 import { Picker } from "meteor/communitypackages:picker";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
@@ -8,12 +15,10 @@ import { pinyin } from "pinyin-pro";
 import { DDP } from "meteor/ddp-client";
 import _ from "lodash";
 
-import { ArticleCollection } from "./features/articles/collection";
-import {
-  FileCollection,
-  FileUserCollection,
-} from "./features/files/collection";
-
+WebApp.connectHandlers.use("/storage/images/", (req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  next();
+});
 let TOTALLIMIT = 150000000;
 async function getUserTotalSize(userId) {
   let fileIds = FileUserCollection.find({
@@ -38,6 +43,7 @@ export const Avatars = new FilesCollection({
   collectionName: "avatars",
   allowClientCode: true,
   downloadRoute: "/images/",
+  allowedOrigins: ["*"],
   storagePath: "/avatars/",
 });
 
@@ -45,6 +51,7 @@ export const Storage = new FilesCollection({
   collectionName: "storage",
   allowClientCode: true,
   downloadRoute: "/storage/images/",
+  allowedOrigins: ["*"],
   storagePath: "/storage/",
 });
 

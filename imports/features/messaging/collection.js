@@ -31,6 +31,25 @@ Message.attachSchema({
   "readedIds.$": {
     type: String,
   },
+  attachments: {
+    type: Array,
+    optional: true,
+  },
+  "attachments.$": {
+    type: Object,
+  },
+  "attachments.$.name": {
+    type: String,
+  },
+  "attachments.$.preview": {
+    type: String,
+  },
+  "attachments.$.createdAt": {
+    type: String,
+  },
+  "attachments.$.type": {
+    type: String,
+  },
 });
 Conversation.attachSchema({
   isRemove: {

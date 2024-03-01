@@ -18,6 +18,7 @@ import {
   isUnread,
   isReadOnly,
   messages,
+  attachments,
   lastMessage,
   lastMessageByLastId,
   sendMessage,
@@ -192,6 +193,24 @@ Api.addRoute("messaging/conversations/:_id/messages", {
           userId: this.userId,
           conversationId: this.urlParams._id,
           bodyParams: this.bodyParams,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("messaging/conversations/:_id/messages/attachments", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        return attachments({
+          conversationId: this.urlParams._id,
         });
       } catch (e) {
         return serverError500({
