@@ -127,7 +127,7 @@ Api.addRoute("files/current/inviteEmails", {
     action: function () {
       try {
         return inviteEmails({
-          user: this.user,
+          userId: this.userId,
           bodyParams: this.bodyParams,
         });
       } catch (e) {
@@ -210,14 +210,3 @@ Api.addRoute("files/current/type/mp3", {
     },
   },
 });
-
-// Api.addRoute('files/storage/upload', {
-//   post: {
-//       authRequired: true,
-//       action: function () {
-//         console.log('123')
-//         const file = this.request;
-//         console.log(file)
-//       }
-//   }
-// })
