@@ -56,4 +56,8 @@ Conversation.attachSchema({
     type: Boolean,
     required: false,
   },
+  createdBy: {
+    type: String,
+    required: false,
+  },
 });

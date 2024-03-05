@@ -7,32 +7,77 @@ import Model, {
 import _ from "lodash";
 import moment from "moment";
 // 分页查询数据
-export function pagination(bodyParams) {
+export async function pagination(bodyParams) {
   let book_id = bodyParams.selector.book_id;
   if (book_id) {
-    let articlesId = BookArticleCollection.find({})
-      .fetch()
-      .map((item) => item.article_id);
-    bodyParams.selector.book_id = "";
-    let curror = ArticleCollection.find(
-      {
-        ..._.pickBy(bodyParams.selector, (value) => value !== ""),
-        _id: {
-          $in: articlesId,
-        },
-      } || {},
-      bodyParams.options
-    );
-    return {
-      data: curror.fetch(),
-      total: ArticleCollection.find(
+    let match = {
+      "article.title": bodyParams.selector.title,
+      "article.published": bodyParams.selector.published,
+    };
+    if (bodyParams.selector && bodyParams.selector.published === "") {
+      delete match["article.published"];
+    }
+    let bookArticles = await BookArticleCollection.rawCollection()
+      .aggregate([
+        { $match: { book_id: bodyParams.selector.book_id } },
         {
-          ..._.pickBy(bodyParams.selector, (value) => value !== ""),
-          _id: {
-            $in: articlesId,
+          $lookup: {
+            from: "articles",
+            localField: "article_id",
+            foreignField: "_id",
+            as: "article",
           },
-        } || {}
-      ).count(),
+        },
+        { $unwind: "$article" },
+        {
+          $match: match,
+        },
+        {
+          $project: {
+            _id: "$article._id",
+            title: "$article.title",
+            published: "$article.published",
+            date: "$article.date",
+            decsription: "$article.decsription",
+            coverUrl: "$article.coverUrl",
+            view: "$article.view",
+            createdBy: "$article.createdBy",
+          },
+        },
+        { $sort: bodyParams.options.sort },
+        { $skip: bodyParams.options.skip },
+        { $limit: bodyParams.options.limit },
+      ])
+      .toArray();
+    let total = await BookArticleCollection.rawCollection()
+      .aggregate([
+        { $match: { book_id: bodyParams.selector.book_id } },
+        {
+          $lookup: {
+            from: "articles",
+            localField: "article_id",
+            foreignField: "_id",
+            as: "article",
+          },
+        },
+        { $unwind: "$article" },
+        {
+          $match: match,
+        },
+        {
+          $project: {
+            _id: "$article._id",
+            title: "$article.title",
+            published: "$article.published",
+          },
+        },
+        { $count: "total" },
+      ])
+      .toArray();
+    console.log("total", total);
+    return {
+      data: bookArticles,
+      total: total.length > 0 ? total[0].total : 0,
     };
   } else {
     let curror = ArticleCollection.find(

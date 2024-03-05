@@ -625,6 +625,7 @@ Api.addRoute("roles/getUsersInRoleOnly", {
             return {
               displayName: profile.displayName || "",
               avatarUrl: profile.photoURL || "",
+              photoURL: profile.photoURL || "",
               phoneNumber: profile.phoneNumber || "",
               description: profile.about,
               realName: profile.realName,

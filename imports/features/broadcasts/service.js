@@ -16,24 +16,22 @@ export function pagination(bodyParams) {
       return {
         ...item,
         leaders: item.leaders
-          ? Meteor.users
-              .find(
-                {
-                  _id: {
-                    $in: item.leaders,
-                  },
+          ? ProfilesCollection.find(
+              {
+                _id: {
+                  $in: item.leaders,
                 },
-                {
-                  fields: {
-                    photoURL: 1,
-                    username: 1,
-                    realName: 1,
-                    displayName: 1,
-                    phoneNumber: 1,
-                  },
-                }
-              )
-              .fetch()
+              },
+              {
+                fields: {
+                  photoURL: 1,
+                  username: 1,
+                  realName: 1,
+                  displayName: 1,
+                  phoneNumber: 1,
+                },
+              }
+            ).fetch()
           : [],
       };
     }),

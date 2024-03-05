@@ -90,30 +90,30 @@ export function isReadOnly(conversationId) {
 
 // 获取会话的消息
 export function messages({ userId, conversationId, bodyParams }) {
-  // let update = MessagesCollection.update(
-  //   {
-  //     conversationId,
-  //     readedIds: { $ne: userId },
-  //   },
-  //   {
-  //     $addToSet: {
-  //       readedIds: userId,
-  //     },
-  //   },
-  //   { multi: true }
-  // );
-  // console.log("messages update", update);
-  return ConversationsCollection.findOne({ _id: conversationId })
+  let result = ConversationsCollection.findOne({ _id: conversationId })
     .messages(bodyParams.options || {})
     .map((item) => {
       return {
         ...item,
-        // attachments: [],
         body: item.body,
         contentType: item.contentType || "text",
         senderId: item.userId,
       };
     });
+  MessagesCollection.update(
+    {
+      conversationId,
+      _id: { $in: result.map((item) => item._id) },
+      readedIds: { $ne: userId },
+    },
+    {
+      $addToSet: {
+        readedIds: userId,
+      },
+    },
+    { multi: true }
+  );
+  return result;
 }
 
 // 获取会话的消息
@@ -216,6 +216,16 @@ export function createNewConversations({ participants, userId }) {
   }
   CollectionHooks.defaultUserId = userId;
   let convo = new Conversation().save();
+  ConversationsCollection.update(
+    {
+      _id: convo._id,
+    },
+    {
+      $set: {
+        createdBy: userId,
+      },
+    }
+  );
   const users = Meteor.users.find({ _id: { $in: participants } }).fetch();
   convo.addParticipants(users);
   return convo;
@@ -251,6 +261,8 @@ export function getConversationsByCurrentUser(user, ids) {
                 username: 1,
                 displayName: 1,
                 realName: 1,
+                address: 1,
+                phoneNumber: 1,
               },
             }
           ).fetch(),
@@ -282,6 +294,8 @@ export function getConversationsByCurrentUser(user, ids) {
               username: 1,
               displayName: 1,
               realName: 1,
+              address: 1,
+              phoneNumber: 1,
             },
           }
         ).fetch(),
@@ -353,7 +367,7 @@ export function participantsAsUsers(conversationId) {
   }).map((item) => {
     return {
       ...item,
-      status: "busy",
+      // status: "busy",
     };
   });
 }

@@ -84,6 +84,9 @@ export async function currentByUserId(userId) {
         fields: {
           photoURL: 1,
           username: 1,
+          realName: 1,
+          displayName: 1,
+          email: 1,
         },
       }
     ).fetch();

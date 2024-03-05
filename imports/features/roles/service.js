@@ -242,6 +242,7 @@ function getItemInfo({ scope, item }) {
         username: 1,
         displayName: 1,
         realName: 1,
+        photoURL: 1,
       },
     }
   );

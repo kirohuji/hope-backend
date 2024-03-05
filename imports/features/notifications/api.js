@@ -47,9 +47,14 @@ Api.addRoute("notifications/current/pagination", {
           (item) => item.notificationId
         );
 
-        const notifications = NotificationtCollection.find({
-          _id: { $in: notificationIds },
-        }).map((notification) => {
+        const notifications = NotificationtCollection.find(
+          {
+            _id: { $in: notificationIds },
+          },
+          {
+            ...this.bodyParams.options,
+          }
+        ).map((notification) => {
           const notificationUser = notificationUsers.find(
             (item) => item.notificationId === notification._id
           );
