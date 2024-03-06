@@ -18,6 +18,7 @@ import {
   isUnread,
   isReadOnly,
   messages,
+  messagesWithDate,
   attachments,
   lastMessage,
   lastMessageByLastId,
@@ -190,6 +191,27 @@ Api.addRoute("messaging/conversations/:_id/messages", {
     action: function () {
       try {
         return messages({
+          userId: this.userId,
+          conversationId: this.urlParams._id,
+          bodyParams: this.bodyParams,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("messaging/conversations/:_id/messages/date", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        return messagesWithDate({
+          date: this.bodyParams.date,
           userId: this.userId,
           conversationId: this.urlParams._id,
           bodyParams: this.bodyParams,

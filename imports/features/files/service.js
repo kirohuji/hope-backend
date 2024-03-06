@@ -65,16 +65,17 @@ export function updateFile({ bodyParams, _id }) {
 // 根据当前用户获取所有的数据
 // 待优化
 export async function currentByUserId(userId) {
-  let totalSize = await getUserTotalSize(userId);
-  let fileUsers = FileUserCollection.find({
-    user_id: userId,
+  const userFiles = FileUserCollection.find({ user_id: userId }).fetch(); // 获取当前用户所有的文件 id
+  const files = Model.find({
+    _id: { $in: userFiles.map((item) => item.file_id) },
+  }).fetch(); // 获取当前用户所有的文件信息
+
+  let users = FileUserCollection.find({
+    file_id: { $in: files.map((item) => item._id) },
   }).fetch();
-  let files = fileUsers.map((item) => {
-    let file = Model.findOne({ _id: item.file_id });
-    let users = FileUserCollection.find({
-      file_id: file._id,
-    }).fetch();
-    let shared = ProfilesCollection.find(
+
+  let profiles = _.keyBy(
+    ProfilesCollection.find(
       {
         _id: {
           $in: users.map((user) => user.user_id),
@@ -89,13 +90,16 @@ export async function currentByUserId(userId) {
           email: 1,
         },
       }
-    ).fetch();
-    file.shared = shared;
-    return file;
-  });
-  console.log(totalSize);
+    ).fetch(),
+    "_id"
+  );
+
+  let totalSize = await getUserTotalSize(userId);
+  let groupByFile = _.groupBy(users, "file_id");
   return {
-    files: files,
+    files,
+    profiles,
+    groupByFile,
     overview: {
       used: totalSize,
     },

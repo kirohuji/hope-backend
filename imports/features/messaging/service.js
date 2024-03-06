@@ -8,6 +8,7 @@ import {
 
 import { ProfilesCollection } from "meteor/socialize:user-profile";
 import _ from "lodash";
+import moment from "moment";
 
 // 删除会话
 export function removeConversations(conversationId) {
@@ -114,6 +115,32 @@ export function messages({ userId, conversationId, bodyParams }) {
     { multi: true }
   );
   return result;
+}
+
+export function messagesWithDate({ date, conversationId, bodyParams }) {
+  const dateTime = moment(date);
+  const today = moment(dateTime).startOf("day");
+  const tomorrow = moment(dateTime).endOf("day");
+  console.log("today", today);
+  console.log("tomorrow", tomorrow);
+  let messages = MessagesCollection.find(
+    {
+      conversationId: conversationId,
+      createdAt: {
+        $gte: today.toDate(), // 大于或等于今天 00:00:00
+        $lt: tomorrow.toDate(), // 小于明天 00:00:00
+      },
+    },
+    bodyParams.options
+  ).map((item) => {
+    return {
+      ...item,
+      body: item.body,
+      contentType: item.contentType || "text",
+      senderId: item.userId,
+    };
+  });
+  return messages;
 }
 
 // 获取会话的消息

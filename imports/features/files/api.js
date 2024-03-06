@@ -194,6 +194,18 @@ Api.addRoute("files/mp3/:_id", {
   },
 });
 
+Api.addRoute("files/:file_id/shared/:user_id", {
+  delete: {
+    authRequired: true,
+    action: function () {
+      return FileUserCollection.remove({
+        file_id: this.urlParams.file_id,
+        user_id: this.urlParams.user_id,
+      });
+    },
+  },
+});
+
 // 废弃
 Api.addRoute("files/current/type/mp3", {
   get: {
