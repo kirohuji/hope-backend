@@ -1,5 +1,6 @@
 import Model, { FileCollection, FileUserCollection } from "./collection";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
+import { Storage } from "../../file-server";
 import _ from "lodash";
 
 let TOTALLIMIT = 150000000;
@@ -44,9 +45,17 @@ export async function createFile({ bodyParams, userId }) {
 
 // 删除文件
 export function removeFile(_id) {
+  let file = FileCollection.fineOne({
+    _id: _id,
+  });
   FileCollection.remove({
     _id: _id,
   });
+  if (file.uuid) {
+    Storage.remove({
+      "meta.uuid": file.uuid,
+    });
+  }
   return FileUserCollection.remove({
     file_id: _id,
   });

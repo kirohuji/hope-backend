@@ -4,4 +4,7 @@ if (Meteor.isServer) {
   import "../imports/initAdmin";
   import "../imports/features";
   import "../imports/file-server";
+  Meteor.methods({
+    checkConnect: () => true,
+  });
 }

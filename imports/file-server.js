@@ -132,6 +132,7 @@ function createUserV1({ usernameWithAge, mapUser, profile }) {
           "about",
           "baptized",
         ]),
+        phoneNumber: mapUser.phoneNumber.toString(),
         available: "banned",
         scope: profile?.scope,
       },
@@ -169,6 +170,7 @@ function createUserV2({ usernameWithAge, mapUser, profile }) {
           "about",
           "baptized",
         ]),
+        phoneNumber: mapUser.phoneNumber.toString(),
         available: "banned",
         scope: profile?.scope,
       },
@@ -449,6 +451,7 @@ if (Meteor.isServer) {
                   } else {
                     res.end(
                       JSON.stringify({
+                        uuid: _addFileMeta.meta.uuid,
                         link: Storage.findOne({
                           "meta.uuid": _addFileMeta.meta.uuid,
                         }).link(),

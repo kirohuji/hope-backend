@@ -15,9 +15,24 @@ export function pagination(bodyParams) {
     bodyParams.selector = _.pickBy(_.omit(bodyParams.selector, ["available"]));
   }
   if (bodyParams.selector && bodyParams.selector.username) {
-    bodyParams.selector.username = {
-      $regex: bodyParams.selector.username,
-      $options: "i",
+    let regex = bodyParams.selector.username;
+    delete bodyParams.selector.username;
+    bodyParams.selector = {
+      ...bodyParams.selector,
+      $or: [
+        {
+          username: {
+            $regex: regex,
+            $options: "i",
+          },
+        },
+        {
+          phoneNumber: {
+            $regex: regex,
+            $options: "i",
+          },
+        },
+      ],
     };
   }
   let data = ProfilesCollection.find(

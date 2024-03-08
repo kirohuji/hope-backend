@@ -121,14 +121,12 @@ export function messagesWithDate({ date, conversationId, bodyParams }) {
   const dateTime = moment(date);
   const today = moment(dateTime).startOf("day");
   const tomorrow = moment(dateTime).endOf("day");
-  console.log("today", today);
-  console.log("tomorrow", tomorrow);
   let messages = MessagesCollection.find(
     {
       conversationId: conversationId,
       createdAt: {
-        $gte: today.toDate(), // 大于或等于今天 00:00:00
-        $lt: tomorrow.toDate(), // 小于明天 00:00:00
+        $gte: today.toDate(),
+        $lt: tomorrow.toDate(),
       },
     },
     bodyParams.options

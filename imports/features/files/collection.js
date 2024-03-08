@@ -1,25 +1,24 @@
 import { Class } from "meteor/jagi:astronomy";
-export const FileCollection = new Mongo.Collection('files')
-export const FileUserCollection = new Mongo.Collection('files_users')
+export const FileCollection = new Mongo.Collection("files");
+export const FileUserCollection = new Mongo.Collection("files_users");
 export const FileUser = Class.create({
   name: "FileUser",
   collection: FileUserCollection,
   fields: {
     user_id: {
       type: String,
-      default: '',
+      default: "",
     },
     file_id: {
       type: String,
-      default: '',
+      default: "",
     },
     is_main: {
       type: Boolean,
       default: true,
-    }
-  }
+    },
+  },
 });
-
 
 export default Class.create({
   name: "File",
@@ -27,16 +26,16 @@ export default Class.create({
   fields: {
     value: {
       type: String,
-      default: '',
+      default: "",
     },
     label: {
       type: String,
-      default: '',
-      label: '名称',
+      default: "",
+      label: "名称",
     },
     url: {
       type: String,
-      default: '',
+      default: "",
     },
     shared: {
       type: [String],
@@ -48,23 +47,27 @@ export default Class.create({
     },
     description: {
       type: String,
-      default: '',
+      default: "",
     },
     size: {
       type: String,
-      default: '',
+      default: "",
     },
     cover: {
       type: String,
-      default: '',
+      default: "",
     },
     type: {
       type: String,
-      default: '',
+      default: "",
+    },
+    uuid: {
+      type: String,
+      default: "",
     },
     lastModified: {
       type: String,
-      default: '',
+      default: "",
     },
-  }
+  },
 });
