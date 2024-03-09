@@ -206,6 +206,17 @@ Api.addRoute("files/:file_id/shared/:user_id", {
   },
 });
 
+Api.addRoute("files/check", {
+  post: {
+    authRequired: true,
+    action: function () {
+      return FileCollection.findOne({
+        label: this.bodyParams.label,
+      });
+    },
+  },
+});
+
 // 废弃
 Api.addRoute("files/current/type/mp3", {
   get: {

@@ -45,7 +45,7 @@ export async function createFile({ bodyParams, userId }) {
 
 // 删除文件
 export function removeFile(_id) {
-  let file = FileCollection.fineOne({
+  let file = FileCollection.findOne({
     _id: _id,
   });
   FileCollection.remove({
