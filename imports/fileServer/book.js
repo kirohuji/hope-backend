@@ -5,35 +5,22 @@ import {
   setReqConfig,
   saveFile,
   checkIsFile,
-  UUID,
-  TOTALLIMIT,
-  getUserTotalSize,
 } from "./utils";
-export const Storage = new FilesCollection({
-  collectionName: "storage:manages",
+export const BooksCollection = new FilesCollection({
+  collectionName: "storage:books",
   allowClientCode: true,
-  downloadRoute: "/storage/manages",
+  downloadRoute: "/storage/books",
   allowedOrigins: ["*"],
-  storagePath: Meteor.isDevelopment ? "./storage/" : "/storage/",
+  storagePath: Meteor.isDevelopment ? "./avatars/" : "/avatars/",
 });
-
-export default function strorage() {
-  Picker.route("/storage/upload", async function (params, req, res, next) {
+export default function book() {
+  Picker.route("/storage/book", function (params, req, res, next) {
     setReqConfig(req);
+    // 文件是否存在
     if (checkIsFile(req, params)) {
+      // 获取当前用户
       const user = getUser(params);
       if (user) {
-        let totalSize = await getUserTotalSize(user._id);
-        if (totalSize > TOTALLIMIT) {
-          res.writeHead(400, { "Content-Type": "application/json" });
-          res.end(
-            JSON.stringify({
-              code: 400,
-              message: "文件无法上传,已经超过限制!",
-            })
-          );
-          return;
-        }
         if (
           !isNotExistingFile({
             collection: BooksCollection,

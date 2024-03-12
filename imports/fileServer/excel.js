@@ -5,6 +5,12 @@ import { pinyin } from "pinyin-pro";
 import { Picker } from "meteor/communitypackages:picker";
 import { Accounts } from "meteor/accounts-base";
 import _ from "lodash";
+import {
+  isNotExistingFile,
+  setReqConfig,
+  saveFile,
+  checkIsFile,
+} from "./utils";
 XLSX.set_fs(fs);
 const property = new Map([
   ["姓名", "username"],
@@ -179,16 +185,7 @@ async function excelProcess(file, profile) {
 
 export default function excel() {
   Picker.route("/storage/excel", async function (params, req, res, next) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Credential", "true");
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "X-Auth-Token,Content-Type,Accept"
-    );
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET,POST,PUT,DELETE,OPTIONS"
-    );
+    setReqConfig();
     if (
       req.file !== undefined &&
       isExcel(req.file.originalname) &&

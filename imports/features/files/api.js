@@ -1,5 +1,6 @@
 import Model, { FileCollection, FileUserCollection } from "./collection";
-import { Storage, Avatars } from "../../file-server";
+import { AvatarsCollection } from "../../fileServer/avatar";
+import { Storage } from "../../fileServer/avatar";
 import {
   currentByUserId,
   createFile,
@@ -150,7 +151,7 @@ Api.addRoute("files/mp3/:_id", {
       console.log("file", file);
       try {
         let tag = parse(fs.readFileSync(file.path));
-        let image = Avatars.findOne({
+        let image = AvatarsCollection.findOne({
           fileName: this.urlParams._id,
         });
         console.log("image", image);
@@ -161,7 +162,7 @@ Api.addRoute("files/mp3/:_id", {
           };
         } else {
           console.log("写入");
-          Avatars.write(
+          AvatarsCollection.write(
             tag.image.data,
             {
               fileName: this.urlParams._id,
@@ -176,7 +177,7 @@ Api.addRoute("files/mp3/:_id", {
               } else {
                 return {
                   ...tag,
-                  image: Avatars.findOne({
+                  image: AvatarsCollection.findOne({
                     fileName: this.urlParams._id,
                   }).link(),
                 };

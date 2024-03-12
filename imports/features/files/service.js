@@ -1,6 +1,6 @@
 import Model, { FileCollection, FileUserCollection } from "./collection";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
-import { Storage } from "../../file-server";
+import { Storage } from "../../fileServer/avatar";
 import _ from "lodash";
 
 let TOTALLIMIT = 150000000;

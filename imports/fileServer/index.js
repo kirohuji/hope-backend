@@ -1,10 +1,11 @@
 import { Meteor } from "meteor/meteor";
 import { WebApp } from "meteor/webapp";
 import { Picker } from "meteor/communitypackages:picker";
-import message from "./fileServer/message";
-import avatar from "./fileServer/avatar";
-import excel from "./fileServer/excel";
-import storage from "./fileServer/storage";
+import message from "./message";
+import avatar from "./avatar";
+import excel from "./excel";
+import storage from "./storage";
+import book from "./book";
 WebApp.connectHandlers.use("/storage/images/", (req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   next();
@@ -20,4 +21,5 @@ if (Meteor.isServer) {
   avatar();
   excel();
   storage();
+  book();
 }
