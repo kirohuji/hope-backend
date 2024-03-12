@@ -4,7 +4,7 @@ import {
   FileUserCollection,
 } from "../features/files/collection";
 const _fs = require("fs");
-export function isNotExistingFile({ collection, user, req }) {
+export function isNotExistingFile({ collection, user, req, res }) {
   const existingFileWithNameAndSize = collection.findOne({
     name: req.file.originalname,
     userId: user._id,
@@ -18,11 +18,15 @@ export function isNotExistingFile({ collection, user, req }) {
     res.end(
       JSON.stringify({
         code: 200,
-        link: collection.findOne({ _id: existingFileWithName._id }).link(),
+        uuid: existingFileWithNameAndSize.meta.uuid,
+        link: collection
+          .findOne({ _id: existingFileWithNameAndSize._id })
+          .link(),
       })
     );
     return true;
   }
+  console.log("existingFileWithName", existingFileWithName);
   if (existingFileWithName) {
     res.writeHead(400, { "Content-Type": "application/json" });
     res.end(
@@ -46,12 +50,13 @@ export function setReqConfig(res) {
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
 }
 
-export function saveFile({ collection, req, user }) {
+export function saveFile({ collection, req, user, res }) {
   _fs.stat(req.file.path, function (_statError, _statData) {
     const _addFileMeta = {
       fileName: req.file.originalname,
       type: req.file.mimetype,
       size: req.file.size,
+      userId: user._id,
       meta: {
         userId: user._id,
         uuid: UUID(),

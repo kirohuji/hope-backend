@@ -4,6 +4,7 @@ import {
   isNotExistingFile,
   setReqConfig,
   saveFile,
+  getUser,
   checkIsFile,
 } from "./utils";
 export const AvatarsCollection = new FilesCollection({
@@ -14,28 +15,21 @@ export const AvatarsCollection = new FilesCollection({
   storagePath: Meteor.isDevelopment ? "./avatars/" : "/avatars/",
 });
 export default function avatar() {
-  Picker.route("/storage/avatar", function (params, req, res, next) {
-    setReqConfig(req);
+  Picker.route("/storage/avatars/upload", function (params, req, res, next) {
+    setReqConfig(res);
     if (checkIsFile(req, params)) {
       if (checkIsFile(req, params)) {
         // 获取当前用户
         const user = getUser(params);
         if (user) {
-          Avatars.remove({ "meta.userId": user._id });
+          AvatarsCollection.remove({ "meta.userId": user._id });
           if (user) {
-            if (
-              !isNotExistingFile({
-                collection: AvatarsCollection,
-                req,
-                user,
-              })
-            ) {
-              saveFile({
-                collection: AvatarsCollection,
-                req,
-                user,
-              });
-            }
+            saveFile({
+              collection: AvatarsCollection,
+              req,
+              res,
+              user,
+            });
           } else {
             res.writeHead(400, { "Content-Type": "application/json" });
             res.end(

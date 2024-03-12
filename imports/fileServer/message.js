@@ -4,35 +4,37 @@ import {
   isNotExistingFile,
   setReqConfig,
   saveFile,
+  getUser,
   checkIsFile,
 } from "./utils";
-export const Messagees = new FilesCollection({
+export const MessageesStorage = new FilesCollection({
   collectionName: "storage:messages",
   allowClientCode: true,
   downloadRoute: "/storage/messages",
   allowedOrigins: ["*"],
   storagePath: Meteor.isDevelopment ? "./messages/" : "/messages/",
 });
-const _fs = require("fs");
 export default function messages() {
   Picker.route(
     "/storage/messages/upload",
     async function (params, req, res, next) {
-      setReqConfig(req);
+      setReqConfig(res);
       if (checkIsFile(req, params)) {
         // 获取当前用户
         const user = getUser(params);
         if (user) {
           if (
             !isNotExistingFile({
-              collection: BooksCollection,
+              collection: MessageesStorage,
               req,
+              res,
               user,
             })
           ) {
             saveFile({
-              collection: BooksCollection,
+              collection: MessageesStorage,
               req,
+              res,
               user,
             });
           }

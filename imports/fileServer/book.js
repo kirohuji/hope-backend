@@ -4,9 +4,10 @@ import {
   isNotExistingFile,
   setReqConfig,
   saveFile,
+  getUser,
   checkIsFile,
 } from "./utils";
-export const BooksCollection = new FilesCollection({
+export const BooksStorage = new FilesCollection({
   collectionName: "storage:books",
   allowClientCode: true,
   downloadRoute: "/storage/books",
@@ -14,8 +15,8 @@ export const BooksCollection = new FilesCollection({
   storagePath: Meteor.isDevelopment ? "./avatars/" : "/avatars/",
 });
 export default function book() {
-  Picker.route("/storage/book", function (params, req, res, next) {
-    setReqConfig(req);
+  Picker.route("/storage/books/upload", function (params, req, res, next) {
+    setReqConfig(res);
     // 文件是否存在
     if (checkIsFile(req, params)) {
       // 获取当前用户
@@ -23,14 +24,16 @@ export default function book() {
       if (user) {
         if (
           !isNotExistingFile({
-            collection: BooksCollection,
+            collection: BooksStorage,
             req,
+            res,
             user,
           })
         ) {
           saveFile({
-            collection: BooksCollection,
+            collection: BooksStorage,
             req,
+            res,
             user,
           });
         }

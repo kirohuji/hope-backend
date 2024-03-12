@@ -5,7 +5,7 @@ import {
   setReqConfig,
   saveFile,
   checkIsFile,
-  UUID,
+  getUser,
   TOTALLIMIT,
   getUserTotalSize,
 } from "./utils";
@@ -19,7 +19,7 @@ export const Storage = new FilesCollection({
 
 export default function strorage() {
   Picker.route("/storage/upload", async function (params, req, res, next) {
-    setReqConfig(req);
+    setReqConfig(res);
     if (checkIsFile(req, params)) {
       const user = getUser(params);
       if (user) {
@@ -36,14 +36,16 @@ export default function strorage() {
         }
         if (
           !isNotExistingFile({
-            collection: BooksCollection,
+            collection: Storage,
             req,
+            res,
             user,
           })
         ) {
           saveFile({
-            collection: BooksCollection,
+            collection: Storage,
             req,
+            res,
             user,
           });
         }
