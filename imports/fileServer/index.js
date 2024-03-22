@@ -6,6 +6,7 @@ import avatar from "./avatar";
 import excel from "./excel";
 import storage from "./storage";
 import book from "./book";
+import broadcast from "./broadcast";
 WebApp.connectHandlers.use("/storage/images/", (req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   next();
@@ -22,4 +23,5 @@ if (Meteor.isServer) {
   excel();
   storage();
   book();
+  broadcast();
 }

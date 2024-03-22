@@ -118,7 +118,6 @@ async function userProcess2(users, profile) {
           $elemMatch: { address: `${mapUser.phoneNumber}@lourd.online` },
         },
       });
-      console.log("current", current?.username);
       // 存在则更新
       if (current) {
         ProfilesCollection.update(
@@ -149,7 +148,6 @@ async function userProcess2(users, profile) {
           false
         );
       } else {
-        console.log("插入");
         let usernameWithAgeUser = Meteor.users.findOne({
           username: usernameWithAge,
         });
@@ -185,7 +183,7 @@ async function excelProcess(file, profile) {
 
 export default function excel() {
   Picker.route("/storage/excel", async function (params, req, res, next) {
-    setReqConfig();
+    setReqConfig(res);
     if (
       req.file !== undefined &&
       isExcel(req.file.originalname) &&
@@ -195,6 +193,7 @@ export default function excel() {
       const user = Meteor.users.findOne({
         "services.resume.loginTokens.hashedToken": hashedToken,
       });
+      console.log("收到");
       if (user) {
         try {
           await excelProcess(req.file.path, user.profile());

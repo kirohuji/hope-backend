@@ -277,16 +277,6 @@ Api.addRoute("books/articles/pagination", {
   post: {
     authRequired: true,
     action: function () {
-      ArticleCollection.update(
-        { title: { $regex: "1月", $options: "i" } },
-        {
-          $set: {
-            coverUrl:
-              "http://localhost:3000/storage/images/storage/m29Cnei8hmK9BCipa/original/m29Cnei8hmK9BCipa.jpg",
-          },
-        },
-        { multi: true }
-      );
       let articles = BookArticleCollection.find({
         book_id: this.bodyParams.book_id,
       }).map((item) => item.article_id);

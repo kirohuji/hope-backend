@@ -74,7 +74,6 @@ export async function pagination(bodyParams) {
         { $count: "total" },
       ])
       .toArray();
-    console.log("total", total);
     return {
       data: bookArticles,
       total: total.length > 0 ? total[0].total : 0,
