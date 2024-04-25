@@ -145,7 +145,7 @@ export function messagesWithDate({ date, conversationId, bodyParams }) {
 export function attachments({ conversationId }) {
   return MessagesCollection.find({
     conversationId,
-    attachments: { $exists: true },
+    attachments: { $exists: true, $elemMatch: { $exists: true } },
   }).map((item) => item.attachments);
 }
 
@@ -192,7 +192,6 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
   }).map((item) => {
     return {
       ...item,
-      attachments: [],
       body: item.body,
       contentType: item.contentType || "text",
       senderId: item.userId,

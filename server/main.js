@@ -4,6 +4,7 @@ if (Meteor.isServer) {
   import "../imports/initAdmin";
   import "../imports/features";
   import "../imports/fileServer/index";
+  import "../imports/cron/index";
   Meteor.methods({
     checkConnect: () => true,
   });

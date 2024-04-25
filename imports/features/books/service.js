@@ -152,16 +152,18 @@ export function play({ userId, date }) {
             : moment(new Date()).format("YYYY/MM//DD"),
         });
         console.log("bookArticle", bookArticle);
-        article = ArticleCollection.findOne(
-          { _id: bookArticle.article_id },
-          {
-            fields: {
-              title: 1,
-              description: 1,
-              date: 1,
-            },
-          }
-        );
+        if (bookArticle?.article_id) {
+          article = ArticleCollection.findOne(
+            { _id: bookArticle?.article_id },
+            {
+              fields: {
+                title: 1,
+                description: 1,
+                date: 1,
+              },
+            }
+          );
+        }
       }
       console.log("article", article);
       // 优化
