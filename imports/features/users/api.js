@@ -19,6 +19,7 @@ Api.addCollection(Meteor.users);
 
 Constructor("users", Model);
 
+// 用户分页
 Api.addRoute("users/pagination", {
   post: function () {
     try {
@@ -31,6 +32,8 @@ Api.addRoute("users/pagination", {
     }
   },
 });
+
+// 根据 profile 获取信息
 Api.addRoute("users/profiles/pagination", {
   post: function () {
     try {
@@ -43,6 +46,8 @@ Api.addRoute("users/profiles/pagination", {
     }
   },
 });
+
+// 删除用户
 Api.addRoute("users/delete/:_id", {
   delete: function () {
     try {
@@ -56,6 +61,7 @@ Api.addRoute("users/delete/:_id", {
   },
 });
 
+// 删除多个用户
 Api.addRoute("users/deleteMany", {
   post: {
     authRequired: true,
@@ -73,6 +79,7 @@ Api.addRoute("users/deleteMany", {
   },
 });
 
+// 激活用户
 Api.addRoute("users/activation", {
   post: {
     authRequired: true,
@@ -90,6 +97,7 @@ Api.addRoute("users/activation", {
   },
 });
 
+// 用户注册
 Api.addRoute("users/register", {
   post: {
     authRequired: true,
@@ -106,6 +114,7 @@ Api.addRoute("users/register", {
   },
 });
 
+// 获取当前用户的基本信息
 Api.addRoute("users/info", {
   get: {
     authRequired: true,
@@ -125,6 +134,7 @@ Api.addRoute("users/info", {
   },
 });
 
+// 获取指定用户的基本信息
 Api.addRoute("users/info/:_id", {
   get: {
     authRequired: true,
@@ -141,6 +151,7 @@ Api.addRoute("users/info/:_id", {
   },
 });
 
+// 修改密码
 Api.addRoute("users/changePassword", {
   post: {
     authRequired: true,

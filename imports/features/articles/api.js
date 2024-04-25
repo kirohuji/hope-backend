@@ -27,7 +27,6 @@ Constructor("articles", Model);
 
 Api.addRoute("articles/pagination", {
   post: function () {
-    // console.log("articles/pagination");
     // ArticleCollection.update(
     //   { title: { $regex: "1月", $options: "i" } },
     //   {

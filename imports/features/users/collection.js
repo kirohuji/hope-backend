@@ -4,6 +4,7 @@ import { User } from 'meteor/socialize:user-model';
 import { UserPresence } from 'meteor/socialize:user-presence';
 import SimpleSchema from 'simpl-schema';
 
+// 待优化
 const Status = Enum.create({
   name: "Status",
   identifiers: ["active", "freeze"],
@@ -37,7 +38,6 @@ export default Class.create({
   }
 });
 
-// Add the schema to the existing schema currently attached to the User model
 User.attachSchema(StatusSchema);
 
 // If `sessionIds` is undefined this signifies we need a fresh start.

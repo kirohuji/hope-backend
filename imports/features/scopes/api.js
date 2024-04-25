@@ -4,8 +4,10 @@ import Constructor from "../base/api"
 import { serverError500 } from "../base/api";
 import { pagination } from './service';
 import _ from 'lodash'
+
 Api.addCollection(ScopeCollection);
 Constructor("scopes", Model)
+
 Api.addRoute('scopes/pagination', {
   post: function () {
     try {
