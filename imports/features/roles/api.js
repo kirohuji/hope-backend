@@ -1,6 +1,8 @@
 import { Meteor } from "meteor/meteor";
 import { Roles } from "meteor/alanning:roles";
+import { ProfilesCollection } from "meteor/socialize:user-profile";
 import Model, { RuleRole, RuleAssignment } from "./collection";
+import { ScopeCollection } from "../scopes/collection";
 import Api from "../../api";
 import { serverError500 } from "../base/api";
 import _ from "lodash";
@@ -311,6 +313,16 @@ Api.addRoute("roles/removeUsersFromRoles", {
 
 Api.addRoute("roles/getInheritedRoleNames", {
   post: function () {
+    const scope = ScopeCollection.findOne({ _id: this.bodyParams._id });
+    if (scope) {
+      const roles = Meteor.roles
+        .find({
+          type: this.bodyParams.type,
+          root: true,
+        })
+        .fetch();
+      return roles;
+    }
     const role = Meteor.roles.findOne({ _id: this.bodyParams._id });
     const currentRolesNames = _.compact(
       Meteor.roles
@@ -361,6 +373,16 @@ function _getInheritedRoleNames(role) {
 Api.addRoute("roles/getInheritedRoleNamesOnly", {
   post: function () {
     try {
+      const scope = ScopeCollection.findOne({ _id: this.bodyParams._id });
+      if (scope) {
+        const roles = Meteor.roles
+          .find({
+            type: this.bodyParams.type,
+            root: true,
+          })
+          .fetch();
+        return roles;
+      }
       const role = Meteor.roles.findOne({ _id: this.bodyParams._id });
       const currentRolesNames = _.compact(
         Meteor.roles
@@ -387,9 +409,88 @@ Api.addRoute("roles/getInheritedRoleNamesOnly", {
   },
 });
 
+Api.addRoute("roles/getChildrenRoleNamesWithUser", {
+  post: function () {
+    try {
+      const scope = ScopeCollection.findOne({ _id: this.bodyParams._id });
+      if (scope) {
+        const roles = Meteor.roles
+          .find({
+            type: this.bodyParams.type,
+            root: true,
+          })
+          .fetch();
+        return roles;
+      }
+      const role = Meteor.roles.findOne({ _id: this.bodyParams._id });
+      const currentRolesNames = _.compact(
+        Meteor.roles
+          .find({
+            _id: {
+              $in: role.children.map((item) => item._id),
+            },
+            type: this.bodyParams.type,
+          })
+          .fetch()
+      );
+      if (this.bodyParams.filter) {
+        currentRolesNames = currentRolesNames.map(
+          (item) => item.type == this.bodyParams.filter && item._id
+        );
+      }
+      const leader = ProfilesCollection.findOne(
+        {
+          _id: role.leader_id,
+        },
+        {
+          fields: {
+            _id: 1,
+            username: 1,
+          },
+        }
+      );
+      let ids = getUserAssignmentsForRoleOnly(role._id, { scope: this.bodyParams.scope })
+        .fetch()
+        .map((a) => a.user._id);
+      let users = ProfilesCollection.find(
+        { _id: { $in: ids } },
+        {
+          fields: {
+            _id: 1,
+            username: 1,
+            realName: 1,
+            displayName: 1,
+            photoURL: 1,
+          },
+        }
+      ).fetch();
+      return {
+        leader,
+        users,
+        children: currentRolesNames,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        statusCode: 500,
+      };
+    }
+  },
+});
+
 Api.addRoute("roles/getChildrenRoleNames", {
   post: function () {
     try {
+      const scope = ScopeCollection.findOne({ _id: this.bodyParams._id });
+      if (scope) {
+        const roles = Meteor.roles
+          .find({
+            type: this.bodyParams.type,
+            root: true,
+          })
+          .fetch();
+        return roles;
+      }
       const role = Meteor.roles.findOne({ _id: this.bodyParams._id });
       const currentRolesNames = _.compact(
         Meteor.roles
