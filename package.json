@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "start": "MONGO_URL=mongodb://meteor:meteor@124.221.67.248:27017/meteor meteor run --port=3030",
-    "dev": "meteor run --port=3000"
+    "dev": "MONGO_URL=mongodb://dev:dev@124.221.67.248:27017/dev meteor run --port=3000"
   },
   "dependencies": {
     "@babel/runtime": "^7.15.4",
