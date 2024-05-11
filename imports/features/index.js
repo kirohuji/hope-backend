@@ -14,3 +14,4 @@ import "./broadcasts";
 import "./notifications";
 import "./payments";
 import "./files";
+import "./aiModels";

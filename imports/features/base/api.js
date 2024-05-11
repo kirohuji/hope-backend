@@ -174,6 +174,7 @@ export default function Constructor (route, Model) {
       authRequired: true,
       action: function () {
         try {
+          console.log('this.urlParams.id', this.urlParams.id)
           Model.update({ _id: this.urlParams.id }, {
             $set: this.bodyParams
           });

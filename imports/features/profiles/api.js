@@ -6,12 +6,13 @@ import Constructor from "../base/api";
 import { serverError500 } from "../base/api";
 import { pagination } from "./service";
 
-Constructor("profiles", Model);
-
 Api.addCollection(ProfilesCollection, {
   path: 'profiles',
   routeOptions: { authRequired: false },
 });
+
+Constructor("profiles", ProfilesCollection);
+
 
 Api.addRoute('profiles/pagination', {
   post: function () {
