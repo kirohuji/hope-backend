@@ -26,6 +26,7 @@ import {
   createNewConversations,
   getConversationsByCurrentUser,
   getConversations,
+  getConversationsByParticipantIds,
   updateReadState,
   addParticipants,
   addParticipant,
@@ -307,7 +308,28 @@ Api.addRoute("messaging/conversations/room", {
       try {
         return createNewConversations({
           participants: this.bodyParams.participants,
+          sessionId: this.bodyParams.sessionId,
+          isSession: this.bodyParams.isSession,
           userId: this.userId,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+Api.addRoute("messaging/users/conversations/participants", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        return getConversationsByParticipantIds({
+          participants: this.bodyParams.participants,
+          userId: this.userId,
+          isSession: this.bodyParams.isSession
         });
       } catch (e) {
         return serverError500({
@@ -624,10 +646,12 @@ Meteor.publish(
     date,
     options = { limit: 100, sort: { createdAt: -1 } }
   ) {
+    console.log(conversationId)
     if (conversationId) {
       const user = Meteor.users.findOne({
         _id: userId,
       });
+      console.log('user?.isParticipatingIn(conversationId)',user?.isParticipatingIn(conversationId))
       if (user?.isParticipatingIn(conversationId)) {
         return MessagesCollection.find(
           {

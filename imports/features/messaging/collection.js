@@ -15,9 +15,23 @@ ConversationsCollection.after.insert(function afterInsert(userId, document) {
     }
   );
 });
+Conversation.attachSchema({
+  sessionId: {
+    type: String,
+    required: false,
+  },
+  label: {
+    type: String,
+    required: false,
+  },
+})
 Message.attachSchema({
   contentType: {
     type: String,
+    required: false,
+  },
+  isGenerate: {
+    type: Boolean,
     required: false,
   },
   sendingMessageId: {

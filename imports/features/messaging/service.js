@@ -10,6 +10,14 @@ import { ProfilesCollection } from "meteor/socialize:user-profile";
 import _ from "lodash";
 import moment from "moment";
 
+export function uuidv4() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 // 删除会话
 export function removeConversations(conversationId) {
   return ConversationsCollection.remove({ _id: conversationId });
@@ -199,9 +207,21 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
   });
 }
 
+export function updateMessage({ messageId, text }) {
+  MessagesCollection.update(
+    {
+      _id: messageId,
+    },
+    {
+      $set: {
+        body: text,
+      },
+    }
+  );
+}
+
 // 发送消息
 export function sendMessage({ conversationId, userId, bodyParams }) {
-  console.log("更新", bodyParams);
   return MessagesCollection.insert(
     new Message({
       conversationId,
@@ -211,6 +231,7 @@ export function sendMessage({ conversationId, userId, bodyParams }) {
       sendingMessageId: bodyParams.sendingMessageId,
       contentType: bodyParams.contentType,
       inFlight: true,
+      isGenerate:bodyParams.isGenerate,
     }),
     {
       extendAutoValueContext: {
@@ -221,10 +242,33 @@ export function sendMessage({ conversationId, userId, bodyParams }) {
 }
 
 // 创建一个新会话
-export function createNewConversations({ participants, userId }) {
-  const conversation = ConversationsCollection.findOne({
-    _participants: participants,
-  });
+export function createNewConversations({
+  isSession,
+  sessionId,
+  participants,
+  userId,
+}) {
+  let conversation = null;
+  if (!isSession) {
+    if (sessionId) {
+      conversation = ConversationsCollection.findOne({
+        sessionId: sessionId,
+      });
+    } else {
+      conversation = ConversationsCollection.findOne({
+        _participants: {
+          $all: _.uniq([...participants, userId]),
+        },
+      });
+      console.log(conversation);
+    }
+  } else {
+    if (sessionId) {
+      conversation = ConversationsCollection.findOne({
+        sessionId: sessionId,
+      });
+    }
+  }
   if (conversation) {
     ConversationsCollection.update(
       {
@@ -240,16 +284,30 @@ export function createNewConversations({ participants, userId }) {
   }
   CollectionHooks.defaultUserId = userId;
   let convo = new Conversation().save();
-  ConversationsCollection.update(
-    {
-      _id: convo._id,
-    },
-    {
-      $set: {
-        createdBy: userId,
+  if (isSession) {
+    ConversationsCollection.update(
+      {
+        _id: convo._id,
       },
-    }
-  );
+      {
+        $set: {
+          sessionId: uuidv4(),
+          createdBy: userId,
+        },
+      }
+    );
+  } else {
+    ConversationsCollection.update(
+      {
+        _id: convo._id,
+      },
+      {
+        $set: {
+          createdBy: userId,
+        },
+      }
+    );
+  }
   const users = Meteor.users.find({ _id: { $in: participants } }).fetch();
   convo.addParticipants(users);
   return convo;
@@ -458,4 +516,18 @@ export function softRemoveConversation(conversationId) {
       },
     }
   );
+}
+
+// 软删除会话
+export function getConversationsByParticipantIds({
+  participants,
+  userId,
+  isSession,
+}) {
+  return ConversationsCollection.find({
+    sessionId: { $exists: isSession },
+    _participants: {
+      $all: _.uniq([...participants, userId]),
+    },
+  }).fetch();
 }
