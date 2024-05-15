@@ -22,6 +22,33 @@ export function uuidv4() {
 export function removeConversations(conversationId) {
   return ConversationsCollection.remove({ _id: conversationId });
 }
+export function messageCountByConverstionId(conversationId) {
+  const conversation = ConversationsCollection.findOne({ _id: conversationId });
+  if (conversation) {
+    const count =  MessagesCollection.find({
+      conversationId,
+    }).count()
+    return count <=2;
+  } else {
+    return false
+  }
+}
+// 更新会话
+export function updateConversations({ conversationId, label }) {
+  const conversation = ConversationsCollection.findOne({ _id: conversationId });
+  if (conversation) {
+    ConversationsCollection.update(
+      {
+        _id: conversation._id,
+      },
+      {
+        $set: {
+          label,
+        },
+      }
+    );
+  }
+}
 
 // 获取会话信息
 export function getConversationsById({ userId, conversationId }) {
@@ -171,27 +198,27 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
     throw new Error("消息不存在");
   }
 
-  let messagesIds = MessagesCollection.find({
-    conversationId,
-    createdAt: {
-      $gte: message.createdAt,
-    },
-  }).map((msg) => msg._id);
-  let update = MessagesCollection.update(
-    {
-      _id: {
-        $in: messagesIds,
-      },
-      readedIds: { $ne: userId },
-    },
-    {
-      $addToSet: {
-        readedIds: userId,
-      },
-    },
-    { multi: true }
-  );
-  console.log("update", update);
+  // let messagesIds = MessagesCollection.find({
+  //   conversationId,
+  //   createdAt: {
+  //     $gte: message.createdAt,
+  //   },
+  // }).map((msg) => msg._id);
+  // let update = MessagesCollection.update(
+  //   {
+  //     _id: {
+  //       $in: messagesIds,
+  //     },
+  //     readedIds: { $ne: userId },
+  //   },
+  //   {
+  //     $addToSet: {
+  //       readedIds: userId,
+  //     },
+  //   },
+  //   { multi: true }
+  // );
+  // console.log("update", update);
   return MessagesCollection.find({
     conversationId,
     createdAt: {
@@ -207,13 +234,14 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
   });
 }
 
-export function updateMessage({ messageId, text }) {
+export function updateMessage({ label, messageId, text }) {
   MessagesCollection.update(
     {
       _id: messageId,
     },
     {
       $set: {
+        label: label,
         body: text,
       },
     }
@@ -231,7 +259,7 @@ export function sendMessage({ conversationId, userId, bodyParams }) {
       sendingMessageId: bodyParams.sendingMessageId,
       contentType: bodyParams.contentType,
       inFlight: true,
-      isGenerate:bodyParams.isGenerate,
+      isGenerate: bodyParams.isGenerate,
     }),
     {
       extendAutoValueContext: {

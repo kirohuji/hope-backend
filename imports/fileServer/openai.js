@@ -1,6 +1,11 @@
 import { Picker } from "meteor/communitypackages:picker";
 import https from "https";
-import { sendMessage, updateMessage } from "../features/messaging/service";
+import {
+  sendMessage,
+  updateConversations,
+  updateMessage,
+  messageCountByConverstionId,
+} from "../features/messaging/service";
 import { setReqConfig, getUser } from "./utils";
 export function uuidv4() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -12,6 +17,27 @@ export function uuidv4() {
 const wrappedUpdateMessage = Meteor.bindEnvironment((options) => {
   updateMessage(options);
 });
+const wrappedUpdateConversation = Meteor.bindEnvironment((options) => {
+  updateConversations(options);
+});
+const wrappedUpdateConverstionTitle = Meteor.bindEnvironment(
+  ({ text, conversationId }) => {
+    if (messageCountByConverstionId(conversationId)) {
+      console.log('生成标题')
+      keyword(text)
+        .then((title) => {
+          console.log(title)
+          wrappedUpdateConversation({
+            conversationId,
+            label: title,
+          });
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+  }
+);
 
 export default function createOpenai() {
   Picker.route("/openai", async (params, req, res) => {
@@ -53,9 +79,9 @@ export default function createOpenai() {
           inFlight: true,
         },
       });
-      res.write(`data: ${JSON.stringify({ messageId:messageId})}\n\n`);
+      res.write(`data: ${JSON.stringify({ messageId: messageId })}\n\n`);
     } else {
-      res.write(`data: ${JSON.stringify({ messageId:messageId})}\n\n`);
+      res.write(`data: ${JSON.stringify({ messageId: messageId })}\n\n`);
     }
     const sseRequest = https.request(
       {
@@ -88,6 +114,7 @@ export default function createOpenai() {
               messageId,
               text,
             });
+            wrappedUpdateConverstionTitle({ text, conversationId: req.body.conversationId});
           }
           res.end();
         });
@@ -102,5 +129,62 @@ export default function createOpenai() {
     });
     sseRequest.write(JSON.stringify(requestData));
     sseRequest.end();
+  });
+}
+
+function keyword(article) {
+  return new Promise((resolve, reject) => {
+    const requestData = JSON.stringify({
+      model: "deepseek-chat",
+      messages: [
+        {
+          role: "user",
+          content:
+            "我给你文章,你总结内容后,只返回总结后内容(英文,不超过15个字):" +
+            article,
+        },
+      ],
+      stream: false,
+      max_tokens: 20, // 生成的最大标记数，可以根据需要调整
+    });
+
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer sk-d14a278795e34f41b9fe18d2ccd21e10", // 替换为您的 API 密钥
+      },
+    };
+
+    const req = https.request(
+      "https://api.deepseek.com/chat/completions",
+      options,
+      (response) => {
+        let responseData = "";
+
+        response.on("data", (chunk) => {
+          responseData += chunk;
+        });
+
+        response.on("end", () => {
+          if (response.statusCode === 200) {
+            const parsedData = JSON.parse(responseData);
+            const title = parsedData.choices[0].message?.content.trim();
+            resolve(title);
+          } else {
+            reject(
+              new Error(`Error: ${response.statusCode} - ${responseData}`)
+            );
+          }
+        });
+      }
+    );
+
+    req.on("error", (error) => {
+      reject(error);
+    });
+
+    req.write(requestData);
+    req.end();
   });
 }
