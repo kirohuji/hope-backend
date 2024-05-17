@@ -136,19 +136,19 @@ export function messages({ userId, conversationId, bodyParams }) {
         senderId: item.userId,
       };
     });
-  MessagesCollection.update(
-    {
-      conversationId,
-      _id: { $in: result.map((item) => item._id) },
-      readedIds: { $ne: userId },
-    },
-    {
-      $addToSet: {
-        readedIds: userId,
-      },
-    },
-    { multi: true }
-  );
+  // MessagesCollection.update(
+  //   {
+  //     conversationId,
+  //     _id: { $in: result.map((item) => item._id) },
+  //     readedIds: { $ne: userId },
+  //   },
+  //   {
+  //     $addToSet: {
+  //       readedIds: userId,
+  //     },
+  //   },
+  //   { multi: true }
+  // );
   return result;
 }
 
@@ -347,8 +347,10 @@ export function getConversationsByCurrentUser(user, ids) {
   if (ids) {
     return ConversationsCollection.find({
       _id: { $in: ids },
+      isRemove: false,
     })
       .fetch()
+      .filter(item=> !item.isRemove)
       .map((item) => {
         return {
           ...item,
@@ -379,9 +381,11 @@ export function getConversationsByCurrentUser(user, ids) {
         };
       });
   }
+  console.log('是这个接口')
   return user
-    .conversations({ _id: { $in: ids } })
+    .conversations({ _id: { $in: ids }, isRemove: false })
     .fetch()
+    .filter(item=> !item.isRemove)
     .map((item) => {
       return {
         ...item,

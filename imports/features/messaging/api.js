@@ -670,6 +670,7 @@ Meteor.publish(
 Meteor.publish("socialize.unreadCount", function publishMessageFor(userId) {
   if (userId) {
     let conversations = ConversationsCollection.find({
+      isRemove: false,
       _participants: {
         $in: [userId],
       },
@@ -716,6 +717,7 @@ Meteor.publish("newMessagesConversations", function (date) {
   // 如果存在更新的会话ID，则返回该会话的发布，否则返回所有会话的发布
   if (updatedConversationId) {
     return ConversationsCollection.find({
+      isRemove: false,
       _id: updatedConversationId,
       _participants: {
         $in: [this.userId],
@@ -723,6 +725,7 @@ Meteor.publish("newMessagesConversations", function (date) {
     });
   } else {
     return ConversationsCollection.find({
+      isRemove: false,
       _participants: {
         $in: [this.userId],
       },
