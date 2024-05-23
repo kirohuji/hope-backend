@@ -25,12 +25,12 @@ export function removeConversations(conversationId) {
 export function messageCountByConverstionId(conversationId) {
   const conversation = ConversationsCollection.findOne({ _id: conversationId });
   if (conversation) {
-    const count =  MessagesCollection.find({
+    const count = MessagesCollection.find({
       conversationId,
-    }).count()
-    return count <=2;
+    }).count();
+    return count <= 2;
   } else {
-    return false
+    return false;
   }
 }
 // 更新会话
@@ -319,6 +319,7 @@ export function createNewConversations({
       },
       {
         $set: {
+          isRemove: false,
           sessionId: uuidv4(),
           createdBy: userId,
         },
@@ -347,10 +348,12 @@ export function getConversationsByCurrentUser(user, ids) {
   if (ids) {
     return ConversationsCollection.find({
       _id: { $in: ids },
+      sessionId: {
+        $exists: false,
+      },
       isRemove: false,
     })
       .fetch()
-      .filter(item=> !item.isRemove)
       .map((item) => {
         return {
           ...item,
@@ -381,11 +384,16 @@ export function getConversationsByCurrentUser(user, ids) {
         };
       });
   }
-  console.log('是这个接口')
-  return user
-    .conversations({ _id: { $in: ids }, isRemove: false })
+  return ConversationsCollection.find({
+    isRemove: false,
+    _participants: {
+      $in: [user._id],
+    },
+    sessionId: {
+      $exists: false,
+    },
+  })
     .fetch()
-    .filter(item=> !item.isRemove)
     .map((item) => {
       return {
         ...item,
@@ -506,7 +514,7 @@ export function numUnreadConversations(userId) {
   return Meteor.users.findOne({ _id: userId }).numUnreadConversations();
 }
 
-// 根据当前用户获取所有的会话
+// 根据当前用户获取所有的会话(有问题)
 export function getConversations(userId) {
   return Meteor.users
     .findOne({ _id: userId })
@@ -558,6 +566,7 @@ export function getConversationsByParticipantIds({
 }) {
   return ConversationsCollection.find({
     sessionId: { $exists: isSession },
+    isRemove: false,
     _participants: {
       $all: _.uniq([...participants, userId]),
     },

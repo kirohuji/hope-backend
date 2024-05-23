@@ -139,13 +139,12 @@ function keyword(article) {
       messages: [
         {
           role: "user",
-          content:
-            "我给你文章,你总结内容后,只返回总结后内容(英文,不超过15个字):" +
-            article,
+          content:`根据以下文章内容生成一个合适的标题,只返回内容:\n\n${article}\n\n:`
         },
       ],
       stream: false,
-      max_tokens: 20, // 生成的最大标记数，可以根据需要调整
+      max_tokens: 10, // 根据需要调整最大token数
+      temperature: 0.7,
     });
 
     const options = {
