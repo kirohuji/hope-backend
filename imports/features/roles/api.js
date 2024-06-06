@@ -1,20 +1,20 @@
-import { Meteor } from "meteor/meteor";
-import { Roles } from "meteor/alanning:roles";
-import { ProfilesCollection } from "meteor/socialize:user-profile";
-import Model, { RuleRole, RuleAssignment } from "./collection";
-import { ScopeCollection } from "../scopes/collection";
-import Api from "../../api";
-import { serverError500 } from "../base/api";
-import _ from "lodash";
+import { Meteor } from 'meteor/meteor';
+import { Roles } from 'meteor/alanning:roles';
+import { ProfilesCollection } from 'meteor/socialize:user-profile';
+import Model, { RuleRole, RuleAssignment } from './collection';
+import { ScopeCollection } from '../scopes/collection';
+import Api from '../../api';
+import { serverError500 } from '../base/api';
+import _ from 'lodash';
 import {
   getRolesByCurrentUser,
   getRolesTreeByCurrentUser,
   permissionTree,
   getUsersInNotRoleOnly,
-} from "./service";
+} from './service';
 Api.addCollection(Meteor.roles);
 
-Api.addRoute("roles/permissions", {
+Api.addRoute('roles/permissions', {
   get: function () {
     try {
       return permissionTree({
@@ -31,7 +31,7 @@ Api.addRoute("roles/permissions", {
 });
 /** 创建一个节点 */
 Api.addRoute(
-  "roles",
+  'roles',
   { authRequired: false },
   {
     post: function () {
@@ -42,14 +42,14 @@ Api.addRoute(
           {
             unlessExists: false,
           },
-          {}
+          {},
         );
         let result = Meteor.roles.upsert(
           {
             ...this.bodyParams,
             _id: _id,
           },
-          { $setOnInsert: { children: [] } }
+          { $setOnInsert: { children: [] } },
         );
         if (!result.insertedId) {
           if (options.unlessExists) return null;
@@ -64,7 +64,7 @@ Api.addRoute(
               descritpion: 1,
               root: 1,
             },
-          }
+          },
         );
       } catch (e) {
         return {
@@ -72,16 +72,16 @@ Api.addRoute(
         };
       }
     },
-  }
+  },
 );
 
 /** 添加父节点 */
-Api.addRoute("roles/addRolesToParent", {
+Api.addRoute('roles/addRolesToParent', {
   post: function () {
     try {
       Roles.addRolesToParent(
         this.bodyParams.rolesNames,
-        this.bodyParams.parentName
+        this.bodyParams.parentName,
       );
       return true;
     } catch (e) {
@@ -93,7 +93,7 @@ Api.addRoute("roles/addRolesToParent", {
 });
 
 /** 添加父节点 */
-Api.addRoute("roles/updateRolesToParent", {
+Api.addRoute('roles/updateRolesToParent', {
   post: function () {
     try {
       const role = Meteor.roles.findOne({ _id: this.bodyParams.parentName });
@@ -102,18 +102,18 @@ Api.addRoute("roles/updateRolesToParent", {
           Meteor.roles
             .find({
               _id: {
-                $in: role?.children.map((item) => item._id) || [],
+                $in: role?.children.map(item => item._id) || [],
               },
             })
-            .map((item) => item.type == "permission" && item._id)
+            .map(item => item.type == 'permission' && item._id),
         );
         Roles.removeRolesFromParent(
           currentRolesNames,
-          this.bodyParams.parentName
+          this.bodyParams.parentName,
         );
         Roles.addRolesToParent(
           this.bodyParams.rolesNames,
-          this.bodyParams.parentName
+          this.bodyParams.parentName,
         );
         return true;
       } else {
@@ -128,7 +128,7 @@ Api.addRoute("roles/updateRolesToParent", {
   },
 });
 
-Api.addRoute("roles/:id", {
+Api.addRoute('roles/:id', {
   get: function () {
     try {
       const _id = this.urlParams.id;
@@ -148,8 +148,8 @@ Api.addRoute("roles/:id", {
           _id: _id,
         },
         {
-          $set: _.omit(this.bodyParams, "_id"),
-        }
+          $set: _.omit(this.bodyParams, '_id'),
+        },
       );
       return Meteor.roles.findOne({ _id: _id });
     } catch (e) {
@@ -170,7 +170,7 @@ Api.addRoute("roles/:id", {
   },
 });
 
-Api.addRoute("roles/model", {
+Api.addRoute('roles/model', {
   get: function () {
     return {
       fields: Model.schema.fields,
@@ -179,7 +179,7 @@ Api.addRoute("roles/model", {
   },
 });
 
-Api.addRoute("roles/pagination", {
+Api.addRoute('roles/pagination', {
   post: function () {
     return {
       data: Meteor.roles
@@ -188,7 +188,7 @@ Api.addRoute("roles/pagination", {
             ...this.bodyParams.selector,
             // type: 'role'
           } || {},
-          this.bodyParams.options
+          this.bodyParams.options,
         )
         .fetch(),
       total: Meteor.roles.find().count(),
@@ -196,7 +196,7 @@ Api.addRoute("roles/pagination", {
   },
 });
 
-Api.addRoute("roles/renameRole", {
+Api.addRoute('roles/renameRole', {
   post: function () {
     try {
       Roles.renameRole(this.bodyParams.oldName, this.bodyParams.newName);
@@ -209,7 +209,7 @@ Api.addRoute("roles/renameRole", {
   },
 });
 
-Api.addRoute("roles/changeLeader", {
+Api.addRoute('roles/changeLeader', {
   post: function () {
     try {
       const role = Meteor.roles.findOne({
@@ -222,7 +222,7 @@ Api.addRoute("roles/changeLeader", {
         {
           ...role,
           ...this.bodyParams,
-        }
+        },
       );
     } catch (e) {
       return {
@@ -266,13 +266,13 @@ Api.addRoute("roles/changeLeader", {
 //   },
 // });
 
-Api.addRoute("roles/removeUsersFromRoles", {
+Api.addRoute('roles/removeUsersFromRoles', {
   post: function () {
     try {
       Roles.removeUsersFromRoles(
         this.bodyParams.users,
         this.bodyParams.roles,
-        this.bodyParams.options
+        this.bodyParams.options,
       );
       // return true;
       // const role = Meteor.roles.findOne({ _id: this.bodyParams.roles });
@@ -311,7 +311,7 @@ Api.addRoute("roles/removeUsersFromRoles", {
   },
 });
 
-Api.addRoute("roles/getInheritedRoleNames", {
+Api.addRoute('roles/getInheritedRoleNames', {
   post: function () {
     const scope = ScopeCollection.findOne({ _id: this.bodyParams._id });
     if (scope) {
@@ -331,11 +331,11 @@ Api.addRoute("roles/getInheritedRoleNames", {
             $in: Roles._getInheritedRoleNames(role),
           },
         })
-        .fetch()
+        .fetch(),
     );
     if (this.bodyParams.filter) {
       currentRolesNames = currentRolesNames.map(
-        (item) => item.type == this.bodyParams.filter && item._id
+        item => item.type == this.bodyParams.filter && item._id,
       );
     }
     return currentRolesNames;
@@ -347,21 +347,21 @@ function _getInheritedRoleNames(role) {
   const nestedRoles = new Set([]);
   const _init_roles = Meteor.roles
     .find(
-      { _id: { $in: role.children.map((r) => r._id) } },
-      { fields: { children: 1 } }
+      { _id: { $in: role.children.map(r => r._id) } },
+      { fields: { children: 1 } },
     )
     .fetch();
-  _init_roles.forEach((r2) => {
+  _init_roles.forEach(r2 => {
     nestedRoles.add(r2);
   });
-  nestedRoles.forEach((r) => {
+  nestedRoles.forEach(r => {
     const roles = Meteor.roles
       .find(
-        { _id: { $in: r.children?.map((r) => r._id) || [] } },
-        { fields: { children: 1 } }
+        { _id: { $in: r.children?.map(r => r._id) || [] } },
+        { fields: { children: 1 } },
       )
       .fetch();
-    roles.forEach((r2) => {
+    roles.forEach(r2 => {
       inheritedRoles.add(r2._id);
       nestedRoles.add(r2);
     });
@@ -370,7 +370,7 @@ function _getInheritedRoleNames(role) {
   return [...inheritedRoles];
 }
 
-Api.addRoute("roles/getInheritedRoleNamesOnly", {
+Api.addRoute('roles/getInheritedRoleNamesOnly', {
   post: function () {
     try {
       const scope = ScopeCollection.findOne({ _id: this.bodyParams._id });
@@ -391,14 +391,14 @@ Api.addRoute("roles/getInheritedRoleNamesOnly", {
               $in: _getInheritedRoleNames(role),
             },
           })
-          .fetch()
+          .fetch(),
       );
       if (this.bodyParams.filter) {
         currentRolesNames = currentRolesNames.map(
-          (item) => item.type == this.bodyParams.filter && item._id
+          item => item.type == this.bodyParams.filter && item._id,
         );
       }
-      console.log("查询成功");
+      console.log('查询成功');
       return currentRolesNames;
     } catch (e) {
       console.log(e);
@@ -409,9 +409,40 @@ Api.addRoute("roles/getInheritedRoleNamesOnly", {
   },
 });
 
-Api.addRoute("roles/getChildrenRoleNamesWithUser", {
+Api.addRoute('roles/getChildrenRoleNamesWithUser', {
   post: function () {
     try {
+      if (this.bodyParams.query) {
+        let regex = this.bodyParams.query;
+        let users = ProfilesCollection.find(
+          {
+            $or: [
+              {
+                username: {
+                  $regex: regex,
+                  $options: 'i',
+                },
+              },
+              {
+                phoneNumber: {
+                  $regex: regex,
+                  $options: 'i',
+                },
+              },
+            ],
+          },
+          {
+            fields: {
+              _id: 1,
+              username: 1,
+              realName: 1,
+              displayName: 1,
+              photoURL: 1,
+            },
+          },
+        ).fetch();
+        return users;
+      }
       const scope = ScopeCollection.findOne({ _id: this.bodyParams._id });
       if (scope) {
         const roles = Meteor.roles
@@ -427,15 +458,15 @@ Api.addRoute("roles/getChildrenRoleNamesWithUser", {
         Meteor.roles
           .find({
             _id: {
-              $in: role.children.map((item) => item._id),
+              $in: role.children.map(item => item._id),
             },
             type: this.bodyParams.type,
           })
-          .fetch()
+          .fetch(),
       );
       if (this.bodyParams.filter) {
         currentRolesNames = currentRolesNames.map(
-          (item) => item.type == this.bodyParams.filter && item._id
+          item => item.type == this.bodyParams.filter && item._id,
         );
       }
       const leader = ProfilesCollection.findOne(
@@ -447,11 +478,13 @@ Api.addRoute("roles/getChildrenRoleNamesWithUser", {
             _id: 1,
             username: 1,
           },
-        }
+        },
       );
-      let ids = getUserAssignmentsForRoleOnly(role._id, { scope: this.bodyParams.scope })
+      let ids = getUserAssignmentsForRoleOnly(role._id, {
+        scope: this.bodyParams.scope,
+      })
         .fetch()
-        .map((a) => a.user._id);
+        .map(a => a.user._id);
       let users = ProfilesCollection.find(
         { _id: { $in: ids } },
         {
@@ -462,7 +495,7 @@ Api.addRoute("roles/getChildrenRoleNamesWithUser", {
             displayName: 1,
             photoURL: 1,
           },
-        }
+        },
       ).fetch();
       return {
         leader,
@@ -478,7 +511,7 @@ Api.addRoute("roles/getChildrenRoleNamesWithUser", {
   },
 });
 
-Api.addRoute("roles/getChildrenRoleNames", {
+Api.addRoute('roles/getChildrenRoleNames', {
   post: function () {
     try {
       const scope = ScopeCollection.findOne({ _id: this.bodyParams._id });
@@ -496,15 +529,15 @@ Api.addRoute("roles/getChildrenRoleNames", {
         Meteor.roles
           .find({
             _id: {
-              $in: role.children.map((item) => item._id),
+              $in: role.children.map(item => item._id),
             },
           })
-          .fetch()
+          .fetch(),
       );
       // console.log(currentRolesNames)
       if (this.bodyParams.filter) {
         currentRolesNames = currentRolesNames.map(
-          (item) => item.type == this.bodyParams.filter && item._id
+          item => item.type == this.bodyParams.filter && item._id,
         );
       }
       return currentRolesNames;
@@ -517,14 +550,14 @@ Api.addRoute("roles/getChildrenRoleNames", {
   },
 });
 
-Api.addRoute("roles/removeUsersFromRolesAndInheritedRole", {
+Api.addRoute('roles/removeUsersFromRolesAndInheritedRole', {
   post: function () {
     const role = Meteor.roles.findOne({ _id: this.bodyParams.roles });
     try {
       Roles.removeUsersFromRoles(
         this.bodyParams.users,
         [this.bodyParams.roles, ...Roles._getInheritedRoleNames(role)],
-        this.bodyParams.options
+        this.bodyParams.options,
       );
       return true;
     } catch (e) {
@@ -535,7 +568,7 @@ Api.addRoute("roles/removeUsersFromRolesAndInheritedRole", {
   },
 });
 
-Api.addRoute("roles/addUsersToRolesAndRoleParents", {
+Api.addRoute('roles/addUsersToRolesAndRoleParents', {
   post: function () {
     try {
       Roles.addUsersToRoles(
@@ -546,7 +579,7 @@ Api.addRoute("roles/addUsersToRolesAndRoleParents", {
             _id: this.bodyParams.roles,
           }),
         ],
-        this.bodyParams.options
+        this.bodyParams.options,
       );
       return true;
     } catch (e) {
@@ -557,13 +590,13 @@ Api.addRoute("roles/addUsersToRolesAndRoleParents", {
   },
 });
 
-Api.addRoute("roles/addUsersToRoles", {
+Api.addRoute('roles/addUsersToRoles', {
   post: function () {
     try {
       Roles.addUsersToRoles(
         this.bodyParams.users,
         this.bodyParams.roles,
-        this.bodyParams.options
+        this.bodyParams.options,
       );
 
       const role = Meteor.roles.findOne({ _id: this.bodyParams.roles });
@@ -574,16 +607,16 @@ Api.addRoute("roles/addUsersToRoles", {
               $in: Roles._getInheritedRoleNames(role),
             },
           })
-          .fetch()
+          .fetch(),
       );
       const permissions = _.compact(
-        currentRolesNames.map((item) => item.type == "permission" && item._id)
+        currentRolesNames.map(item => item.type == 'permission' && item._id),
       );
-      permissions.forEach((permission) => {
+      permissions.forEach(permission => {
         const ruleRoles = RuleRole.find({
           role_id: permission,
         }).fetch();
-        ruleRoles.forEach((e) => {
+        ruleRoles.forEach(e => {
           const ruleAssignment = new RuleAssignment();
           ruleAssignment.set({
             user_id: this.bodyParams.users._id,
@@ -592,7 +625,7 @@ Api.addRoute("roles/addUsersToRoles", {
             router: e.router,
           });
           ruleAssignment.save();
-          console.log("ruleRoles", ruleAssignment);
+          console.log('ruleRoles', ruleAssignment);
         });
       });
       return true;
@@ -605,35 +638,33 @@ Api.addRoute("roles/addUsersToRoles", {
 });
 
 /** 根据角色获取用户列表,类似分页 */
-Api.addRoute("roles/getUsersInRole", {
+Api.addRoute('roles/getUsersInRole', {
   post: function () {
     try {
       let ids;
       ids = Roles.getUserAssignmentsForRole(
         this.bodyParams.roles,
-        this.bodyParams.options
+        this.bodyParams.options,
       )
         .fetch()
-        .map((a) => a.user._id);
+        .map(a => a.user._id);
       return {
-        data: Meteor.users
-          .find(
-            { _id: { $in: ids } },
-            (this.bodyParams.options && this.bodyParams.options.queryOptions) ||
-              this.bodyParams.queryOptions ||
-              {}
-          )
-          .fetch()
-          .map((item) => {
-            const profile = item.profile();
-            return {
-              displayName: profile.displayName || "",
-              avatarUrl: profile.photoURL || "",
-              phoneNumber: profile.phoneNumber || "",
-              description: profile.about,
-              ..._.omit(item, "services"),
-            };
-          }),
+        data: ProfilesCollection.find(
+          { _id: { $in: ids } },
+          (this.bodyParams.options && this.bodyParams.options.queryOptions) ||
+            this.bodyParams.queryOptions ||
+            {},
+        ).fetch(),
+        // .map((item) => {
+        //   const profile = item.profile();
+        //   return {
+        //     displayName: profile.displayName || "",
+        //     avatarUrl: profile.photoURL || "",
+        //     phoneNumber: profile.phoneNumber || "",
+        //     description: profile.about,
+        //     ..._.omit(item, "services"),
+        //   };
+        // }),
         total: Meteor.users.find({ _id: { $in: ids } }).count(),
       };
     } catch (e) {
@@ -652,7 +683,7 @@ function getUserAssignmentsForRoleOnly(roles, options) {
       anyScope: false,
       queryOptions: {},
     },
-    options
+    options,
   );
 
   if (!Array.isArray(roles)) roles = [roles];
@@ -671,7 +702,7 @@ function _getUsersInRoleCursorOnly(roles, options, filter) {
       anyScope: false,
       onlyScoped: false,
     },
-    options
+    options,
   );
 
   // ensure array to simplify code
@@ -681,13 +712,13 @@ function _getUsersInRoleCursorOnly(roles, options, filter) {
 
   filter = Object.assign(
     {
-      fields: { "user._id": 1 },
+      fields: { 'user._id': 1 },
     },
-    filter
+    filter,
   );
 
   selector = {
-    "role._id": { $in: roles },
+    'role._id': { $in: roles },
   };
 
   if (!options.anyScope) {
@@ -702,35 +733,35 @@ function _getUsersInRoleCursorOnly(roles, options, filter) {
 }
 
 /** 根据角色获取用户列表,类似分页 */
-Api.addRoute("roles/getUsersInRoleOnly", {
+Api.addRoute('roles/getUsersInRoleOnly', {
   post: function () {
     try {
       let ids;
       ids = getUserAssignmentsForRoleOnly(
         this.bodyParams.roles,
-        this.bodyParams.options
+        this.bodyParams.options,
       )
         .fetch()
-        .map((a) => a.user._id);
+        .map(a => a.user._id);
       return {
         data: Meteor.users
           .find(
             { _id: { $in: ids } },
             (this.bodyParams.options && this.bodyParams.options.queryOptions) ||
               this.bodyParams.queryOptions ||
-              {}
+              {},
           )
           .fetch()
-          .map((item) => {
+          .map(item => {
             const profile = item.profile();
             return {
-              displayName: profile.displayName || "",
-              avatarUrl: profile.photoURL || "",
-              photoURL: profile.photoURL || "",
-              phoneNumber: profile.phoneNumber || "",
+              displayName: profile.displayName || '',
+              avatarUrl: profile.photoURL || '',
+              photoURL: profile.photoURL || '',
+              phoneNumber: profile.phoneNumber || '',
               description: profile.about,
               realName: profile.realName,
-              ..._.omit(item, "services"),
+              ..._.omit(item, 'services'),
             };
           }),
         total: Meteor.users.find({ _id: { $in: ids } }).count(),
@@ -743,33 +774,33 @@ Api.addRoute("roles/getUsersInRoleOnly", {
   },
 });
 
-Api.addRoute("roles/getUsersInNotRole", {
+Api.addRoute('roles/getUsersInNotRole', {
   post: function () {
     try {
       let ids;
       ids = Role.getUserAssignmentsForRole(
         this.bodyParams.roles,
-        this.bodyParams.options
+        this.bodyParams.options,
       )
         .fetch()
-        .map((a) => a.user._id);
+        .map(a => a.user._id);
       return {
         data: Meteor.users
           .find(
             { _id: { $nin: ids } },
             (this.bodyParams.options && this.bodyParams.options.queryOptions) ||
               this.bodyParams.queryOptions ||
-              {}
+              {},
           )
           .fetch()
-          .map((item) => {
+          .map(item => {
             const profile = item.profile();
             return {
-              displayName: profile.displayName || "",
-              avatarUrl: profile.photoURL || "",
-              phoneNumber: profile.phoneNumber || "",
+              displayName: profile.displayName || '',
+              avatarUrl: profile.photoURL || '',
+              phoneNumber: profile.phoneNumber || '',
               description: profile.about,
-              ..._.omit(item, "services"),
+              ..._.omit(item, 'services'),
             };
           }),
         total: Meteor.users.find({ _id: { $nin: ids } }).count(),
@@ -782,7 +813,7 @@ Api.addRoute("roles/getUsersInNotRole", {
   },
 });
 
-Api.addRoute("roles/getUsersInNotRoleOnly", {
+Api.addRoute('roles/getUsersInNotRoleOnly', {
   post: function () {
     try {
       return getUsersInNotRoleOnly({
@@ -799,13 +830,13 @@ Api.addRoute("roles/getUsersInNotRoleOnly", {
   },
 });
 
-Api.addRoute("roles/addPermission", {
+Api.addRoute('roles/addPermission', {
   post: function () {
     try {
       let role = Meteor.roles.findOne({
         _id: this.bodyParams.parentName,
       });
-      let roles = role.children.map((item) => item._id);
+      let roles = role.children.map(item => item._id);
       let remove = _.difference(roles, this.bodyParams.rolesNames);
       Roles.removeRolesFromParent(remove, this.bodyParams.parentName);
       let add = _.difference(this.bodyParams.rolesNames, roles);
@@ -819,34 +850,34 @@ Api.addRoute("roles/addPermission", {
   },
 });
 
-Api.addRoute("roles/get", {
+Api.addRoute('roles/get', {
   post: function () {
     return Meteor.roles
       .find(
         {
           ...this.bodyParams.selector,
         } || {},
-        this.bodyParams.options
+        this.bodyParams.options,
       )
       .fetch()
-      .map((item) => {
+      .map(item => {
         return {
           ...item,
           count: _.uniqBy(
             getUserAssignmentsForRoleOnly(
               [item._id, ...Roles._getInheritedRoleNames(item)],
-              this.bodyParams.selector
+              this.bodyParams.selector,
             )
               .fetch()
-              .map((item) => item.user),
-            "_id"
+              .map(item => item.user),
+            '_id',
           ).length,
         };
       });
   },
 });
 
-Api.addRoute("roles/getWithUser", {
+Api.addRoute('roles/getWithUser', {
   post: function () {
     try {
       return getRolesByCurrentUser({
@@ -862,7 +893,7 @@ Api.addRoute("roles/getWithUser", {
   },
 });
 
-Api.addRoute("roles/getRolesTreeByCurrentUser", {
+Api.addRoute('roles/getRolesTreeByCurrentUser', {
   post: {
     authRequired: true,
     action: function () {
@@ -883,9 +914,9 @@ Api.addRoute("roles/getRolesTreeByCurrentUser", {
 });
 
 /** 添加数据权限的规则 */
-Api.addRoute("roles/addRules", {
+Api.addRoute('roles/addRules', {
   post: function () {
-    this.bodyParams.rules.forEach((e) => {
+    this.bodyParams.rules.forEach(e => {
       const ruleRole = new RuleRole();
       ruleRole.set({
         role_id: this.bodyParams.roleName,
@@ -893,12 +924,12 @@ Api.addRoute("roles/addRules", {
         router: e.route,
       });
       ruleRole.save();
-      console.log("保存成功", this.bodyParams.roleName);
+      console.log('保存成功', this.bodyParams.roleName);
       Roles.getUserAssignmentsForRole(this.bodyParams.roleName, {
         anyScope: true,
       })
         .fetch()
-        .map((a) => {
+        .map(a => {
           const ruleAssignment = new RuleAssignment();
           ruleAssignment.set({
             user_id: a.user._id,
@@ -914,9 +945,9 @@ Api.addRoute("roles/addRules", {
 });
 
 /** 删除数据权限的规则 */
-Api.addRoute("roles/removeRules", {
+Api.addRoute('roles/removeRules', {
   post: function () {
-    this.bodyParams.rules.forEach((e) => {
+    this.bodyParams.rules.forEach(e => {
       const ruleRole = RuleRole.findOne({
         role_id: this.bodyParams.roleName,
         rule_value: e.rule_value,
@@ -927,7 +958,7 @@ Api.addRoute("roles/removeRules", {
         anyScope: true,
       })
         .fetch()
-        .forEach((a) => {
+        .forEach(a => {
           const ruleAssignment = RuleAssignment.findOne({
             user_id: a.user._id,
             role_id: this.bodyParams.roleName,
@@ -941,7 +972,7 @@ Api.addRoute("roles/removeRules", {
   },
 });
 
-Api.addRoute("roles/addCurrentUserToRolesAndRoleParents", {
+Api.addRoute('roles/addCurrentUserToRolesAndRoleParents', {
   post: {
     authRequired: true,
     action: function () {
@@ -954,9 +985,9 @@ Api.addRoute("roles/addCurrentUserToRolesAndRoleParents", {
               _id: this.bodyParams.roles,
             }),
           ],
-          this.bodyParams.options
+          this.bodyParams.options,
         );
-        console.log("this.bodyParams.roles", this.bodyParams.roles);
+        console.log('this.bodyParams.roles', this.bodyParams.roles);
         return true;
       } catch (e) {
         console.log(e);
@@ -968,7 +999,7 @@ Api.addRoute("roles/addCurrentUserToRolesAndRoleParents", {
   },
 });
 
-Api.addRoute("roles/getRoleWithUser", {
+Api.addRoute('roles/getRoleWithUser', {
   post: {
     authRequired: true,
     action: function () {
@@ -978,11 +1009,11 @@ Api.addRoute("roles/getRoleWithUser", {
           scope: this.bodyParams.scope,
         });
         // console.log(roles)
-        if (roles.indexOf("admin") != -1) {
+        if (roles.indexOf('admin') != -1) {
           return Meteor.roles
             .find({
               scope: this.bodyParams.scope,
-              type: this.bodyParams.type || "permission",
+              type: this.bodyParams.type || 'permission',
             })
             .fetch();
         } else {
@@ -990,9 +1021,9 @@ Api.addRoute("roles/getRoleWithUser", {
             .find(
               {
                 _id: { $in: roles },
-                type: this.bodyParams.type || "permission",
+                type: this.bodyParams.type || 'permission',
               } || {},
-              this.bodyParams.options
+              this.bodyParams.options,
             )
             .fetch();
         }
@@ -1006,7 +1037,7 @@ Api.addRoute("roles/getRoleWithUser", {
   },
 });
 
-Api.addRoute("roles/getMaxRole", {
+Api.addRoute('roles/getMaxRole', {
   post: {
     authRequired: true,
     action: function () {
