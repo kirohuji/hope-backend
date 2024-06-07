@@ -1,22 +1,22 @@
-import { Picker } from "meteor/communitypackages:picker";
-import { FilesCollection } from "meteor/ostrio:files";
+import { Picker } from 'meteor/communitypackages:picker';
+import { FilesCollection } from 'meteor/ostrio:files';
 import {
   isNotExistingFile,
   setReqConfig,
   saveFile,
   getUser,
   checkIsFile,
-} from "./utils";
+} from './utils';
 export const MessageesStorage = new FilesCollection({
-  collectionName: "storage:messages",
+  collectionName: 'storage:messages',
   allowClientCode: true,
-  downloadRoute: "/storage/messages",
-  allowedOrigins: ["*"],
-  storagePath: Meteor.isDevelopment ? "./messages/" : "/messages/",
+  downloadRoute: '/storage/messages',
+  allowedOrigins: ['*'],
+  storagePath: Meteor.isDevelopment ? './messages/' : '/messages/',
 });
 export default function messages() {
   Picker.route(
-    "/storage/messages/upload",
+    '/storage/messages/upload',
     async function (params, req, res, next) {
       setReqConfig(res);
       if (checkIsFile(req, params)) {
@@ -39,23 +39,23 @@ export default function messages() {
             });
           }
         } else {
-          res.writeHead(400, { "Content-Type": "application/json" });
+          res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(
             JSON.stringify({
               code: 400,
-              message: "user not exsit",
-            })
+              message: 'user not exsit',
+            }),
           );
         }
       } else {
-        res.writeHead(400, { "Content-Type": "application/json" });
+        res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(
           JSON.stringify({
             code: 400,
-            message: "file is not or authToken is not valid",
-          })
+            message: 'file is not or authToken is not valid',
+          }),
         );
       }
-    }
+    },
   );
 }

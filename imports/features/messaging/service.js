@@ -136,19 +136,19 @@ export function messages({ userId, conversationId, bodyParams }) {
         senderId: item.userId,
       };
     });
-  // MessagesCollection.update(
-  //   {
-  //     conversationId,
-  //     _id: { $in: result.map((item) => item._id) },
-  //     readedIds: { $ne: userId },
-  //   },
-  //   {
-  //     $addToSet: {
-  //       readedIds: userId,
-  //     },
-  //   },
-  //   { multi: true }
-  // );
+  MessagesCollection.update(
+    {
+      conversationId,
+      _id: { $in: result.map(item => item._id) },
+      readedIds: { $ne: userId },
+    },
+    {
+      $addToSet: {
+        readedIds: userId,
+      },
+    },
+    { multi: true },
+  );
   return result;
 }
 
@@ -198,27 +198,26 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
     throw new Error('消息不存在');
   }
 
-  // let messagesIds = MessagesCollection.find({
-  //   conversationId,
-  //   createdAt: {
-  //     $gte: message.createdAt,
-  //   },
-  // }).map((msg) => msg._id);
-  // let update = MessagesCollection.update(
-  //   {
-  //     _id: {
-  //       $in: messagesIds,
-  //     },
-  //     readedIds: { $ne: userId },
-  //   },
-  //   {
-  //     $addToSet: {
-  //       readedIds: userId,
-  //     },
-  //   },
-  //   { multi: true }
-  // );
-  // console.log("update", update);
+  let messagesIds = MessagesCollection.find({
+    conversationId,
+    createdAt: {
+      $gte: message.createdAt,
+    },
+  }).map(msg => msg._id);
+  let update = MessagesCollection.update(
+    {
+      _id: {
+        $in: messagesIds,
+      },
+      readedIds: { $ne: userId },
+    },
+    {
+      $addToSet: {
+        readedIds: userId,
+      },
+    },
+    { multi: true },
+  );
   return MessagesCollection.find({
     conversationId,
     createdAt: {

@@ -657,7 +657,10 @@ Meteor.publish(
               $gte: date,
             },
           },
-          options,
+          {
+            ...options,
+            fields: { readedIds: 0 },
+          },
         );
       }
     }
@@ -693,11 +696,14 @@ Meteor.publish('newMessagesConversations', function (date) {
 
   let updatedConversationId = null; // 存储更新的会话ID
 
-  const observer = MessagesCollection.find({
-    createdAt: {
-      $gte: date,
+  const observer = MessagesCollection.find(
+    {
+      createdAt: {
+        $gte: date,
+      },
     },
-  }).observeChanges({
+    { fields: { readedIds: 0 } },
+  ).observeChanges({
     added: (id, fields) => {
       // 仅在更新的会话ID为空时，才将其设置为第一个新增消息所属的会话ID
       if (!updatedConversationId) {
@@ -713,19 +719,25 @@ Meteor.publish('newMessagesConversations', function (date) {
 
   // 如果存在更新的会话ID，则返回该会话的发布，否则返回所有会话的发布
   if (updatedConversationId) {
-    return ConversationsCollection.find({
-      isRemove: false,
-      _id: updatedConversationId,
-      _participants: {
-        $in: [this.userId],
+    return ConversationsCollection.find(
+      {
+        isRemove: false,
+        _id: updatedConversationId,
+        _participants: {
+          $in: [this.userId],
+        },
       },
-    });
+      { fields: { unreadCount: 0 } },
+    );
   } else {
-    return ConversationsCollection.find({
-      isRemove: false,
-      _participants: {
-        $in: [this.userId],
+    return ConversationsCollection.find(
+      {
+        isRemove: false,
+        _participants: {
+          $in: [this.userId],
+        },
       },
-    });
+      { fields: { unreadCount: 0 } },
+    );
   }
 });
