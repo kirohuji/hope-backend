@@ -28,11 +28,12 @@ module.exports = {
     },
   },
   app: {
+    // deployCheckWaitTime: 3000,
     volumes: {
       "/avatars": "/avatars/",
       "/storage": "/storage/",
-      "/etc/hosts": "/etc/hosts",
-      "/etc/resolve.conf": "/etc/resolve.conf",
+      // "/etc/hosts": "/etc/hosts",
+      // "/etc/resolve.conf": "/etc/resolve.conf",
     },
     name: "hope-backend",
     path: "../",
@@ -51,14 +52,15 @@ module.exports = {
       MONGO_URL: "mongodb://meteor:meteor@124.221.67.248:27017/meteor",
     },
     docker: {
-      image: "zodern/meteor:root",
+      image: "zodern/meteor:backend-hope",
       useBuildKit: true,
       prepareBundle: true,
       // bind: "127.0.0.1",
       args: [
+        // "--build-arg 'NVM_NODEJS_ORG_MIRROR=https://npmmirror.com/mirrors/node'",
         // "-v /etc/hosts:/etc/hosts",
         // linking example
-        "--add-host='github.com:140.82.113.4'",
+        // "--add-host='github.com:140.82.113.4'",
         // "--dns 8.8.8.8",
         // "--build-arg 'HTTP_PROXY=http://172.17.0.1:1087'",
         // "--build-arg 'HTTPS_PROXY=http://172.17.0.1:1087'",
@@ -83,6 +85,7 @@ module.exports = {
         // "RUN npm config set disturl https://npm.taobao.org/dist",
         // "RUN npm install yarn -g ",
         // "RUN npm config set phantomjs_cdnurl https://npm.taobao.org/mirrors/phantomjs/",
+        "ENV NVM_NODEJS_ORG_MIRROR=https://npmmirror.com/mirrors/node",
         "RUN npm config set registry https://registry.npmmirror.com",
         // "RUN npm config set disturl https://npm.taobao.org/dist ",
         // "RUN npm config set timeout 60000",
