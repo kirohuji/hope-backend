@@ -116,7 +116,7 @@ export async function currentByUserId(userId) {
 }
 
 // 接受文件共享
-export function accpetShareFile({ userId, bodyParams }) {
+export function acceptShareFile({ userId, bodyParams }) {
   const user = ProfilesCollection.findOne({
     _id: userId,
   });

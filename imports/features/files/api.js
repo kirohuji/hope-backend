@@ -6,7 +6,7 @@ import {
   createFile,
   removeFile,
   updateFile,
-  accpetShareFile,
+  acceptShareFile,
   inviteEmails,
   denyShareFile,
 } from "./service";
@@ -83,12 +83,12 @@ Api.addRoute("files/current/:_id", {
   },
 });
 
-Api.addRoute("files/current/accpetShareFile", {
+Api.addRoute("files/current/acceptShareFile", {
   post: {
     authRequired: true,
     action: function () {
       try {
-        return accpetShareFile({
+        return acceptShareFile({
           userId: this.userId,
           bodyParams: this.bodyParams,
         });

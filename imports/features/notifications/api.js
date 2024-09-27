@@ -1,6 +1,6 @@
 import Api from "../../api";
 import Model, {
-  NotificationtCollection,
+  NotificationCollection,
   NotificationUserCollection,
 } from "./collection";
 import Constructor from "../base/api";
@@ -8,22 +8,22 @@ import _ from "lodash";
 import { serverError500 } from "../base/api";
 import { pagination } from "./service";
 import { publishComposite } from "meteor/reywood:publish-composite";
-Api.addCollection(NotificationtCollection);
+Api.addCollection(NotificationCollection);
 
-// Constructor("notifications", Model);
+Constructor("notifications", Model);
 
-// Api.addRoute("notifications/pagination", {
-//   post: function () {
-//     try {
-//       return pagination(this.bodyParams);
-//     } catch (e) {
-//       return serverError500({
-//         code: 500,
-//         message: e.message,
-//       });
-//     }
-//   },
-// });
+Api.addRoute("notifications/pagination", {
+  post: function () {
+    try {
+      return pagination(this.bodyParams);
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message,
+      });
+    }
+  },
+});
 
 Api.addRoute("notifications/current/pagination", {
   post: {
@@ -47,7 +47,7 @@ Api.addRoute("notifications/current/pagination", {
           (item) => item.notificationId
         );
 
-        const notifications = NotificationtCollection.find(
+        const notifications = NotificationCollection.find(
           {
             _id: { $in: notificationIds },
           },
@@ -73,6 +73,7 @@ Api.addRoute("notifications/current/pagination", {
     },
   },
 });
+
 Api.addRoute("notifications/current/checkRead/:_id", {
   post: {
     authRequired: true,
@@ -98,6 +99,7 @@ Api.addRoute("notifications/current/checkRead/:_id", {
     },
   },
 });
+
 Api.addRoute("notifications/current/overview", {
   get: {
     authRequired: true,
@@ -137,7 +139,7 @@ Api.addRoute("notifications/current/overview", {
 
 // 发布
 Meteor.publish("notifications", function () {
-  return NotificationtCollection.find({
+  return NotificationCollection.find({
     target_id: this.userId,
     isRemove: false,
     isUnRead: true,
@@ -146,7 +148,6 @@ Meteor.publish("notifications", function () {
 
 publishComposite("userUnreadNotifications", {
   find() {
-    // 这里假设你有一个名为NotificationUserCollection的集合来存储用户的通知信息
     return NotificationUserCollection.find({
       userId: this.userId,
       isUnRead: true,
@@ -156,8 +157,7 @@ publishComposite("userUnreadNotifications", {
   children: [
     {
       find(notificationUser) {
-        // 假设你有一个名为NotificationtCollection的集合来存储通知信息
-        return NotificationtCollection.find({
+        return NotificationCollection.find({
           _id: notificationUser.notificationId,
         });
       },

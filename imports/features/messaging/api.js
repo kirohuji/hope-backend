@@ -23,6 +23,7 @@ import {
   lastMessage,
   lastMessageByLastId,
   sendMessage,
+  savePushNotificationToken,
   createNewConversations,
   getConversationsByCurrentUser,
   getConversations,
@@ -250,7 +251,11 @@ Api.addRoute('messaging/conversations/:_id/lastMessage', {
     authRequired: true,
     action: function () {
       try {
-        return lastMessage(this.urlParams._id);
+        const message =  lastMessage(this.urlParams._id);
+        return {
+          ...message,
+          user: ProfilesCollection.findOne({ _id: message.userId })
+        }
       } catch (e) {
         return serverError500({
           code: 500,
@@ -290,6 +295,25 @@ Api.addRoute('messaging/conversations/:_id/sendMessage', {
           conversationId: this.urlParams._id,
           userId: this.userId,
           bodyParams: this.bodyParams,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute('messaging/conversations/savePushNotificationToken', {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        return savePushNotificationToken({
+          userId: this.userId,
+          token: this.bodyParams.token,
         });
       } catch (e) {
         return serverError500({

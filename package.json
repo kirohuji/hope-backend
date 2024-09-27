@@ -8,6 +8,7 @@
   "dependencies": {
     "@babel/runtime": "^7.15.4",
     "@jsdevtools/rehype-toc": "^3.0.2",
+    "apn": "^2.2.0",
     "body-parser": "^1.20.2",
     "http-proxy": "^1.18.1",
     "id3-parser": "^3.0.0",

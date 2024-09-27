@@ -1,9 +1,9 @@
 import { Class } from "meteor/jagi:astronomy";
-export const NotificationtCollection = new Mongo.Collection("notifications");
+export const NotificationCollection = new Mongo.Collection("notifications");
 export const NotificationUserCollection = new Mongo.Collection(
   "notifications_users"
 );
-Meteor.notifications = NotificationtCollection;
+Meteor.notifications = NotificationCollection;
 Meteor.notificationsUsers = NotificationUserCollection;
 
 export const NotificationUser = Class.create({
@@ -19,7 +19,7 @@ export const NotificationUser = Class.create({
 
 export default Class.create({
   name: "Notification",
-  collection: NotificationtCollection,
+  collection: NotificationCollection,
   fields: {
     value: {
       type: String,

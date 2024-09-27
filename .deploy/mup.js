@@ -32,6 +32,7 @@ module.exports = {
     volumes: {
       "/avatars": "/avatars/",
       "/storage": "/storage/",
+      "/hope": "/hope/",
       // "/etc/hosts": "/etc/hosts",
       // "/etc/resolve.conf": "/etc/resolve.conf",
     },
