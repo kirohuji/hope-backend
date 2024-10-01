@@ -291,11 +291,20 @@ Api.addRoute('messaging/conversations/:_id/sendMessage', {
     authRequired: true,
     action: function () {
       try {
-        return sendMessage({
+        let messageId =  sendMessage({
           conversationId: this.urlParams._id,
           userId: this.userId,
           bodyParams: this.bodyParams,
         });
+        if(messageId){
+          const message = MessagesCollection.findOne({
+            _id: messageId
+          })
+          return {
+            ...message,
+            senderId: message.userId
+          }
+        }
       } catch (e) {
         return serverError500({
           code: 500,
@@ -674,6 +683,7 @@ Meteor.publish(
         _id: userId,
       });
       if (user?.isParticipatingIn(conversationId)) {
+        console.log('1')
         return MessagesCollection.find(
           {
             conversationId: conversationId,
@@ -751,7 +761,7 @@ Meteor.publish('newMessagesConversations', function (date) {
           $in: [this.userId],
         },
       },
-      { fields: { unreadCount: 0 } },
+      { fields: { unreadCount: 0,readedIds: 0 } },
     );
   } else {
     return ConversationsCollection.find(
@@ -761,7 +771,7 @@ Meteor.publish('newMessagesConversations', function (date) {
           $in: [this.userId],
         },
       },
-      { fields: { unreadCount: 0 } },
+      { fields: { unreadCount: 0,readedIds: 0 } },
     );
   }
 });

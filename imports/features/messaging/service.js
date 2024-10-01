@@ -6,9 +6,11 @@ import {
   MessagesCollection,
 } from 'meteor/socialize:messaging';
 import apn from 'apn';
+import { UserPresence } from 'meteor/socialize:user-presence';
+import ServerPresence from 'meteor/socialize:server-presence';
 import { ProfilesCollection } from 'meteor/socialize:user-profile';
 import _ from 'lodash';
-import { PushNotificationTokenCollection } from './collection'
+import { PushNotificationTokenCollection } from './collection';
 import moment from 'moment';
 const apnProvider = new apn.Provider({
   token: {
@@ -255,43 +257,61 @@ export function updateMessage({ label, messageId, text }) {
   );
 }
 
-export function savePushNotificationToken({ userId, token}) {
+export function savePushNotificationToken({ userId, token }) {
   check(token, String);
   // 插入或更新 FCM token 到数据库
   PushNotificationTokenCollection.upsert(
-    { userId },  // 使用 userId 作为唯一标识符
-    { $set: { token, updatedAt: new Date() } }  // 更新 token 和更新时间
+    { userId }, // 使用 userId 作为唯一标识符
+    { $set: { token, updatedAt: new Date() } }, // 更新 token 和更新时间
   );
 }
-function sendPushNotification({ userId, body, conversationId }) {
-  const userToken = PushNotificationTokenCollection.findOne({ userId })?.token;
-  const profile = ProfilesCollection.findOne({ _id: userId })
-  if (userToken) {
-    const notification = new apn.Notification();
-    notification.alert = body;
-    notification.title = profile.displayName;
-    notification.launchImage = profile.photoURL;
-    notification.badge = MessagesCollection.find({
-      conversationId,
-      readedIds: {
-        $nin: [userId],
-      },
-    }).count();
-    notification.topic = 'lourd.hope.app'; // iOS app 的 bundle id
-    apnProvider
-      .send(notification, userToken)
-      .then(result => {
-        console.log('APNs result:', result);
-      })
-      .catch(error => {
-        console.error('Error sending APNs notification:', error);
-      });
+
+function sendPushNotification({ contentType, body, conversationId }) {
+  let userIds = ConversationsCollection.findOne({ _id: conversationId })
+    .participantsAsUsers()
+    .map(item => item._id);
+
+  const userTokens = PushNotificationTokenCollection.find({
+    userId: {
+      $in: userIds,
+    },
+  }).fetch();
+  if (userTokens && userTokens.length > 0) {
+    userTokens.forEach(userToken => {
+      if (
+        Meteor.users.findOne({
+          _id: userToken.userId,
+          status: { $exists: false },
+        })
+      ) {
+        const profile = ProfilesCollection.findOne({ _id: userToken.userId });
+        const notification = new apn.Notification();
+        notification.alert = contentType==='text'? body : '对方发送了一张图片给你';
+        notification.title = profile.displayName;
+        notification.launchImage = profile.photoURL;
+        notification.badge = MessagesCollection.find({
+          conversationId,
+          readedIds: {
+            $nin: [userToken.userId],
+          },
+        }).count();
+        notification.topic = 'lourd.hope.app'; // iOS app 的 bundle id
+        apnProvider
+          .send(notification, userToken.token)
+          .then(result => {
+            console.log('APNs result:', result);
+          })
+          .catch(error => {
+            console.error('Error sending APNs notification:', error);
+          });
+      }
+    });
   }
 }
 
 // 发送消息
 export function sendMessage({ conversationId, userId, bodyParams }) {
-  const message =  MessagesCollection.insert(
+  const message = MessagesCollection.insert(
     new Message({
       conversationId,
       body: bodyParams.body,
@@ -308,15 +328,14 @@ export function sendMessage({ conversationId, userId, bodyParams }) {
       },
     },
   );
-  if(message){
-    // sendPushNotification({
-    //   userId: userId,
-    //   body: bodyParams.body,
-    //   conversationId,
-    // })
+  if (message) {
+    sendPushNotification({
+      body: bodyParams.body,
+      contentType: bodyParams.contentType,
+      conversationId,
+    });
     return message;
   }
-
 }
 
 // 创建一个新会话
