@@ -10,6 +10,7 @@
     "@jsdevtools/rehype-toc": "^3.0.2",
     "apn": "^2.2.0",
     "body-parser": "^1.20.2",
+    "firebase-admin": "^12.6.0",
     "http-proxy": "^1.18.1",
     "id3-parser": "^3.0.0",
     "lodash": "^4.17.21",

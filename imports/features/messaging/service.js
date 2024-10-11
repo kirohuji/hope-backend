@@ -12,6 +12,14 @@ import { ProfilesCollection } from 'meteor/socialize:user-profile';
 import _ from 'lodash';
 import { PushNotificationTokenCollection } from './collection';
 import moment from 'moment';
+
+const firebaseAdmin = require('firebase-admin');
+const serviceAccount = require('/Users/lourd/Desktop/hope(workshop)/hope-backend/hopehome-12650-firebase-adminsdk-ornad-b1abbd59c9.json');
+
+firebaseAdmin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 const apnProvider = new apn.Provider({
   token: {
     key: '/Users/lourd/Desktop/hope(workshop)/hope-backend/AuthKey_F2J9GLB6LA.p8', // APNs 密钥的路径
@@ -286,7 +294,8 @@ function sendPushNotification({ contentType, body, conversationId }) {
       ) {
         const profile = ProfilesCollection.findOne({ _id: userToken.userId });
         const notification = new apn.Notification();
-        notification.alert = contentType==='text'? body : '对方发送了一张图片给你';
+        notification.alert =
+          contentType === 'text' ? body : '对方发送了一张图片给你';
         notification.title = profile.displayName;
         notification.launchImage = profile.photoURL;
         notification.badge = MessagesCollection.find({
@@ -303,6 +312,22 @@ function sendPushNotification({ contentType, body, conversationId }) {
           })
           .catch(error => {
             console.error('Error sending APNs notification:', error);
+          });
+        /** firebase */
+        firebaseAdmin
+          .messaging()
+          .send({
+            notification: {
+              title: profile.displayName,
+              body: contentType === 'text' ? body : '对方发送了一张图片给你',
+            },
+            token: userToken.token,
+          })
+          .then(response => {
+            console.log('Successfully sent message:', response);
+          })
+          .catch(error => {
+            console.log('Error sending message:', error);
           });
       }
     });
