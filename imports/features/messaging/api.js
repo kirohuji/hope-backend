@@ -28,6 +28,7 @@ import {
   getConversationsByCurrentUser,
   getConversations,
   getConversationsByParticipantIds,
+  updateConversations,
   updateReadState,
   addParticipants,
   addParticipant,
@@ -51,6 +52,22 @@ Api.addRoute('messaging/conversations/:_id', {
     action: function () {
       try {
         return removeConversations(this.urlParams._id);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+  patch: {
+    authRequired: true,
+    action: function () {
+      try {
+        return updateConversations({
+          conversationId: this.urlParams._id,
+          ...this.bodyParams
+        });
       } catch (e) {
         return serverError500({
           code: 500,

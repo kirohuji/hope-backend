@@ -40,6 +40,7 @@ export function uuidv4() {
 export function removeConversations(conversationId) {
   return ConversationsCollection.remove({ _id: conversationId });
 }
+
 export function messageCountByConverstionId(conversationId) {
   const conversation = ConversationsCollection.findOne({ _id: conversationId });
   if (conversation) {
@@ -55,7 +56,7 @@ export function messageCountByConverstionId(conversationId) {
 export function updateConversations({ conversationId, label }) {
   const conversation = ConversationsCollection.findOne({ _id: conversationId });
   if (conversation) {
-    ConversationsCollection.update(
+    return ConversationsCollection.update(
       {
         _id: conversation._id,
       },
@@ -66,6 +67,7 @@ export function updateConversations({ conversationId, label }) {
       },
     );
   }
+  return 0
 }
 
 // 获取会话信息
