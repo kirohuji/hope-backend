@@ -323,6 +323,9 @@ Api.addRoute('messaging/conversations/savePushNotificationToken', {
         return savePushNotificationToken({
           userId: this.userId,
           token: this.bodyParams.token,
+          device: this.bodyParams.device,
+          deviceId: this.bodyParams.deviceId,
+
         });
       } catch (e) {
         return serverError500({

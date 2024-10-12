@@ -12,17 +12,17 @@ import { ProfilesCollection } from 'meteor/socialize:user-profile';
 import _ from 'lodash';
 import { PushNotificationTokenCollection } from './collection';
 import moment from 'moment';
-
+const isDev = process.env.NODE_ENV !== 'production'; // 判断是否是开发环境
 const firebaseAdmin = require('firebase-admin');
-const serviceAccount = require('/Users/lourd/Desktop/hope(workshop)/hope-backend/hopehome-12650-firebase-adminsdk-ornad-b1abbd59c9.json');
+const serviceAccount = require('./hopehome-12650-firebase-adminsdk-ornad-b1abbd59c9.json');
 
 firebaseAdmin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: firebaseAdmin.credential.cert(serviceAccount),
 });
 
 const apnProvider = new apn.Provider({
   token: {
-    key: '/Users/lourd/Desktop/hope(workshop)/hope-backend/AuthKey_F2J9GLB6LA.p8', // APNs 密钥的路径
+    key: isDev ? '/Users/lourd/Desktop/hope/hope-backend/AuthKey_F2J9GLB6LA.p8' : '/hope/AuthKey_F2J9GLB6LA.p8' , // APNs 密钥的路径
     keyId: 'F2J9GLB6LA', // Key ID
     teamId: '7JB945M6KZ', // Apple Developer Team ID
   },
@@ -265,12 +265,12 @@ export function updateMessage({ label, messageId, text }) {
   );
 }
 
-export function savePushNotificationToken({ userId, token }) {
+export function savePushNotificationToken({ userId, token, device, deviceId }) {
   check(token, String);
   // 插入或更新 FCM token 到数据库
   PushNotificationTokenCollection.upsert(
-    { userId }, // 使用 userId 作为唯一标识符
-    { $set: { token, updatedAt: new Date() } }, // 更新 token 和更新时间
+    { userId, deviceId: deviceId?.identifier }, // 使用 userId 和 deviceId 作为唯一标识符
+    { $set: { token, updatedAt: new Date(), device, deviceId } }, // 更新 token 和更新时间
   );
 }
 
@@ -308,27 +308,27 @@ function sendPushNotification({ contentType, body, conversationId }) {
         apnProvider
           .send(notification, userToken.token)
           .then(result => {
-            console.log('APNs result:', result);
+            console.log('APNs result:', result.failed[0].response);
           })
           .catch(error => {
             console.error('Error sending APNs notification:', error);
           });
         /** firebase */
-        firebaseAdmin
-          .messaging()
-          .send({
-            notification: {
-              title: profile.displayName,
-              body: contentType === 'text' ? body : '对方发送了一张图片给你',
-            },
-            token: userToken.token,
-          })
-          .then(response => {
-            console.log('Successfully sent message:', response);
-          })
-          .catch(error => {
-            console.log('Error sending message:', error);
-          });
+      //   firebaseAdmin
+      //     .messaging()
+      //     .send({
+      //       notification: {
+      //         title: profile.displayName,
+      //         body: contentType === 'text' ? body : '对方发送了一张图片给你',
+      //       },
+      //       token: userToken.token,
+      //     })
+      //     .then(response => {
+      //       console.log('Successfully sent message:', response);
+      //     })
+      //     .catch(error => {
+      //       console.log('Error sending message:', error);
+      //     });
       }
     });
   }
@@ -380,6 +380,7 @@ export function createNewConversations({
       conversation = ConversationsCollection.findOne({
         _participants: {
           $all: _.uniq([...participants, userId]),
+          $size: _.uniq([...participants, userId]).length
         },
       });
       console.log(conversation);
