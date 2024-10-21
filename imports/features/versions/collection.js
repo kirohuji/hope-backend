@@ -20,6 +20,31 @@ export default Class.create({
       default: "",
       optional: true,
     },
+    majorVersion: {
+      type: String,
+      default: "",
+      optional: true,
+    },
+    minorVersion: {
+      type: String,
+      default: "",
+      optional: true,
+    },
+    patchVersion: {
+      type: String,
+      default: "",
+      optional: true,
+    },
+    isMandatory: {
+      type: String,
+      default: "",
+      optional: true,
+    },
+    releaseDate: {
+      type: String,
+      default: "",
+      optional: true,
+    },
     description: {
       type: String,
       default: "",
