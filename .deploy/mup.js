@@ -53,7 +53,7 @@ module.exports = {
       MONGO_URL: "mongodb://meteor:meteor@124.221.67.248:27017/meteor",
     },
     docker: {
-      image: "zodern/meteor:backend-hope",
+      image: "zodern/meteor:root",
       useBuildKit: true,
       prepareBundle: true,
       // bind: "127.0.0.1",

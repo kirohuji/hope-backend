@@ -442,6 +442,7 @@ export function createNewConversations({
 // 根据当前用户获取所有的会话
 export function getConversationsByCurrentUser(user, ids) {
   console.log('ids', ids);
+  console.log('user._id', user._id);
   if (ids) {
     return ConversationsCollection.find({
       _id: { $in: ids },
@@ -482,7 +483,11 @@ export function getConversationsByCurrentUser(user, ids) {
       });
   }
   return ConversationsCollection.find({
-    isRemove: false,
+    // isRemove: false,
+    $or: [
+      { isRemove: false },
+      { isRemove: { $exists: false } },
+    ],
     _participants: {
       $in: [user._id],
     },
