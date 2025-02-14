@@ -724,7 +724,10 @@ Meteor.publish(
 Meteor.publish('socialize.unreadCount', function publishMessageFor(userId) {
   if (userId) {
     let conversations = ConversationsCollection.find({
-      isRemove: false,
+      $or: [
+        { isRemove: false },
+        { isRemove: { $exists: false } },
+      ],
       _participants: {
         $in: [userId],
       },
@@ -775,7 +778,10 @@ Meteor.publish('newMessagesConversations', function (date) {
   if (updatedConversationId) {
     return ConversationsCollection.find(
       {
-        isRemove: false,
+        $or: [
+          { isRemove: false },
+          { isRemove: { $exists: false } },
+        ],
         _id: updatedConversationId,
         _participants: {
           $in: [this.userId],
@@ -786,7 +792,10 @@ Meteor.publish('newMessagesConversations', function (date) {
   } else {
     return ConversationsCollection.find(
       {
-        isRemove: false,
+        $or: [
+          { isRemove: false },
+          { isRemove: { $exists: false } },
+        ],
         _participants: {
           $in: [this.userId],
         },

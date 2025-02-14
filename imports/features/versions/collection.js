@@ -60,6 +60,9 @@ export default Class.create({
       default: "",
       optional: true,
     },
+    isMain: {
+      type: Boolean,
+    },
   },
   behaviors: {
     timestamp: {

@@ -299,6 +299,7 @@ function sendPushNotification({ contentType, body, conversationId }) {
         notification.alert =
           contentType === 'text' ? body : '对方发送了一张图片给你';
         notification.title = profile.displayName;
+        notification.sound = "default";
         notification.launchImage = profile.photoURL;
         notification.badge = MessagesCollection.find({
           conversationId,
@@ -441,15 +442,16 @@ export function createNewConversations({
 
 // 根据当前用户获取所有的会话
 export function getConversationsByCurrentUser(user, ids) {
-  console.log('ids', ids);
-  console.log('user._id', user._id);
   if (ids) {
     return ConversationsCollection.find({
       _id: { $in: ids },
       sessionId: {
         $exists: false,
       },
-      isRemove: false,
+      $or: [
+        { isRemove: false },
+        { isRemove: { $exists: false } },
+      ],
     })
       .fetch()
       .map(item => {
@@ -668,7 +670,10 @@ export function getConversationsByParticipantIds({
 }) {
   return ConversationsCollection.find({
     sessionId: { $exists: isSession },
-    isRemove: false,
+    $or: [
+      { isRemove: false },
+      { isRemove: { $exists: false } },
+    ],
     _participants: {
       $all: _.uniq([...participants, userId]),
     },
