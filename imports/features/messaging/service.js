@@ -13,12 +13,12 @@ import _ from 'lodash';
 import { PushNotificationTokenCollection } from './collection';
 import moment from 'moment';
 const isDev = process.env.NODE_ENV !== 'production'; // 判断是否是开发环境
-const firebaseAdmin = require('firebase-admin');
-const serviceAccount = require('./hopehome-12650-firebase-adminsdk-ornad-b1abbd59c9.json');
+// const firebaseAdmin = require('firebase-admin');
+// const serviceAccount = require('./hopehome-12650-firebase-adminsdk-ornad-b1abbd59c9.json');
 
-firebaseAdmin.initializeApp({
-  credential: firebaseAdmin.credential.cert(serviceAccount),
-});
+// firebaseAdmin.initializeApp({
+//   credential: firebaseAdmin.credential.cert(serviceAccount),
+// });
 
 const apnProvider = new apn.Provider({
   token: {
