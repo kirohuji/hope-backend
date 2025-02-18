@@ -374,7 +374,7 @@ export function getRolesTreeByCurrentUser({ selector, options, userId }) {
     // });
     const roles = Meteor.roles
       .find(
-        { type: selector.type },
+        { type: selector.type, scope: scope._id },
         {
           fields: {
             label: 1,

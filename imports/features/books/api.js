@@ -19,6 +19,7 @@ import {
 } from "./service";
 import moment from "moment";
 import _ from "lodash";
+
 Api.addCollection(BookUserCollection, {
   path: "books/users",
 });
@@ -295,7 +296,6 @@ Api.addRoute("books/articles/pagination", {
 Api.addRoute("books/:bookId/publish", {
   post: function () {
     try {
-      console.log("this.urlParams._id", this.urlParams);
       return publish(this.urlParams.bookId);
     } catch (e) {
       return serverError500({

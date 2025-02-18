@@ -42,21 +42,11 @@ export default Class.create({
       default: "",
       label: "名称",
     },
-    // // 参与者
-    // participants: {
-    //   type: [String],
-    //   default: '',
-    // },
     // 是否发布
     published: {
       type: Boolean,
       default: false,
     },
-    // // 服务提供
-    // services: {
-    //   type: [String],
-    //   default: '',
-    // },
     // 负责人
     leaders: {
       type: [String],
@@ -88,6 +78,10 @@ export default Class.create({
       default: "",
     },
     type: {
+      type: String,
+      default: "",
+    },
+    scope: {
       type: String,
       default: "",
     },
