@@ -1,13 +1,13 @@
-import Api from '../../api';
-import _ from 'lodash';
+import Api from "../../api";
+import _ from "lodash";
 import {
   ConversationsCollection,
   ParticipantsCollection,
   MessagesCollection,
-} from 'meteor/socialize:messaging';
-import { ProfilesCollection } from 'meteor/socialize:user-profile';
-import { publishComposite } from 'meteor/reywood:publish-composite';
-import { User } from 'meteor/socialize:user-model';
+} from "meteor/socialize:messaging";
+import { ProfilesCollection } from "meteor/socialize:user-profile";
+import { publishComposite } from "meteor/reywood:publish-composite";
+import { User } from "meteor/socialize:user-model";
 import {
   removeConversations,
   findExistingConversationWithUsers,
@@ -24,6 +24,7 @@ import {
   lastMessageByLastId,
   sendMessage,
   savePushNotificationToken,
+  updateDeviceStatus,
   createNewConversations,
   getConversationsByCurrentUser,
   getConversations,
@@ -43,10 +44,11 @@ import {
   isParticipatingInByCurrentUser,
   isParticipatingIn,
   softRemoveConversation,
-} from './service';
-import { serverError500 } from '../base/api';
+  sendHuaweiPush,
+} from "./service";
+import { serverError500 } from "../base/api";
 
-Api.addRoute('messaging/conversations/:_id', {
+Api.addRoute("messaging/conversations/:_id", {
   delete: {
     authRequired: true,
     action: function () {
@@ -66,7 +68,7 @@ Api.addRoute('messaging/conversations/:_id', {
       try {
         return updateConversations({
           conversationId: this.urlParams._id,
-          ...this.bodyParams
+          ...this.bodyParams,
         });
       } catch (e) {
         return serverError500({
@@ -94,7 +96,7 @@ Api.addRoute('messaging/conversations/:_id', {
   },
 });
 
-Api.addRoute('messaging/unreadConversations', {
+Api.addRoute("messaging/unreadConversations", {
   post: {
     authRequired: true,
     action: function () {
@@ -113,7 +115,7 @@ Api.addRoute('messaging/unreadConversations', {
   },
 });
 
-Api.addRoute('messaging/newestConversation', {
+Api.addRoute("messaging/newestConversation", {
   get: {
     authRequired: true,
     action: function () {
@@ -131,7 +133,7 @@ Api.addRoute('messaging/newestConversation', {
   },
 });
 
-Api.addRoute('messaging/isObserving/:_id', {
+Api.addRoute("messaging/isObserving/:_id", {
   get: {
     authRequired: true,
     action: function () {
@@ -150,7 +152,7 @@ Api.addRoute('messaging/isObserving/:_id', {
   },
 });
 
-Api.addRoute('messaging/findExistingConversationWithUsers', {
+Api.addRoute("messaging/findExistingConversationWithUsers", {
   post: {
     authRequired: true,
     action: function () {
@@ -169,7 +171,7 @@ Api.addRoute('messaging/findExistingConversationWithUsers', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/isUnread', {
+Api.addRoute("messaging/conversations/:_id/isUnread", {
   post: {
     authRequired: true,
     action: function () {
@@ -188,7 +190,7 @@ Api.addRoute('messaging/conversations/:_id/isUnread', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/isReadOnly', {
+Api.addRoute("messaging/conversations/:_id/isReadOnly", {
   get: {
     authRequired: true,
     action: function () {
@@ -204,7 +206,7 @@ Api.addRoute('messaging/conversations/:_id/isReadOnly', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/messages', {
+Api.addRoute("messaging/conversations/:_id/messages", {
   post: {
     authRequired: true,
     action: function () {
@@ -224,7 +226,7 @@ Api.addRoute('messaging/conversations/:_id/messages', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/messages/date', {
+Api.addRoute("messaging/conversations/:_id/messages/date", {
   post: {
     authRequired: true,
     action: function () {
@@ -245,7 +247,7 @@ Api.addRoute('messaging/conversations/:_id/messages/date', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/messages/attachments', {
+Api.addRoute("messaging/conversations/:_id/messages/attachments", {
   post: {
     authRequired: true,
     action: function () {
@@ -263,16 +265,16 @@ Api.addRoute('messaging/conversations/:_id/messages/attachments', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/lastMessage', {
+Api.addRoute("messaging/conversations/:_id/lastMessage", {
   get: {
     authRequired: true,
     action: function () {
       try {
-        const message =  lastMessage(this.urlParams._id);
+        const message = lastMessage(this.urlParams._id);
         return {
           ...message,
-          user: ProfilesCollection.findOne({ _id: message.userId })
-        }
+          user: ProfilesCollection.findOne({ _id: message.userId }),
+        };
       } catch (e) {
         return serverError500({
           code: 500,
@@ -283,7 +285,7 @@ Api.addRoute('messaging/conversations/:_id/lastMessage', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/lastMessage/:lastId', {
+Api.addRoute("messaging/conversations/:_id/lastMessage/:lastId", {
   get: {
     authRequired: true,
     action: function () {
@@ -303,24 +305,24 @@ Api.addRoute('messaging/conversations/:_id/lastMessage/:lastId', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/sendMessage', {
+Api.addRoute("messaging/conversations/:_id/sendMessage", {
   post: {
     authRequired: true,
     action: function () {
       try {
-        let messageId =  sendMessage({
+        let messageId = sendMessage({
           conversationId: this.urlParams._id,
           userId: this.userId,
           bodyParams: this.bodyParams,
         });
-        if(messageId){
+        if (messageId) {
           const message = MessagesCollection.findOne({
-            _id: messageId
-          })
+            _id: messageId,
+          });
           return {
             ...message,
-            senderId: message.userId
-          }
+            senderId: message.userId,
+          };
         }
       } catch (e) {
         return serverError500({
@@ -332,7 +334,7 @@ Api.addRoute('messaging/conversations/:_id/sendMessage', {
   },
 });
 
-Api.addRoute('messaging/conversations/savePushNotificationToken', {
+Api.addRoute("messaging/conversations/savePushNotificationToken", {
   post: {
     authRequired: true,
     action: function () {
@@ -342,7 +344,6 @@ Api.addRoute('messaging/conversations/savePushNotificationToken', {
           token: this.bodyParams.token,
           device: this.bodyParams.device,
           deviceId: this.bodyParams.deviceId,
-
         });
       } catch (e) {
         return serverError500({
@@ -354,7 +355,46 @@ Api.addRoute('messaging/conversations/savePushNotificationToken', {
   },
 });
 
-Api.addRoute('messaging/conversations/room', {
+Api.addRoute("messaging/conversations/updateDeviceStatus", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        return updateDeviceStatus({
+          userId: this.userId,
+          status: this.bodyParams.status,
+          deviceId: this.bodyParams.deviceId,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("messaging/test", {
+  post: {
+    authRequired: false,
+    action: function () {
+      try {
+        return sendHuaweiPush(
+          "KAAAAACy1InRAAB7dNSVW3S6ZZBNwC8MFjY_jgdLUmq0dTp1Nun1-FeBm9in0XiupfSuSctn4_MZUW0V2TQrBSGwDUHT0KKaJ85sqDNSYhWdKYubiA",
+          "收到了吗?"
+        );
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("messaging/conversations/room", {
   post: {
     authRequired: true,
     action: function () {
@@ -374,7 +414,7 @@ Api.addRoute('messaging/conversations/room', {
     },
   },
 });
-Api.addRoute('messaging/users/conversations/participants', {
+Api.addRoute("messaging/users/conversations/participants", {
   post: {
     authRequired: true,
     action: function () {
@@ -394,7 +434,7 @@ Api.addRoute('messaging/users/conversations/participants', {
   },
 });
 
-Api.addRoute('messaging/users/conversations', {
+Api.addRoute("messaging/users/conversations", {
   get: {
     authRequired: true,
     action: function () {
@@ -423,7 +463,7 @@ Api.addRoute('messaging/users/conversations', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/updateReadState/:_status', {
+Api.addRoute("messaging/conversations/:_id/updateReadState/:_status", {
   get: {
     authRequired: true,
     action: function () {
@@ -442,7 +482,7 @@ Api.addRoute('messaging/conversations/:_id/updateReadState/:_status', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/addParticipants', {
+Api.addRoute("messaging/conversations/:_id/addParticipants", {
   post: {
     authRequired: true,
     action: function () {
@@ -461,7 +501,7 @@ Api.addRoute('messaging/conversations/:_id/addParticipants', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/removeParticipants', {
+Api.addRoute("messaging/conversations/:_id/removeParticipants", {
   post: {
     authRequired: true,
     action: function () {
@@ -480,7 +520,7 @@ Api.addRoute('messaging/conversations/:_id/removeParticipants', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/addParticipant', {
+Api.addRoute("messaging/conversations/:_id/addParticipant", {
   post: {
     authRequired: true,
     action: function () {
@@ -499,7 +539,7 @@ Api.addRoute('messaging/conversations/:_id/addParticipant', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/removeParticipant', {
+Api.addRoute("messaging/conversations/:_id/removeParticipant", {
   post: {
     authRequired: true,
     action: function () {
@@ -518,7 +558,7 @@ Api.addRoute('messaging/conversations/:_id/removeParticipant', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/participants', {
+Api.addRoute("messaging/conversations/:_id/participants", {
   get: {
     authRequired: true,
     action: function () {
@@ -534,7 +574,7 @@ Api.addRoute('messaging/conversations/:_id/participants', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/participantsAsUsers', {
+Api.addRoute("messaging/conversations/:_id/participantsAsUsers", {
   get: {
     authRequired: true,
     action: function () {
@@ -550,7 +590,7 @@ Api.addRoute('messaging/conversations/:_id/participantsAsUsers', {
   },
 });
 
-Api.addRoute('messaging/participants/conversation/:_id', {
+Api.addRoute("messaging/participants/conversation/:_id", {
   get: {
     authRequired: true,
     action: function () {
@@ -566,7 +606,7 @@ Api.addRoute('messaging/participants/conversation/:_id', {
   },
 });
 
-Api.addRoute('messaging/participants/user/:_id', {
+Api.addRoute("messaging/participants/user/:_id", {
   get: {
     authRequired: true,
     action: function () {
@@ -582,7 +622,7 @@ Api.addRoute('messaging/participants/user/:_id', {
   },
 });
 
-Api.addRoute('messaging/users/numUnreadConversations', {
+Api.addRoute("messaging/users/numUnreadConversations", {
   get: {
     authRequired: true,
     action: function () {
@@ -598,7 +638,7 @@ Api.addRoute('messaging/users/numUnreadConversations', {
   },
 });
 
-Api.addRoute('messaging/users/numUnreadConversations/:_id', {
+Api.addRoute("messaging/users/numUnreadConversations/:_id", {
   get: {
     authRequired: true,
     action: function () {
@@ -614,7 +654,7 @@ Api.addRoute('messaging/users/numUnreadConversations/:_id', {
   },
 });
 
-Api.addRoute('messaging/users/conversations/:_id', {
+Api.addRoute("messaging/users/conversations/:_id", {
   get: {
     authRequired: true,
     action: function () {
@@ -630,7 +670,7 @@ Api.addRoute('messaging/users/conversations/:_id', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/isParticipatingIn', {
+Api.addRoute("messaging/conversations/:_id/isParticipatingIn", {
   get: {
     authRequired: true,
     action: function () {
@@ -649,7 +689,7 @@ Api.addRoute('messaging/conversations/:_id/isParticipatingIn', {
   },
 });
 
-Api.addRoute('messaging/conversations/:_id/isParticipatingIn/:_userId', {
+Api.addRoute("messaging/conversations/:_id/isParticipatingIn/:_userId", {
   get: {
     authRequired: true,
     action: function () {
@@ -668,7 +708,7 @@ Api.addRoute('messaging/conversations/:_id/isParticipatingIn/:_userId', {
   },
 });
 
-Api.addRoute('messaging/conversations/delete/:_id', {
+Api.addRoute("messaging/conversations/delete/:_id", {
   post: {
     authRequired: true,
     action: function () {
@@ -691,19 +731,19 @@ const optionsArgumentCheck = {
 };
 
 Meteor.publish(
-  'socialize.messagesFor2',
+  "socialize.messagesFor2",
   function publishMessageFor(
     conversationId,
     userId,
     date,
-    options = { limit: 100, sort: { createdAt: -1 } },
+    options = { limit: 100, sort: { createdAt: -1 } }
   ) {
     if (conversationId) {
       const user = Meteor.users.findOne({
         _id: userId,
       });
       if (user?.isParticipatingIn(conversationId)) {
-        console.log('1')
+        console.log("1");
         return MessagesCollection.find(
           {
             conversationId: conversationId,
@@ -714,25 +754,22 @@ Meteor.publish(
           {
             ...options,
             fields: { readedIds: 0 },
-          },
+          }
         );
       }
     }
-  },
+  }
 );
 
-Meteor.publish('socialize.unreadCount', function publishMessageFor(userId) {
+Meteor.publish("socialize.unreadCount", function publishMessageFor(userId) {
   if (userId) {
     let conversations = ConversationsCollection.find({
-      $or: [
-        { isRemove: false },
-        { isRemove: { $exists: false } },
-      ],
+      $or: [{ isRemove: false }, { isRemove: { $exists: false } }],
       _participants: {
         $in: [userId],
       },
     });
-    return conversations.map(item => {
+    return conversations.map((item) => {
       return {
         conversationId: item._id,
         unreadCount: MessagesCollection.find({
@@ -746,7 +783,7 @@ Meteor.publish('socialize.unreadCount', function publishMessageFor(userId) {
   }
 });
 
-Meteor.publish('newMessagesConversations', function (date) {
+Meteor.publish("newMessagesConversations", function (date) {
   if (!this.userId) {
     return this.ready();
   }
@@ -759,7 +796,7 @@ Meteor.publish('newMessagesConversations', function (date) {
         $gte: date,
       },
     },
-    { fields: { readedIds: 0 } },
+    { fields: { readedIds: 0 } }
   ).observeChanges({
     added: (id, fields) => {
       // 仅在更新的会话ID为空时，才将其设置为第一个新增消息所属的会话ID
@@ -778,29 +815,23 @@ Meteor.publish('newMessagesConversations', function (date) {
   if (updatedConversationId) {
     return ConversationsCollection.find(
       {
-        $or: [
-          { isRemove: false },
-          { isRemove: { $exists: false } },
-        ],
+        $or: [{ isRemove: false }, { isRemove: { $exists: false } }],
         _id: updatedConversationId,
         _participants: {
           $in: [this.userId],
         },
       },
-      { fields: { unreadCount: 0,readedIds: 0 } },
+      { fields: { unreadCount: 0, readedIds: 0 } }
     );
   } else {
     return ConversationsCollection.find(
       {
-        $or: [
-          { isRemove: false },
-          { isRemove: { $exists: false } },
-        ],
+        $or: [{ isRemove: false }, { isRemove: { $exists: false } }],
         _participants: {
           $in: [this.userId],
         },
       },
-      { fields: { unreadCount: 0,readedIds: 0 } },
+      { fields: { unreadCount: 0, readedIds: 0 } }
     );
   }
 });

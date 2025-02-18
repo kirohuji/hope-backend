@@ -55,15 +55,12 @@ Api.addRoute("ai/current", {
 
 Meteor.methods({
   async getChatGPTResponseStream(prompt) {
-    console.log("收到");
     try {
       const response = HTTP.call(
         "POST",
         "https://api.deepseek.com/chat/completions",
         config(prompt)
       );
-
-      // 返回响应流
       return response;
     } catch (error) {
       throw new Meteor.Error(
