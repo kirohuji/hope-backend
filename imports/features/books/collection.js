@@ -103,6 +103,10 @@ export default Class.create({
       type: String,
       default: "",
     },
+    scope: {
+      type: String,
+      default: "",
+    },
   },
   behaviors: {
     timestamp: {

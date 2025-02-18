@@ -9,6 +9,7 @@ export const ArticleFavoriteCollection = new Mongo.Collection(
   "articles_favorites"
 );
 export const BookArticleCollection = new Mongo.Collection("books_articles");
+
 export const ArticleFavorite = Class.create({
   name: "ArticleFavorite",
   collection: ArticleFavoriteCollection,
@@ -17,6 +18,7 @@ export const ArticleFavorite = Class.create({
     user_id: Mongo.ObjectID,
   },
 });
+
 export const ArticleComment = Class.create({
   name: "ArticleComment",
   collection: ArticleCommentCollection,
@@ -27,6 +29,7 @@ export const ArticleComment = Class.create({
     reply_comment_id: Mongo.ObjectID,
   },
 });
+
 export const ArticleUser = Class.create({
   name: "ArticleUser",
   collection: ArticleUserCollection,
@@ -37,6 +40,7 @@ export const ArticleUser = Class.create({
     completedDate: String,
   },
 });
+
 export default Class.create({
   name: "Article",
   collection: ArticleCollection,

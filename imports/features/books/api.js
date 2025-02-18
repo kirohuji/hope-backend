@@ -1,5 +1,5 @@
-import moment from "moment";
 import Api from "../../api";
+import Constructor, { serverError500 } from "../base/api";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
 import Model, { BookCollection, BookUserCollection } from "./collection";
 import {
@@ -7,9 +7,6 @@ import {
   ArticleCollection,
   ArticleUserCollection,
 } from "../articles/collection";
-import _ from "lodash";
-import Constructor from "../base/api";
-import { serverError500 } from "../base/api";
 import {
   pagination,
   publish,
@@ -20,7 +17,8 @@ import {
   getCurrentReadBook,
   select,
 } from "./service";
-
+import moment from "moment";
+import _ from "lodash";
 Api.addCollection(BookUserCollection, {
   path: "books/users",
 });

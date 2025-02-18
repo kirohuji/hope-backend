@@ -1,31 +1,11 @@
-import Model, {
-  BookCollection,
-  BookPostCollection,
-  BookPostQuestionCollection,
-  BookPost,
-  BookUserCollection,
-} from "./collection";
+import { BookCollection, BookUserCollection } from "./collection";
 import {
   BookArticleCollection,
   ArticleCollection,
-  ArticleUserCollection,
 } from "../articles/collection";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
-import { unified } from "unified";
-import parse from "rehype-parse";
-import slug from "rehype-slug";
-import toc from "@jsdevtools/rehype-toc";
-import stringify from "rehype-stringify";
 import _ from "lodash";
 import moment from "moment";
-const processor = unified()
-  .use(parse)
-  .use(slug)
-  .use(toc, {
-    nav: false,
-  })
-  .use(stringify);
-
 export function findOne(bodyParams) {
   return BookCollection.findOne(bodyParams.selector || {}, bodyParams.options);
 }
@@ -131,7 +111,6 @@ export function play({ userId, date }) {
         },
       }
     );
-    console.log("select_article_id", bookUser);
     if (book) {
       if (bookUser.select_article_id) {
         article = ArticleCollection.findOne(
@@ -165,8 +144,6 @@ export function play({ userId, date }) {
           );
         }
       }
-      console.log("article", article);
-      // 优化
       articleList = BookArticleCollection.find(
         {
           book_id: bookUser?.book_id,
@@ -237,8 +214,6 @@ export function select({ userId, article_id, book_id }) {
     user_id: userId,
   });
   if (bookUser) {
-    console.log("book_id", book_id);
-    console.log("userId", userId);
     return BookUserCollection.update(
       {
         book_id: book_id,
