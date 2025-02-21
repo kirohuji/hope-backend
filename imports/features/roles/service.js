@@ -432,8 +432,12 @@ export function getUsersInNotRoleOnly({ roles, options, queryOptions }) {
   ids = getUserAssignmentsForRoleOnly(roles, options)
     .fetch()
     .map((a) => a.user._id);
-  let users = Meteor.users.find(
-    { _id: { $nin: ids }, username: queryOptions.username },
+  let users = ProfilesCollection.find(
+    {
+      _id: { $nin: ids },
+      username: queryOptions.username,
+      scope: options.scope,
+    },
     {
       limit: 50,
       // skip: 0,
@@ -444,18 +448,13 @@ export function getUsersInNotRoleOnly({ roles, options, queryOptions }) {
     data: _.compact(
       users.map((user) => {
         if (user) {
-          const profile = user.profile();
-          if (profile) {
-            return {
-              displayName: profile.displayName || "",
-              avatarUrl: profile.photoURL || "",
-              phoneNumber: profile.phoneNumber || "",
-              description: profile.about,
-              realName: profile.realName,
-              // ...profile,
-              ..._.omit(user, "services"),
-            };
-          }
+          return {
+            displayName: user.displayName || "",
+            avatarUrl: user.photoURL || "",
+            phoneNumber: user.phoneNumber || "",
+            description: user.about,
+            realName: user.realName,
+          };
         }
       })
     ),

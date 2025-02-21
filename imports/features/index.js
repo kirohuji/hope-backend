@@ -14,4 +14,6 @@ import "./broadcasts";
 import "./notifications";
 import "./payments";
 import "./files";
+import "./audits";
+import "./sensitiveWords";
 import "./aiModels";
