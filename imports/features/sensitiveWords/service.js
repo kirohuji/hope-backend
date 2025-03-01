@@ -4,6 +4,19 @@ import _ from "lodash";
 
 // 分页查询数据
 export function pagination(bodyParams) {
+  if (bodyParams.selector && bodyParams.selector.level == "all") {
+    bodyParams.selector = _.pickBy(_.omit(bodyParams.selector, ["level"]));
+  }
+  if (bodyParams.selector && bodyParams.selector.category.length === 0) {
+    bodyParams.selector = _.pickBy(_.omit(bodyParams.selector, ["category"]));
+  } else if (bodyParams.selector && bodyParams.selector.category.length > 0) {
+    bodyParams.selector = {
+      ..._.pickBy(bodyParams.selector),
+      category: {
+        $in: bodyParams.selector.category,
+      },
+    };
+  }
   let curror = SensitiveWordsCollection.find(
     _.pickBy(bodyParams.selector) || {},
     bodyParams.options

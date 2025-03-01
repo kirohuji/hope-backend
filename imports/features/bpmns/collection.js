@@ -1,16 +1,11 @@
 import { Class } from "meteor/jagi:astronomy";
-export const AuditCollection = new Mongo.Collection("audits");
-export const AuditUserCollection = new Mongo.Collection("audits_users");
+export const BpmnCollection = new Mongo.Collection("bpmns");
 
 export default Class.create({
-  name: "Audit",
-  collection: AuditCollection,
+  name: "Bpmn",
+  collection: BpmnCollection,
   fields: {
     value: {
-      type: String,
-      default: "",
-    },
-    sourceId: {
       type: String,
       default: "",
     },
@@ -27,23 +22,15 @@ export default Class.create({
       type: String,
       default: "",
     },
+    content: {
+      type: String,
+      default: "",
+    },
     status: {
       type: String,
       default: "",
     },
     category: {
-      type: String,
-      default: "",
-    },
-    result: {
-      type: String,
-      default: "",
-    },
-    reason: {
-      type: String,
-      default: "",
-    },
-    reviewerId: {
       type: String,
       default: "",
     },

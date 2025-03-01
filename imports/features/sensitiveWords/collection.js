@@ -25,7 +25,7 @@ export default Class.create({
     },
     category: {
       type: String,
-      allowedValues: ["2", "3", "4", "5", "6", "7", "8"],
+      // allowedValues: ["2", "3", "4", "5", "6", "7", "8"],
       required: true,
     },
     replacement: {

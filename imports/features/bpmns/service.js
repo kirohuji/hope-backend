@@ -1,4 +1,4 @@
-import { AuditCollection } from "./collection";
+import { BpmnCollection } from "./collection";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
 import _ from "lodash";
 
@@ -17,7 +17,7 @@ export function pagination(bodyParams) {
       },
     };
   }
-  let curror = AuditCollection.find(
+  let curror = BpmnCollection.find(
     _.pickBy(bodyParams.selector) || {},
     bodyParams.options
   );
