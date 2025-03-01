@@ -3,8 +3,7 @@ import { check, Match } from "meteor/check";
 import { Mongo } from "meteor/mongo";
 import { Meteor } from "meteor/meteor";
 import { Random } from "meteor/random";
-
-const BpmnEngine = require("bpmn-engine");
+import BpmnEngine from "bpmn-engine";
 const { EventEmitter } = require("events");
 
 /**
@@ -16,7 +15,7 @@ const validExecuteOptions = ["listener", "services", "variables"];
 /**
  * The default Bpmn engine import from 'bpmn-engine'.
  */
-Bpmn = BpmnEngine;
+const Bpmn = BpmnEngine;
 
 // //////////////////////////////////////////////////////////////////////////////////////
 //
@@ -502,7 +501,7 @@ Bpmn.Engine.prototype.stop = (function () {
 // //////////////////////////////////////////////////////////////////////////////////////
 
 const originalResume = Bpmn.Engine.resume;
-const originalResumePrototype = originalResume.prototype;
+// const originalResumePrototype = originalResume.prototype;
 
 Bpmn.Engine.resume = function (state, options, callback) {
   const _options = options;
@@ -574,4 +573,6 @@ Bpmn.Engine.resume = function (state, options, callback) {
   return engineRef;
 };
 
-Bpmn.Engine.resume.prototype = originalResumePrototype;
+// Bpmn.Engine.resume.prototype = originalResumePrototype;
+
+export default Bpmn;
