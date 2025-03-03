@@ -2,6 +2,7 @@
 import { check, Match } from "meteor/check";
 import { Mongo } from "meteor/mongo";
 import { Meteor } from "meteor/meteor";
+import Bpmn from "./engine";
 
 const { EventEmitter } = require("events");
 

@@ -3,7 +3,8 @@ import { ProfilesCollection } from "meteor/socialize:user-profile";
 import { ServiceContext } from "./engine/serviceContext";
 import _ from "lodash";
 import Bpmn from "./engine/engine";
-import ZeebeModdle from "zeebe-bpmn-moddle/resources/zeebe.json";
+import camundaModdle from "camunda-bpmn-moddle/resources/camunda.json";
+const { EventEmitter } = require("events");
 
 // 分页查询数据
 export function pagination(bodyParams) {
@@ -41,47 +42,93 @@ export function pagination(bodyParams) {
   };
 }
 
-export function execute({ source, variables }) {
+function ServiceExpressionFn(activity) {
+  const { type: atype, behaviour, environment } = activity;
+  const { extensionElements } = behaviour;
+  const inputParameters = extensionElements.values[0]?.inputParameters || [];
+  const expression = behaviour.expression;
+
+  const type = `${atype}:expression`;
+
+  return {
+    type,
+    expression,
+    execute,
+  };
+
+  function execute(executionMessage, callback) {
+    // console.log("ServiceTask Inputs:", executionMessage);
+    const serviceFn = environment.resolveExpression(
+      expression,
+      executionMessage
+    );
+    const parameters = inputParameters.reduce((acc, param) => {
+      acc[param.name] = param.value;
+      return acc;
+    }, {});
+    const mergedExecutionMessage = { ...executionMessage, parameters };
+    serviceFn.call(activity, mergedExecutionMessage, (err, result) => {
+      callback(err, result);
+    });
+  }
+}
+
+export function execute({ source, variables, userId, Api }) {
   const engine = new Bpmn.Engine(
     {
       source,
       moddleOptions: {
-        zeebe: ZeebeModdle,
+        camunda: camundaModdle,
+      },
+      services: {
+        rest(scope, callback) {
+          callback(null, scope.parameters);
+        },
+      },
+      extensions: {
+        camundaServiceTask(activity) {
+          if (activity.behaviour.expression) {
+            activity.behaviour.Service = ServiceExpressionFn;
+          }
+          if (activity.behaviour.resultVariable) {
+            activity.on("end", (api) => {
+              activity.environment.output[activity.behaviour.resultVariable] =
+                api.content.output;
+            });
+          }
+        },
       },
     },
     (err) => {
-      console.log(err);
+      console.log("EngineErr", err);
     }
   );
 
   const listener = new EventEmitter();
+
   listener.on("error", (err, displayErr) => {
     console.error(err);
-    console.log(displayErr);
   });
-
   engine.on("error", (err, displayErr) => {
     console.error(err);
-    console.log(displayErr);
   });
-
   engine.execute(
     {
-      userId: this.userId,
+      userId: userId,
       listener,
       variables: Object.assign(
         {},
         {
-          startedBy: this.userId,
+          startedBy: userId,
         },
         variables
       ),
-      services: ServiceContext,
     },
-    (err) => {
-      console.log(err);
+    (err, execution) => {
+      console.log(execution.environment.output);
     }
   );
+  return true;
 }
 
 export function getState({ instanceId }) {

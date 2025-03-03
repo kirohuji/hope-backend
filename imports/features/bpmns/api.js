@@ -34,7 +34,11 @@ Api.addRoute("bpmns/pagination", {
 Api.addRoute("bpmns/execute", {
   post: function () {
     try {
-      return execute(this.bodyParams);
+      return execute.call(this, {
+        ...this.bodyParams,
+        userId: this.userId,
+        Api,
+      });
     } catch (e) {
       return serverError500({
         code: 500,

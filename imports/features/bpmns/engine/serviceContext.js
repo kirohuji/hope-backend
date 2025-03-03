@@ -18,6 +18,7 @@ ServiceContext.register(function notify(userId, message, next) {
     //   createdAt,
     // });
     // next(null, insertId);
+    console.log("你好");
     next(null);
   } catch (err) {
     next(err);

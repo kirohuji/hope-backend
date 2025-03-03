@@ -439,6 +439,9 @@ Bpmn.Engine.prototype.execute = (function () {
     options.listener = processListener;
 
     return original.call(this, cleanOptions(options), (err, engine) => {
+      if (err) {
+        console.log(err);
+      }
       engine.stopped = false;
       processes.updateState(instance.instanceId, states.running);
 

@@ -1,5 +1,13 @@
 import Bpmn from "./engine";
 import { Extensions } from "./extensions";
+import "./tasklist.js";
+import "./persistence.js";
+import "./history.js";
+import "./instances.js";
+Bpmn.persistence.on();
+Bpmn.tasklist.on();
+Bpmn.history.on();
+Bpmn.persistence.on();
 const extensions = Bpmn.extensions.getAll();
 extensions.forEach((entry) => {
   const extension = entry.ref;
