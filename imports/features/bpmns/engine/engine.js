@@ -140,7 +140,7 @@ Bpmn.hooks = hooks;
 //
 // //////////////////////////////////////////////////////////////////////////////////////
 
-const collectionName = "BpmnProcesses";
+const collectionName = "bpmn:processes";
 const BpmnProcessCollection = new Mongo.Collection(collectionName);
 BpmnProcessCollection.name = collectionName;
 

@@ -1,6 +1,6 @@
 export const Extensions = {};
 
-const collectionName = "BpmnEngineExtensions";
+const collectionName = "bpmn:extensions";
 const collection = new Mongo.Collection(collectionName);
 Extensions.collectionName = collectionName;
 Extensions.collection = collection;

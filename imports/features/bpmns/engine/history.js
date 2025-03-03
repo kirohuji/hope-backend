@@ -48,7 +48,7 @@ const BpmnHistoryCollectionSchema = {
  * Default name of the collection for the history log.
  * @type {string}
  */
-const historyCollectionName = "BpmnHistoryCollection";
+const historyCollectionName = "bpmn:history";
 
 /**
  * The default collection for logging history of events.

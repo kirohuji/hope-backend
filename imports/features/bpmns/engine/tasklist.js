@@ -55,7 +55,7 @@ const BpmnTasklistCollectionSchema = {
   },
 };
 
-const collectionName = "BpmnTasklistCollection";
+const collectionName = "bpmn:tasklist";
 const BpmnTaskListCollection = new Mongo.Collection(collectionName);
 BpmnTaskListCollection.name = collectionName;
 BpmnTaskListCollection.schema = BpmnTasklistCollectionSchema;

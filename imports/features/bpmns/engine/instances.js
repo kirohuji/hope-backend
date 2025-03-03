@@ -16,7 +16,7 @@ const BpmnEngineInstancesSchema = {
   instanceId: String,
 };
 
-const collectionName = "BpmnEngineInstances";
+const collectionName = "bpmn:instances";
 const BpmnEngineInstances = new Mongo.Collection(collectionName);
 BpmnEngineInstances.name = collectionName;
 BpmnEngineInstances.schema = BpmnEngineInstancesSchema;

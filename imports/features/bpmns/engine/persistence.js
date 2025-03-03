@@ -33,7 +33,7 @@ const BpmnPersistenceCollectionSchema = {
   },
 };
 
-const collectionName = "BpmnPersistenceCollection";
+const collectionName = "bpmn:persistence";
 const BpmnPersistenceCollection = new Mongo.Collection(collectionName);
 BpmnPersistenceCollection.name = collectionName;
 BpmnPersistenceCollection.schema = BpmnPersistenceCollectionSchema;
