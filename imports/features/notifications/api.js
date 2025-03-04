@@ -3,11 +3,117 @@ import Model, {
   NotificationCollection,
   NotificationUserCollection,
 } from "./collection";
+import { ConversationsCollection } from "meteor/socialize:messaging";
+import { ProfilesCollection } from "meteor/socialize:user-profile";
 import Constructor from "../base/api";
 import _ from "lodash";
 import { serverError500 } from "../base/api";
 import { pagination } from "./service";
 import { publishComposite } from "meteor/reywood:publish-composite";
+import Bull from "bull";
+import apn from "apn";
+
+const isDev = process.env.NODE_ENV !== "production"; // 判断是否是开发环境
+
+const apnProvider = new apn.Provider({
+  token: {
+    key: isDev
+      ? "/Users/lourd/Desktop/hope/hope-backend/AuthKey_F2J9GLB6LA.p8"
+      : "/hope/AuthKey_F2J9GLB6LA.p8", // APNs 密钥的路径
+    keyId: "F2J9GLB6LA", // Key ID
+    teamId: "7JB945M6KZ", // Apple Developer Team ID
+  },
+  production: false, // 设置为 true 在生产环境中使用
+});
+
+const queue = new Bull("notification", {
+  redis: { host: "124.221.67.248", port: 6379 },
+});
+
+function createNotification({
+  contentType,
+  body,
+  profile,
+  conversationId,
+  userToken,
+}) {
+  const notification = new apn.Notification();
+  notification.alert = contentType === "text" ? body : "对方发送了一张图片给你";
+  notification.title = profile.displayName;
+  notification.sound = "default";
+  notification.launchImage = profile.photoURL;
+  notification.badge = MessagesCollection.find({
+    conversationId,
+    readedIds: { $nin: [userToken.userId] },
+  }).count();
+  notification.topic = "lourd.hope.app"; // iOS app 的 bundle id
+  return {
+    message: notification,
+    profile,
+    token: userToken.token,
+  };
+}
+
+function sendPushNotification({ contentType, body, conversationId }) {
+  let userIds = ConversationsCollection.findOne({ _id: conversationId })
+    .participantsAsUsers()
+    .map((item) => item._id);
+
+  const userTokens = PushNotificationTokenCollection.find({
+    userId: {
+      $in: userIds,
+    },
+    status: "deactive",
+  }).fetch();
+  if (userTokens && userTokens.length > 0) {
+    userTokens.forEach((userToken) => {
+      if (
+        Meteor.users.findOne({
+          _id: userToken.userId,
+        })
+      ) {
+        const profile = ProfilesCollection.findOne({ _id: userToken.userId });
+        if (userToken.device.platform === "ios") {
+          const notification = createNotification({
+            contentType,
+            body,
+            profile,
+            conversationId,
+            userToken,
+          });
+          apnProvider
+            .send(notification.message, notification.token)
+            .then((result) => {
+              console.log("APNs result:", result);
+            })
+            .catch((error) => {
+              console.error("Error sending APNs notification:", error);
+            });
+        }
+        // } else {
+        //   sendHuaweiPush({
+        //     contentType,
+        //     body,
+        //     profile,
+        //     conversationId,
+        //     userToken,
+        //   });
+        // }
+      }
+    });
+  }
+}
+
+queue.process(async (job) => {
+  sendPushNotification({ ...job.data });
+});
+
+Meteor.methods({
+  "queue.addNotification"(data) {
+    queue.add(data);
+  },
+});
+
 Api.addCollection(NotificationCollection);
 
 Constructor("notifications", Model);

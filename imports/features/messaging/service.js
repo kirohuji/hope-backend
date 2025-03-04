@@ -5,7 +5,6 @@ import {
   Message,
   MessagesCollection,
 } from "meteor/socialize:messaging";
-import apn from "apn";
 import { SensitiveWordsCollection } from "../sensitiveWords/collection";
 import { UserPresence } from "meteor/socialize:user-presence";
 import ServerPresence from "meteor/socialize:server-presence";
@@ -15,7 +14,6 @@ import { PushNotificationTokenCollection } from "./collection";
 import moment from "moment";
 const CryptoJS = require("crypto-js");
 const secretKey = "future";
-const isDev = process.env.NODE_ENV !== "production"; // 判断是否是开发环境
 // const firebaseAdmin = require('firebase-admin');
 // const serviceAccount = require('./hopehome-12650-firebase-adminsdk-ornad-b1abbd59c9.json');
 
@@ -108,16 +106,6 @@ export async function sendHuaweiPush({
   }
 }
 
-const apnProvider = new apn.Provider({
-  token: {
-    key: isDev
-      ? "/Users/lourd/Desktop/hope/hope-backend/AuthKey_F2J9GLB6LA.p8"
-      : "/hope/AuthKey_F2J9GLB6LA.p8", // APNs 密钥的路径
-    keyId: "F2J9GLB6LA", // Key ID
-    teamId: "7JB945M6KZ", // Apple Developer Team ID
-  },
-  production: false, // 设置为 true 在生产环境中使用
-});
 export function uuidv4() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0,
@@ -407,79 +395,6 @@ export function updateDeviceStatus({ userId, status, deviceId }) {
   }
 }
 
-function createNotification({
-  contentType,
-  body,
-  profile,
-  conversationId,
-  userToken,
-}) {
-  const notification = new apn.Notification();
-  notification.alert = contentType === "text" ? body : "对方发送了一张图片给你";
-  notification.title = profile.displayName;
-  notification.sound = "default";
-  notification.launchImage = profile.photoURL;
-  notification.badge = MessagesCollection.find({
-    conversationId,
-    readedIds: { $nin: [userToken.userId] },
-  }).count();
-  notification.topic = "lourd.hope.app"; // iOS app 的 bundle id
-  return {
-    message: notification,
-    profile,
-    token: userToken.token,
-  };
-}
-
-function sendPushNotification({ contentType, body, conversationId }) {
-  let userIds = ConversationsCollection.findOne({ _id: conversationId })
-    .participantsAsUsers()
-    .map((item) => item._id);
-
-  const userTokens = PushNotificationTokenCollection.find({
-    userId: {
-      $in: userIds,
-    },
-    status: "deactive",
-  }).fetch();
-  if (userTokens && userTokens.length > 0) {
-    userTokens.forEach((userToken) => {
-      if (
-        Meteor.users.findOne({
-          _id: userToken.userId,
-        })
-      ) {
-        const profile = ProfilesCollection.findOne({ _id: userToken.userId });
-        if (userToken.device.platform === "ios") {
-          const notification = createNotification({
-            contentType,
-            body,
-            profile,
-            conversationId,
-            userToken,
-          });
-          apnProvider
-            .send(notification.message, notification.token)
-            .then((result) => {
-              console.log("APNs result:", result);
-            })
-            .catch((error) => {
-              console.error("Error sending APNs notification:", error);
-            });
-        } else {
-          sendHuaweiPush({
-            contentType,
-            body,
-            profile,
-            conversationId,
-            userToken,
-          });
-        }
-      }
-    });
-  }
-}
-
 /** firebase */
 //   firebaseAdmin
 //     .messaging()
@@ -534,14 +449,13 @@ export function sendMessage({ conversationId, userId, bodyParams }) {
       },
     }
   );
-  // if (message) {
-  //   sendPushNotification({
-  //     body: bodyParams.body,
-  //     contentType: bodyParams.contentType,
-  //     conversationId,
-  //   });
-  //   return message;
-  // }
+  if (message) {
+    Meteor.call("queue.addNotification", {
+      body: bodyParams.body,
+      contentType: bodyParams.contentType,
+      conversationId,
+    });
+  }
   return message;
 }
 
