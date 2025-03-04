@@ -35,3 +35,37 @@ Api.addRoute("services/pagination", {
     }
   },
 });
+
+Api.addRoute("services/options", {
+  post: function () {
+    try {
+      const route = _.find(Api._routes, ["path", "bpmns/pagination"]);
+      console.log(route.endpoints.post.action.call(this));
+      return Api._config.paths.map((item) => {
+        return {
+          label: item,
+          value: item,
+        };
+      });
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message,
+      });
+    }
+  },
+});
+
+Api.addRoute("services/custom", {
+  post: function () {
+    try {
+      const route = _.find(Api._routes, ["path", this.bodyParams.target]);
+      return route.endpoints.post.action.call(this);
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message,
+      });
+    }
+  },
+});

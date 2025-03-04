@@ -24,11 +24,6 @@ export default Class.create({
       type: [String],
       default: [],
     },
-    // 有效期限
-    available: {
-      type: Available,
-      default: "",
-    },
     // 照片集
     images: {
       type: [Object],

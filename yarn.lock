@@ -844,6 +844,11 @@ crypto-browserify@^3.12.0:
     randombytes "^2.0.0"
     randomfill "^1.0.3"
 
+crypto-js@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.npmmirror.com/crypto-js/-/crypto-js-4.2.0.tgz"
+  integrity sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==
+
 debug@^3.1.0:
   version "3.2.7"
   resolved "https://registry.npmmirror.com/debug/-/debug-3.2.7.tgz"
@@ -2335,6 +2340,11 @@ semver@^7.5.4:
   version "7.7.1"
   resolved "https://registry.npmmirror.com/semver/-/semver-7.7.1.tgz"
   integrity sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==
+
+sensitive-word-tool@^1.1.10:
+  version "1.1.10"
+  resolved "https://registry.npmmirror.com/sensitive-word-tool/-/sensitive-word-tool-1.1.10.tgz"
+  integrity sha512-pa9ZGi/A0O95CMxFc8qgJTdL/JH0M3y/HW3vdYNb9bE1tdCn0pAiLlGL2BCXzt+SMbRe19JnBFZiY1zAYtKrPg==
 
 set-function-length@^1.2.1:
   version "1.2.2"

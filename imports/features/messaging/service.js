@@ -6,12 +6,15 @@ import {
   MessagesCollection,
 } from "meteor/socialize:messaging";
 import apn from "apn";
+import { SensitiveWordsCollection } from "../sensitiveWords/collection";
 import { UserPresence } from "meteor/socialize:user-presence";
 import ServerPresence from "meteor/socialize:server-presence";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
 import _ from "lodash";
 import { PushNotificationTokenCollection } from "./collection";
 import moment from "moment";
+const CryptoJS = require("crypto-js");
+const secretKey = "future";
 const isDev = process.env.NODE_ENV !== "production"; // 判断是否是开发环境
 // const firebaseAdmin = require('firebase-admin');
 // const serviceAccount = require('./hopehome-12650-firebase-adminsdk-ornad-b1abbd59c9.json');
@@ -19,6 +22,7 @@ const isDev = process.env.NODE_ENV !== "production"; // 判断是否是开发环
 // firebaseAdmin.initializeApp({
 //   credential: firebaseAdmin.credential.cert(serviceAccount),
 // });
+
 const huaweiConfig = {
   appId: "113475539",
   appSecret: "d3036c59f4ed320bd6e7c1eb6f73ba91b62a3dba5a436a7928140020d18dd20a",
@@ -493,12 +497,30 @@ function sendPushNotification({ contentType, body, conversationId }) {
 //       console.log('Error sending message:', error);
 //     });
 
+function checkProfanity(bodyMessage) {
+  const decryptedMessage = CryptoJS.AES.decrypt(
+    bodyMessage,
+    secretKey
+  ).toString(CryptoJS.enc.Utf8);
+  let sanitizedText = decryptedMessage;
+  sanitizedText = Meteor.filter.filter(sanitizedText, "**");
+  if (sanitizedText !== decryptedMessage) {
+    const checkedMessage = CryptoJS.AES.encrypt(
+      sanitizedText,
+      secretKey
+    ).toString();
+    return checkedMessage;
+  }
+  return bodyMessage;
+}
 // 发送消息
 export function sendMessage({ conversationId, userId, bodyParams }) {
+  let bodyMessage = bodyParams.body;
+  const checkedMessage = checkProfanity(bodyMessage);
   const message = MessagesCollection.insert(
     new Message({
       conversationId,
-      body: bodyParams.body,
+      body: checkedMessage,
       attachments: bodyParams.attachments,
       readedIds: [userId],
       sendingMessageId: bodyParams.sendingMessageId,
@@ -512,14 +534,15 @@ export function sendMessage({ conversationId, userId, bodyParams }) {
       },
     }
   );
-  if (message) {
-    sendPushNotification({
-      body: bodyParams.body,
-      contentType: bodyParams.contentType,
-      conversationId,
-    });
-    return message;
-  }
+  // if (message) {
+  //   sendPushNotification({
+  //     body: bodyParams.body,
+  //     contentType: bodyParams.contentType,
+  //     conversationId,
+  //   });
+  //   return message;
+  // }
+  return message;
 }
 
 // 创建一个新会话

@@ -18,3 +18,4 @@ import "./audits";
 import "./sensitiveWords";
 import "./aiModels";
 import "./bpmns";
+import "./services";

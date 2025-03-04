@@ -1,7 +1,6 @@
 import { SensitiveWordsCollection } from "./collection";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
 import _ from "lodash";
-
 // 分页查询数据
 export function pagination(bodyParams) {
   if (bodyParams.selector && bodyParams.selector.level == "all") {

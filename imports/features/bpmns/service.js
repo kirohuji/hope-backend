@@ -82,7 +82,21 @@ export function execute({ source, variables, userId, Api }) {
       },
       services: {
         rest(scope, callback) {
-          callback(null, scope.parameters);
+          const route = _.find(Api._routes, ["path", "bpmns/pagination"]);
+          // this.bodyParams = {
+          //   selector: {
+          //     scope: "KtTLuJQbpe3ixKfLq",
+          //     category: [],
+          //     status: "all",
+          //   },
+          //   options: {
+          //     skip: 0,
+          //     limit: 10,
+          //   },
+          // };
+          // const result = route.endpoints.post.action.call(this);
+          // console.log("result", result);
+          callback(null, result);
         },
       },
       extensions: {
