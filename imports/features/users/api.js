@@ -1,9 +1,9 @@
-import _ from 'lodash';
-import Api from '../../api';
-import Constructor from '../base/api';
-import Model from './collection';
-import { UserSessions } from 'meteor/socialize:user-presence';
-import { ServerPresence} from 'meteor/socialize:server-presence';
+import _ from "lodash";
+import Api from "../../api";
+import Constructor from "../base/api";
+import Model from "./collection";
+// import { UserSessions } from 'meteor/socialize:user-presence';
+// import { ServerPresence} from 'meteor/socialize:server-presence';
 import {
   pagination,
   paginationByProfile,
@@ -14,15 +14,15 @@ import {
   infoByCurrent,
   changePassword,
   activation,
-} from './service';
-import { serverError500 } from '../base/api';
+} from "./service";
+import { serverError500 } from "../base/api";
 
 Api.addCollection(Meteor.users);
 
-Constructor('users', Model);
+Constructor("users", Model);
 
 // 用户分页
-Api.addRoute('users/pagination', {
+Api.addRoute("users/pagination", {
   post: function () {
     try {
       return pagination(this.bodyParams);
@@ -36,7 +36,7 @@ Api.addRoute('users/pagination', {
 });
 
 // 根据 profile 获取信息
-Api.addRoute('users/profiles/pagination', {
+Api.addRoute("users/profiles/pagination", {
   post: function () {
     try {
       return paginationByProfile(this.bodyParams);
@@ -50,7 +50,7 @@ Api.addRoute('users/profiles/pagination', {
 });
 
 // 删除用户
-Api.addRoute('users/delete/:_id', {
+Api.addRoute("users/delete/:_id", {
   delete: function () {
     try {
       return removeUser(this.urlParams._id);
@@ -64,7 +64,7 @@ Api.addRoute('users/delete/:_id', {
 });
 
 // 删除多个用户
-Api.addRoute('users/deleteMany', {
+Api.addRoute("users/deleteMany", {
   post: {
     authRequired: true,
     action: function () {
@@ -82,7 +82,7 @@ Api.addRoute('users/deleteMany', {
 });
 
 // 激活用户
-Api.addRoute('users/activation', {
+Api.addRoute("users/activation", {
   post: {
     authRequired: true,
     action: function () {
@@ -100,7 +100,7 @@ Api.addRoute('users/activation', {
 });
 
 // 用户注册
-Api.addRoute('users/register', {
+Api.addRoute("users/register", {
   post: {
     authRequired: true,
     action: function () {
@@ -117,7 +117,7 @@ Api.addRoute('users/register', {
 });
 
 // 获取当前用户的基本信息
-Api.addRoute('users/info', {
+Api.addRoute("users/info", {
   get: {
     authRequired: true,
     action: function () {
@@ -137,7 +137,7 @@ Api.addRoute('users/info', {
 });
 
 // 获取指定用户的基本信息
-Api.addRoute('users/info/:_id', {
+Api.addRoute("users/info/:_id", {
   get: {
     authRequired: true,
     action: function () {
@@ -154,7 +154,7 @@ Api.addRoute('users/info/:_id', {
 });
 
 // 修改密码
-Api.addRoute('users/changePassword', {
+Api.addRoute("users/changePassword", {
   post: {
     authRequired: true,
     action: function () {

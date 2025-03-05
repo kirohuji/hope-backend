@@ -1,23 +1,20 @@
-import { NotificationCollection } from "./collection";
+import { PostsCollection, Post } from "meteor/socialize:postable";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
+import SimpleSchema from "simpl-schema";
 import _ from "lodash";
 
+Post.attachSchema({
+  posterId: {
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    autoValue: null,
+    index: 1,
+    denyUpdate: true,
+  },
+});
 // 分页查询数据
 export function pagination(bodyParams) {
-  if (bodyParams.selector && bodyParams.selector.status == "all") {
-    bodyParams.selector = _.pickBy(_.omit(bodyParams.selector, ["status"]));
-  }
-  if (bodyParams.selector && bodyParams.selector.category.length === 0) {
-    bodyParams.selector = _.pickBy(_.omit(bodyParams.selector, ["category"]));
-  } else if (bodyParams.selector && bodyParams.selector.category.length > 0) {
-    bodyParams.selector = {
-      ..._.pickBy(bodyParams.selector),
-      category: {
-        $in: bodyParams.selector.category,
-      },
-    };
-  }
-  let curror = NotificationCollection.find(
+  let curror = PostsCollection.find(
     _.pickBy(bodyParams.selector) || {},
     bodyParams.options
   );
@@ -36,4 +33,14 @@ export function pagination(bodyParams) {
     data: enhancedData,
     total: curror.count(),
   };
+}
+
+export function create({ userId, bodyParams }) {
+  const usersFeed = this.user.feed();
+  const post = new Post({
+    body: bodyParams.body,
+    posterId: userId,
+    ...usersFeed.getLinkObject(),
+  }).save();
+  return post;
 }

@@ -5,9 +5,6 @@ import {
   Message,
   MessagesCollection,
 } from "meteor/socialize:messaging";
-import { SensitiveWordsCollection } from "../sensitiveWords/collection";
-import { UserPresence } from "meteor/socialize:user-presence";
-import ServerPresence from "meteor/socialize:server-presence";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
 import _ from "lodash";
 import { PushNotificationTokenCollection } from "./collection";

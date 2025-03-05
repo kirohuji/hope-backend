@@ -119,3 +119,28 @@ Api.addRoute("dictionaries/generate", {
     });
   },
 });
+
+Api.addRoute("dictionaries/dict", {
+  post: function () {
+    const dictionary = DictionaryCollection.findOne({
+      value: this.bodyParams.value,
+    });
+    if (dictionary) {
+      if (this.bodyParams.isTree) {
+        return generate(dictionary);
+      } else {
+        return {
+          ...dictionary,
+          chidlren: DictionaryOptionCollection.find({
+            parentId: dictionary._id,
+            dictionaryId: dictionary._id,
+          }).fetch(),
+        };
+      }
+    } else {
+      return {
+        data: [],
+      };
+    }
+  },
+});
