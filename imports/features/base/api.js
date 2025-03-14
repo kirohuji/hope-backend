@@ -8,7 +8,7 @@ const continue100 = (body = "No Content") => {
   };
 };
 
-const success200 = (body = {}) => {
+export const success200 = (body = {}) => {
   return {
     statusCode: 200,
     status: "success",
@@ -56,7 +56,7 @@ const forbidden403 = (body = "Forbidden") => {
   };
 };
 
-const notFound404 = (body = "Not Found") => {
+export const notFound404 = (body = "Not Found") => {
   return {
     statusCode: 404,
     status: "fail",
@@ -141,7 +141,7 @@ export default function Constructor(route, Model) {
       authRequired: true,
       action: function () {
         try {
-          let model = Model.findOne(this.urlParams.id);
+          let model = Model.findOne(this.urlParams._id || this.urlParams.id);
           if (model.createdBy) {
             const profile = ProfilesCollection.findOne({
               _id: model.createdBy,
@@ -158,8 +158,11 @@ export default function Constructor(route, Model) {
       authRequired: true,
       action: function () {
         try {
-          Model.update({ _id: this.urlParams.id }, this.bodyParams);
-          let model = Model.findOne(this.urlParams.id);
+          Model.update(
+            { _id: this.urlParams._id || this.urlParams.id },
+            this.bodyParams
+          );
+          let model = Model.findOne(this.urlParams._id || this.urlParams.id);
           return success200(model);
         } catch (e) {
           return badRequest400({
@@ -173,14 +176,17 @@ export default function Constructor(route, Model) {
       authRequired: true,
       action: function () {
         try {
-          console.log("this.urlParams.id", this.urlParams.id);
+          console.log(
+            "this.urlParams.id",
+            this.urlParams._id || this.urlParams.id
+          );
           Model.update(
-            { _id: this.urlParams.id },
+            { _id: this.urlParams._id || this.urlParams.id },
             {
               $set: this.bodyParams,
             }
           );
-          let model = Model.findOne(this.urlParams.id);
+          let model = Model.findOne(this.urlParams._id || this.urlParams.id);
           return success200(model);
         } catch (e) {
           return badRequest400({
@@ -194,7 +200,7 @@ export default function Constructor(route, Model) {
       authRequired: true,
       action: function () {
         try {
-          let model = Model.findOne(this.urlParams.id);
+          let model = Model.findOne(this.urlParams._id || this.urlParams.id);
           model.remove();
           return success200(model);
         } catch (e) {
@@ -202,6 +208,26 @@ export default function Constructor(route, Model) {
             code: 400,
             message: e.message,
           });
+        }
+      },
+    },
+  });
+
+  Api.addRoute(`${route}/pagination`, {
+    post: {
+      authRequired: true,
+      action: function () {
+        try {
+          const result = {
+            data: Model.find(
+              this.bodyParams.selector || {},
+              this.bodyParams.options
+            ).fetch(),
+            total: Model.find(this.bodyParams.selector || {}).count(),
+          };
+          return success200(result);
+        } catch (e) {
+          return serverError500(e.message);
         }
       },
     },

@@ -339,12 +339,13 @@ Api.addRoute("messaging/conversations/savePushNotificationToken", {
     authRequired: true,
     action: function () {
       try {
-        return savePushNotificationToken({
+        savePushNotificationToken({
           userId: this.userId,
           token: this.bodyParams.token,
           device: this.bodyParams.device,
           deviceId: this.bodyParams.deviceId,
         });
+        return true;
       } catch (e) {
         return serverError500({
           code: 500,
@@ -360,11 +361,12 @@ Api.addRoute("messaging/conversations/updateDeviceStatus", {
     authRequired: true,
     action: function () {
       try {
-        return updateDeviceStatus({
+        updateDeviceStatus({
           userId: this.userId,
           status: this.bodyParams.status,
           deviceId: this.bodyParams.deviceId,
         });
+        return true;
       } catch (e) {
         return serverError500({
           code: 500,

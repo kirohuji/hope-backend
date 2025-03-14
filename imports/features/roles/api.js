@@ -104,8 +104,9 @@ Api.addRoute('roles/updateRolesToParent', {
               _id: {
                 $in: role?.children.map(item => item._id) || [],
               },
+              type: 'permission'
             })
-            .map(item => item.type == 'permission' && item._id),
+            .map(item => item._id),
         );
         Roles.removeRolesFromParent(
           currentRolesNames,
@@ -655,16 +656,6 @@ Api.addRoute('roles/getUsersInRole', {
             this.bodyParams.queryOptions ||
             {},
         ).fetch(),
-        // .map((item) => {
-        //   const profile = item.profile();
-        //   return {
-        //     displayName: profile.displayName || "",
-        //     avatarUrl: profile.photoURL || "",
-        //     phoneNumber: profile.phoneNumber || "",
-        //     description: profile.about,
-        //     ..._.omit(item, "services"),
-        //   };
-        // }),
         total: Meteor.users.find({ _id: { $in: ids } }).count(),
       };
     } catch (e) {
@@ -756,7 +747,6 @@ Api.addRoute('roles/getUsersInRoleOnly', {
             const profile = item.profile();
             return {
               displayName: profile.displayName || '',
-              avatarUrl: profile.photoURL || '',
               photoURL: profile.photoURL || '',
               phoneNumber: profile.phoneNumber || '',
               description: profile.about,
@@ -797,7 +787,7 @@ Api.addRoute('roles/getUsersInNotRole', {
             const profile = item.profile();
             return {
               displayName: profile.displayName || '',
-              avatarUrl: profile.photoURL || '',
+              photoURL: user.photoURL || "",
               phoneNumber: profile.phoneNumber || '',
               description: profile.about,
               ..._.omit(item, 'services'),

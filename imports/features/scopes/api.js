@@ -1,36 +1,22 @@
-import Model, { ScopeCollection } from './collection'
+import Model, { ScopeCollection } from "./collection";
 import Api from "../../api";
-import Constructor from "../base/api"
+import Constructor from "../base/api";
 import { serverError500 } from "../base/api";
-import { pagination } from './service';
-import _ from 'lodash'
+import { pagination } from "./service";
+import _ from "lodash";
 
 Api.addCollection(ScopeCollection);
-Constructor("scopes", Model)
+Constructor("scopes", Model);
 
-Api.addRoute('scopes/pagination', {
+Api.addRoute("scopes/current", {
   post: function () {
     try {
       return pagination(this.bodyParams);
     } catch (e) {
       return serverError500({
         code: 500,
-        message: e.message
-      })
+        message: e.message,
+      });
     }
-  }
+  },
 });
-
-Api.addRoute('scopes/current', {
-  post: function () {
-    try {
-      return pagination(this.bodyParams);
-    } catch (e) {
-      return serverError500({
-        code: 500,
-        message: e.message
-      })
-    }
-  }
-});
-

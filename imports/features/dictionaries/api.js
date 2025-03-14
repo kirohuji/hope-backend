@@ -1,62 +1,33 @@
 import Api from "../../api";
+import Constructor, { serverError500 } from "../base/api";
 import Model, {
   DictionaryOption,
   DictionaryCollection,
   DictionaryOptionCollection,
 } from "./collection";
+import { pagination, sync } from "./service";
 import _ from "lodash";
-// Api.addCollection(DictionaryCollection, roleRequired('dictionaries', '字典(Dictionaries)'));
+
 Api.addCollection(DictionaryCollection);
-Api.addRoute("dictionaries/model", {
-  get: function () {
-    console.log();
-    return {
-      fields: Model.schema.fields,
-      fieldsNames: Model.schema.fieldsNames,
-    };
-  },
-});
-Api.addRoute("dictionaries/findOne", {
-  post: function () {
-    return DictionaryCollection.findOne(
-      this.bodyParams.selector || {},
-      this.bodyParams.options
-    );
-  },
-});
-Api.addRoute("dictionaries/pagination", {
-  post: function () {
-    return {
-      data: Model.find(
-        this.bodyParams.selector || {},
-        this.bodyParams.options
-      ).fetch(),
-      total: Model.find().count(),
-    };
-  },
-});
+
+Constructor("dictionaries", Model);
 
 Api.addCollection(DictionaryOptionCollection, {
   path: "dictionaries/options",
-  routeOptions: { authRequired: false },
 });
 
-Api.addRoute("dictionaries/options/model", {
-  get: function () {
-    console.log();
-    return {
-      fields: DictionaryOption.schema.fields,
-      fieldsNames: DictionaryOption.schema.fieldsNames,
-    };
-  },
-});
+Constructor("dictionaries/options", DictionaryOption);
 
-Api.addRoute("dictionaries/options/findOne", {
+Api.addRoute("dictionaries/pagination", {
   post: function () {
-    return DictionaryOptionCollection.findOne(
-      this.bodyParams.selector || {},
-      this.bodyParams.options
-    );
+    try {
+      return pagination(this.bodyParams);
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message,
+      });
+    }
   },
 });
 
@@ -141,6 +112,19 @@ Api.addRoute("dictionaries/dict", {
       return {
         data: [],
       };
+    }
+  },
+});
+
+Api.addRoute("dictionaries/sync", {
+  post: function () {
+    try {
+      return sync(this.bodyParams);
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message,
+      });
     }
   },
 });

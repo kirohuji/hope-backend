@@ -47,7 +47,7 @@ Api.addRoute("books/:bookId/dates", {
     action: function () {
       return BookArticleCollection.find({
         book_id: this.urlParams.bookId,
-      }).map((item) => moment(item.date).format("YYYY/MM//DD"));
+      }).map((item) => moment(item.date).format("YYYY/MM/DD"));
     },
   },
 });
@@ -64,7 +64,7 @@ Api.addRoute("books/users/current/start", {
         book_id: bookUser?.book_id,
         date:
           this.bodyParams.date &&
-          moment(this.bodyParams.date).format("YYYY/MM//DD"),
+          moment(this.bodyParams.date).format("YYYY/MM/DD"),
       });
       return article || false;
     },
@@ -230,7 +230,7 @@ Api.addRoute("books/users/current/:bookId/summarize", {
             },
           })
             .fetch()
-            .map((item) => moment(item.date).format("YYYY/MM//DD"));
+            .map((item) => moment(item.date).format("YYYY/MM/DD"));
 
           return {
             total: total.count(),

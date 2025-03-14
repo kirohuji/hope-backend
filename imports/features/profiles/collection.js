@@ -1,9 +1,9 @@
-import { Profile, ProfilesCollection } from 'meteor/socialize:user-profile';
-import { Class } from "meteor/jagi:astronomy"
+import { Profile, ProfilesCollection } from "meteor/socialize:user-profile";
+import { Class } from "meteor/jagi:astronomy";
 import SimpleSchema from "simpl-schema";
 const photoURL = new SimpleSchema({
   path: String,
-  preview: String
+  preview: String,
 });
 Profile.attachSchema({
   displayName: {
@@ -74,42 +74,42 @@ Profile.attachSchema({
     type: String,
     required: false,
   },
-})
+});
 export default Class.create({
   name: "Profile",
   collection: ProfilesCollection,
   fields: {
     photoURL: {
       type: String,
-      default: '',
+      default: "",
     },
     username: {
       type: String,
-      default: '',
+      default: "",
     },
     displayName: {
       type: String,
-      default: '',
+      default: "",
     },
     phoneNumber: {
       type: String,
-      default: '',
+      default: "",
     },
     country: {
       type: String,
-      default: '',
+      default: "",
     },
     gender: {
       type: String,
-      default: '',
+      default: "",
     },
     age: {
       type: String,
-      default: '',
+      default: "",
     },
     isPublic: {
       type: Boolean,
-      default: '',
+      default: "",
     },
     email: {
       type: String,
@@ -117,18 +117,18 @@ export default Class.create({
     },
     state: {
       type: String,
-      default: '',
+      default: "",
     },
     city: {
       type: String,
-      default: '',
+      default: "",
     },
     address: {
       type: String,
     },
     about: {
       type: String,
-      default: '',
+      default: "",
     },
     status: {
       type: String,
@@ -146,13 +146,11 @@ export default Class.create({
       type: String,
       required: false,
     },
-  }
+  },
 });
 
 Meteor.users.after.remove(function afterRemoveUser(userId) {
-  console.log('userId',  this.userId)
-  console.log('userId',  userId)
-  if(userId){
+  if (userId) {
     ProfilesCollection.remove({ _id: userId });
   }
 });

@@ -435,7 +435,7 @@ export function getUsersInNotRoleOnly({ roles, options, queryOptions }) {
   let users = ProfilesCollection.find(
     {
       _id: { $nin: ids },
-      username: queryOptions.username,
+      realName: queryOptions.realName,
       scope: options.scope,
     },
     {
@@ -449,8 +449,9 @@ export function getUsersInNotRoleOnly({ roles, options, queryOptions }) {
       users.map((user) => {
         if (user) {
           return {
+            _id: user._id,
             displayName: user.displayName || "",
-            avatarUrl: user.photoURL || "",
+            photoURL: user.photoURL || "",
             phoneNumber: user.phoneNumber || "",
             description: user.about,
             realName: user.realName,

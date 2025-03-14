@@ -6,6 +6,7 @@ import { ArticleUserCollection } from "../articles/collection";
 import { BookUserCollection } from "../books/collection";
 import { BroadcastUserCollection } from "../broadcasts/collection";
 import { EventUserCollection } from "../events/collection";
+import { MembershipCollection } from "../memberships/collection";
 import { NotificationUserCollection } from "../notifications/collection";
 import _ from "lodash";
 
@@ -128,11 +129,13 @@ export function infoByCurrent({ userId, user }) {
     )
     .fetch();
   const permissions = roles.filter((item) => item.type === "permission");
+  const membership = MembershipCollection.findOne({ _id: userId }) || {};
   return {
     user: _.omit(user, ["services"]),
     profile: user.profile(),
     roles: roles.filter((item) => item.type !== "permission"),
     permissions: permissions.map((item) => item),
+    membership: membership,
   };
 }
 
@@ -142,6 +145,7 @@ export function info(_id) {
   if (!user) {
     throw new Error("用户不存在");
   }
+  const membership = MembershipCollection.findOne({ _id: _id });
   const roles = Meteor.roles
     .find(
       {
@@ -167,6 +171,7 @@ export function info(_id) {
     profile: user.profile(),
     roles: roles.filter((item) => item.type !== "permission"),
     permissions: permissions.map((item) => item),
+    membership: membership,
   };
 }
 

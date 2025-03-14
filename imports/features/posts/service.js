@@ -2,42 +2,32 @@ import { PostsCollection, Post } from "meteor/socialize:postable";
 import { LikesCollection, Like } from "meteor/socialize:likeable";
 import { CommentsCollection, Comment } from "meteor/socialize:commentable";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
-import SimpleSchema from "simpl-schema";
 import _ from "lodash";
+import moment from "moment";
 
-Post.attachSchema({
-  posterId: {
-    type: String,
-    regEx: SimpleSchema.RegEx.Id,
-    autoValue: null,
-    index: 1,
-    denyUpdate: true,
-  },
-  scope: {
-    type: String,
-    regEx: SimpleSchema.RegEx.Id,
-  },
-});
-Like.attachSchema({
-  userId: {
-    type: String,
-    regEx: SimpleSchema.RegEx.Id,
-    autoValue: null,
-    index: 1,
-    denyUpdate: true,
-  },
-});
-Comment.attachSchema({
-  userId: {
-    type: String,
-    regEx: SimpleSchema.RegEx.Id,
-    autoValue: null,
-    index: 1,
-    denyUpdate: true,
-  },
-});
 // 分页查询数据
 export function pagination(bodyParams) {
+  if (bodyParams.selector && bodyParams.selector.status == "all") {
+    bodyParams.selector = _.pickBy(_.omit(bodyParams.selector, ["status"]));
+  }
+  if (
+    bodyParams.selector &&
+    bodyParams.selector.category &&
+    bodyParams.selector.category.length === 0
+  ) {
+    bodyParams.selector = _.pickBy(_.omit(bodyParams.selector, ["category"]));
+  } else if (
+    bodyParams.selector &&
+    bodyParams.selector.category &&
+    bodyParams.selector.category.length > 0
+  ) {
+    bodyParams.selector = {
+      ..._.pickBy(bodyParams.selector),
+      category: {
+        $in: bodyParams.selector.category,
+      },
+    };
+  }
   let curror = PostsCollection.find(
     _.pickBy(bodyParams.selector) || {},
     bodyParams.options
@@ -59,32 +49,15 @@ export function pagination(bodyParams) {
   };
 }
 
-LikesCollection._hookAspects.insert.after = [];
-LikesCollection._hookAspects.remove.after = [];
-LikesCollection.after.insert(function afterInsert(userId, like) {
-  const collection = this.transform().getCollectionForParentLink();
-  like.userId &&
-    collection &&
-    collection.update({ _id: like.linkedObjectId }, { $inc: { likeCount: 1 } });
-});
-
-LikesCollection.after.remove(function afterRemove(userId, like) {
-  const collection = this.transform().getCollectionForParentLink();
-  like.userId &&
-    collection &&
-    collection.update(
-      { _id: like.linkedObjectId },
-      { $inc: { likeCount: -1 } }
-    );
-});
-
 export function create({ scope, user, userId, bodyParams }) {
   const usersFeed = user.feed();
   const post = new Post({
-    body: bodyParams.body,
+    ...bodyParams,
     posterId: userId,
     scope: scope,
+    status: bodyParams.published ? "pending_review" : "draft",
     ...usersFeed.getLinkObject(),
+    publishedAt: bodyParams.published ? moment(new Date()).toISOString() : "",
   }).save();
   return post;
 }
@@ -115,4 +88,38 @@ export function addComment({ userId, postId, bodyParams }) {
     ...post.getLinkObject(),
   }).save();
   return comment;
+}
+
+export function detail({ postId }) {
+  const post = PostsCollection.findOne({ _id: postId });
+  const user = ProfilesCollection.findOne({ _id: post.posterId });
+  return {
+    ...post,
+    poster: user,
+  };
+}
+
+export function comments({ postId, bodyParams }) {
+  let comments = CommentsCollection.find(
+    {
+      linkedObjectId: postId,
+      objectType: "socialize:posts",
+      ..._.pickBy(bodyParams.selector),
+    },
+    bodyParams.options
+  ).fetch();
+  const createdByIds = _.map(comments, "userId");
+  const users = ProfilesCollection.find({ _id: { $in: createdByIds } }).fetch();
+  const userMap = _.keyBy(users, "_id");
+  const enhancedData = comments.map((comment) => {
+    const user = userMap[comment.userId]; // 使用字典查找用户信息
+    return {
+      ...comment,
+      author: user || {}, // 假设你要显示用户的 name
+    };
+  });
+  return {
+    data: enhancedData,
+    total: CommentsCollection.find(bodyParams.selector).count(),
+  };
 }

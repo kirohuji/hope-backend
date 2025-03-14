@@ -20,3 +20,5 @@ import "./aiModels";
 import "./bpmns";
 import "./posts";
 import "./services";
+import "./memberships";
+import "./orders";

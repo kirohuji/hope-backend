@@ -348,7 +348,7 @@ export function savePushNotificationToken({ userId, token, device, deviceId }) {
     "deviceId.identifier": deviceId?.identifier,
   });
   if (isExsist && isExsist.userId !== userId) {
-    PushNotificationTokenCollection.update(
+    return PushNotificationTokenCollection.update(
       {
         "deviceId.identifier": deviceId?.identifier,
       },
@@ -363,7 +363,7 @@ export function savePushNotificationToken({ userId, token, device, deviceId }) {
       }
     );
   } else if (!isExsist) {
-    PushNotificationTokenCollection.insert({
+    return PushNotificationTokenCollection.insert({
       userId,
       token,
       updatedAt: new Date(),

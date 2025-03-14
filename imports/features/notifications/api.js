@@ -27,7 +27,7 @@ const apnProvider = new apn.Provider({
 });
 
 const queue = new Bull("notification", {
-  redis: { host: "124.221.67.248", port: 6379 },
+  redis: { host: "124.221.67.248", port: 6379, password: "Zyd1362848650" },
 });
 
 function createNotification({
