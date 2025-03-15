@@ -21,19 +21,6 @@ Api.addCollection(PostsCollection, {
   path: "posts",
 });
 
-Api.addRoute("posts/pagination", {
-  post: function () {
-    try {
-      return pagination(this.bodyParams);
-    } catch (e) {
-      return serverError500({
-        code: 500,
-        message: e.message,
-      });
-    }
-  },
-});
-
 Api.addRoute("posts", {
   post: {
     authRequired: true,

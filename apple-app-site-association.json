@@ -1,0 +1,10 @@
+{
+    "applinks": {
+      "details": [
+        {
+          "appID": "lourd.hope.app",
+          "paths": ["/pay/*", "/payment/*"]
+        }
+      ]
+    }
+  }

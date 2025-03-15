@@ -9,8 +9,6 @@ import { ProfilesCollection } from "meteor/socialize:user-profile";
 import _ from "lodash";
 import { PushNotificationTokenCollection } from "./collection";
 import moment from "moment";
-const CryptoJS = require("crypto-js");
-const secretKey = "future";
 // const firebaseAdmin = require('firebase-admin');
 // const serviceAccount = require('./hopehome-12650-firebase-adminsdk-ornad-b1abbd59c9.json');
 
@@ -409,26 +407,10 @@ export function updateDeviceStatus({ userId, status, deviceId }) {
 //       console.log('Error sending message:', error);
 //     });
 
-function checkProfanity(bodyMessage) {
-  const decryptedMessage = CryptoJS.AES.decrypt(
-    bodyMessage,
-    secretKey
-  ).toString(CryptoJS.enc.Utf8);
-  let sanitizedText = decryptedMessage;
-  sanitizedText = Meteor.filter.filter(sanitizedText, "**");
-  if (sanitizedText !== decryptedMessage) {
-    const checkedMessage = CryptoJS.AES.encrypt(
-      sanitizedText,
-      secretKey
-    ).toString();
-    return checkedMessage;
-  }
-  return bodyMessage;
-}
 // 发送消息
 export function sendMessage({ conversationId, userId, bodyParams }) {
   let bodyMessage = bodyParams.body;
-  const checkedMessage = checkProfanity(bodyMessage);
+  const checkedMessage = Meteor.checkProfanity(bodyMessage);
   const message = MessagesCollection.insert(
     new Message({
       conversationId,

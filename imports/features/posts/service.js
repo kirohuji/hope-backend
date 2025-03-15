@@ -2,6 +2,7 @@ import { PostsCollection, Post } from "meteor/socialize:postable";
 import { LikesCollection, Like } from "meteor/socialize:likeable";
 import { CommentsCollection, Comment } from "meteor/socialize:commentable";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
+import Audit from "../audits/collection";
 import _ from "lodash";
 import moment from "moment";
 
@@ -51,14 +52,28 @@ export function pagination(bodyParams) {
 
 export function create({ scope, user, userId, bodyParams }) {
   const usersFeed = user.feed();
+  const body = Meteor.checkProfanity(bodyParams.body);
   const post = new Post({
     ...bodyParams,
+    body,
     posterId: userId,
     scope: scope,
     status: bodyParams.published ? "pending_review" : "draft",
     ...usersFeed.getLinkObject(),
     publishedAt: bodyParams.published ? moment(new Date()).toISOString() : "",
   }).save();
+  if(bodyParams.published){
+    new Audit({
+      sourceId: post._id,
+      userId: userId,
+      label: "发布",
+      description: "发布了一篇文章",
+      status: "in_review",
+      category: "内容分享",
+      createdBy: userId,
+      scope: scope,
+    }).save();;
+  }
   return post;
 }
 
