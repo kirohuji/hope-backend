@@ -271,10 +271,16 @@ Api.addRoute("messaging/conversations/:_id/lastMessage", {
     action: function () {
       try {
         const message = lastMessage(this.urlParams._id);
-        return {
-          ...message,
-          user: ProfilesCollection.findOne({ _id: message.userId }),
-        };
+        if(!message){
+          return {
+            ...message,
+            user: ProfilesCollection.findOne({ _id: message.userId }),
+          };
+        } else {
+          return {
+            user: {}
+          };
+        }
       } catch (e) {
         return serverError500({
           code: 500,

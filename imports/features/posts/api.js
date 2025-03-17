@@ -1,4 +1,5 @@
 import { PostsCollection, Post } from "meteor/socialize:postable";
+import Constructor from "../base/api";
 import Api from "../../api";
 import {
   pagination,
@@ -55,6 +56,23 @@ Api.addRoute("posts/:_id", {
       } catch (e) {
         console.log(e);
         return notFound404();
+      }
+    },
+  },
+  delete: {
+    authRequired: true,
+    action: function () {
+      try {
+        const post = PostsCollection.findOne({ _id: this.urlParams.id });
+        if(post){
+          PostsCollection.remove({ _id: this.urlParams.id });
+        }
+        return success200(post);
+      } catch (e) {
+        return badRequest400({
+          code: 400,
+          message: e.message,
+        });
       }
     },
   },

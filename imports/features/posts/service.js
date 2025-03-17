@@ -106,7 +106,9 @@ export function addComment({ userId, postId, bodyParams }) {
 }
 
 export function detail({ postId }) {
+  console.log('postId',postId);
   const post = PostsCollection.findOne({ _id: postId });
+  console.log('post',post);
   const user = ProfilesCollection.findOne({ _id: post.posterId });
   return {
     ...post,
