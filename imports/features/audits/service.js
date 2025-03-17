@@ -23,17 +23,42 @@ export function pagination(bodyParams) {
   );
   const data = curror.fetch();
   const createdByIds = _.map(data, "createdBy");
+  const reviewerByIds = _.map(
+    data.filter((item) => item.reviewerId),
+    "reviewerId"
+  );
   const users = ProfilesCollection.find({ _id: { $in: createdByIds } }).fetch();
+  const reviewers = ProfilesCollection.find({
+    _id: { $in: reviewerByIds },
+  }).fetch();
+  const reviewersMap = _.keyBy(reviewers, "_id");
   const userMap = _.keyBy(users, "_id");
   const enhancedData = data.map((item) => {
     const user = userMap[item.createdBy]; // 使用字典查找用户信息
+    const reviewer = reviewersMap[item.reviewerId]; // 使用字典查找用户信息
     return {
       ...item,
       createdUser: user, // 假设你要显示用户的 name
+      reviewer: reviewer,
     };
   });
   return {
     data: enhancedData,
     total: curror.count(),
   };
+}
+
+export function moderation(bodyParams) {
+  return AuditCollection.update(
+    {
+      _id: bodyParams._id,
+    },
+    {
+      $set: {
+        status: bodyParams.status,
+        reason: bodyParams.reason,
+        reviewerId: bodyParams.reviewerId,
+      },
+    }
+  );
 }
