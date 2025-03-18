@@ -1,6 +1,8 @@
 import { AuditCollection } from "./collection";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
+import { PostsCollection } from "meteor/socialize:postable";
 import _ from "lodash";
+import moment from "moment";
 
 // 分页查询数据
 export function pagination(bodyParams) {
@@ -49,6 +51,16 @@ export function pagination(bodyParams) {
 }
 
 export function moderation(bodyParams) {
+  if(bodyParams.category === "内容分享"){
+    PostsCollection.update({
+      _id: bodyParams.sourceId	,
+    }, {
+      $set: {
+        status: "published",
+        publishedAt: moment(new Date()).toISOString()
+      },
+    })
+  }
   return AuditCollection.update(
     {
       _id: bodyParams._id,

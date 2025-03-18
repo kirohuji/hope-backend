@@ -4,6 +4,7 @@ import BroadcastCollection, {
   BroadcastUserCollection,
 } from "./collection";
 import _ from "lodash";
+import moment from "moment";
 
 // 分页查询数据
 export function pagination(bodyParams) {
@@ -192,4 +193,11 @@ export function addUsers({ broadcast_id, users_id, currentUserId }) {
   //     published: false
   //   }
   // })
+}
+
+export function recent(bodyParams){
+  const oneMonthAgo = moment().subtract(1, "months").toDate(); // 计算一个月前的时间
+  return BroadcastCollection.find({
+    createdAt: { $gte: oneMonthAgo },
+  }).fetch();
 }

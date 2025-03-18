@@ -52,7 +52,7 @@ export function pagination(bodyParams) {
 
 export function create({ scope, user, userId, bodyParams }) {
   const usersFeed = user.feed();
-  const body = Meteor.checkProfanity(bodyParams.body);
+  const body = Meteor.checkProfanity(bodyParams.body, true);
   const post = new Post({
     ...bodyParams,
     body,

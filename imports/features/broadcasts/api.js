@@ -15,6 +15,7 @@ import {
   publish,
   unPublish,
   addUsers,
+  recent
 } from "./service";
 import _ from "lodash";
 import moment from "moment";
@@ -159,6 +160,19 @@ Api.addRoute("broadcasts/addUsers", {
         users_id: this.bodyParams.users_id,
         currentUserId: this.userId,
       });
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message,
+      });
+    }
+  },
+});
+
+Api.addRoute("broadcasts/recent", {
+  post: function () {
+    try {
+      return recent(this.bodyParams);
     } catch (e) {
       return serverError500({
         code: 500,

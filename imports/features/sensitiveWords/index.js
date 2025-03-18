@@ -10,19 +10,30 @@ Meteor.filter = createFilter(
     ? "/Users/lourd/Desktop/hope/hope-backend/imports/features/sensitiveWords/badwords/gfw.txt"
     : "/hope/gfw.txt"
 );
-Meteor.checkProfanity = function (bodyMessage) {
-  const decryptedMessage = CryptoJS.AES.decrypt(
-    bodyMessage,
-    secretKey
-  ).toString(CryptoJS.enc.Utf8);
-  let sanitizedText = decryptedMessage;
-  sanitizedText = Meteor.filter.filter(sanitizedText, "**");
-  if (sanitizedText !== decryptedMessage) {
+Meteor.checkProfanity = function (bodyMessage, isEncrypt) {
+  let sanitizedText = "";
+  if (isEncrypt) {
+    sanitizedText = bodyMessage;
+    sanitizedText = Meteor.filter.filter(sanitizedText, "**");
     const checkedMessage = CryptoJS.AES.encrypt(
       sanitizedText,
       secretKey
     ).toString();
     return checkedMessage;
+  } else {
+    const decryptedMessage = CryptoJS.AES.decrypt(
+      bodyMessage,
+      secretKey
+    ).toString(CryptoJS.enc.Utf8);
+    sanitizedText = decryptedMessage;
+    sanitizedText = Meteor.filter.filter(sanitizedText, "**");
+    if (sanitizedText !== decryptedMessage) {
+      const checkedMessage = CryptoJS.AES.encrypt(
+        sanitizedText,
+        secretKey
+      ).toString();
+      return checkedMessage;
+    }
+    return bodyMessage;
   }
-  return bodyMessage;
-}
+};
