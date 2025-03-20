@@ -5,6 +5,7 @@ import {
   pagination,
   create,
   like,
+  isLike,
   unlike,
   addComment,
   comments,
@@ -95,6 +96,22 @@ Api.addRoute("posts/pagination", {
 });
 
 Api.addRoute("posts/:_id/like", {
+  get: {
+    authRequired: true,
+    action: function () {
+      try {
+        return isLike({
+          userId: this.userId,
+          postId: this.urlParams._id,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
   post: {
     authRequired: true,
     action: function () {
@@ -127,7 +144,9 @@ Api.addRoute("posts/:_id/like", {
       }
     },
   },
-});
+})
+
+
 
 Api.addRoute("posts/:_id/comments", {
   post: {

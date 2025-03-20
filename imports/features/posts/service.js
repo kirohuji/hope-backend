@@ -86,6 +86,18 @@ export function like({ userId, postId }) {
   return like;
 }
 
+export function isLike({ userId, postId }) {
+  const like = LikesCollection.findOne({
+    userId: userId,
+    linkedObjectId: postId,
+  });
+  if(like){
+    return like;
+  } else {
+    return false;
+  }
+}
+
 export function unlike({ userId, postId }) {
   const like = LikesCollection.findOne({
     userId: userId,
