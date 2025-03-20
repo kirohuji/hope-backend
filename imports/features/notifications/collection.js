@@ -34,9 +34,21 @@ export default Class.create({
       type: String,
       default: "",
     },
+    scope: {
+      type: String,
+      default: "",
+    },
     type: {
       type: String,
       default: "article",
+    },
+    status: {
+      type: String,
+      allowedValues: [
+        "pending",
+        "published"
+      ],
+      default: "pending",
     },
     category: {
       type: String,
@@ -46,7 +58,15 @@ export default Class.create({
       type: String,
       default: "2023/10/23",
     },
+    createdBy: {
+      type: String,
+      default: "2023/10/23",
+    },
     publisherId: {
+      type: String,
+      default: "",
+    },
+    sendingTiming: {
       type: String,
       default: "",
     },

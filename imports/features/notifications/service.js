@@ -4,8 +4,8 @@ import _ from "lodash";
 
 // 分页查询数据
 export function pagination(bodyParams) {
-  if (bodyParams.selector && bodyParams.selector.status == "all") {
-    bodyParams.selector = _.pickBy(_.omit(bodyParams.selector, ["status"]));
+  if (bodyParams.selector && bodyParams.selector.type == "all") {
+    bodyParams.selector = _.pickBy(_.omit(bodyParams.selector, ["type"]));
   }
   if (bodyParams.selector && bodyParams.selector.category.length === 0) {
     bodyParams.selector = _.pickBy(_.omit(bodyParams.selector, ["category"]));
@@ -29,7 +29,7 @@ export function pagination(bodyParams) {
     const user = userMap[item.createdBy]; // 使用字典查找用户信息
     return {
       ...item,
-      createdUser: user && user.realName, // 假设你要显示用户的 name
+      createdUser: user, // 假设你要显示用户的 name
     };
   });
   return {

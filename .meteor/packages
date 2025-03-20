@@ -45,3 +45,4 @@ socialize:commentable
 socialize:likeable
 socialize:user-presence
 socialize:server-presence
+littledata:synced-cron

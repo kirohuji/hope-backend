@@ -1,4 +1,4 @@
-import { SyncedCron } from 'meteor/percolate:synced-cron';
+import { SyncedCron } from 'meteor/littledata:synced-cron';
 import { MessageesStorage } from '../fileServer/message';
 
 // Configure SyncedCron
