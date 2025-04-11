@@ -16,12 +16,12 @@ module.exports = {
       httpsPort: 443,
       nginxConfig: "./nginx.conf",
       env: {
-        DEFAULT_HOST: "www.lourd.top",
-        LETSENCRYPT_HOST: "www.lourd.top",
+        DEFAULT_HOST: "hope.lourd.top",
+        LETSENCRYPT_HOST: "hope.lourd.top",
         LETSENCRYPT_EMAIL: "z1309014381@gmail.com",
       },
     },
-    domains: "www.lourd.top",
+    domains: "hope.lourd.top",
     ssl: {
       forceSSL: true,
       letsEncryptEmail: "z1309014381@gmail.com",
@@ -49,7 +49,7 @@ module.exports = {
       serverOnly: true,
     },
     env: {
-      ROOT_URL: "https://www.lourd.top",
+      ROOT_URL: "https://hope.lourd.top",
       MONGO_URL: "mongodb://meteor:meteor@115.159.95.166:27017/meteor",
     },
     docker: {

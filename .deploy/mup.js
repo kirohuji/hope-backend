@@ -1,43 +1,43 @@
 module.exports = {
   servers: {
     one: {
-      host: "124.221.67.248",
-      username: "root",
-      password: "Zyd1362848650",
+      host: '192.168.50.113',
+      username: 'lourd',
+      password: 'Zyd1362848650!',
     },
   },
   proxy: {
     servers: {
       one: {},
     },
-    nginxServerConfig: "./server.conf",
+    nginxServerConfig: './server.conf',
     shared: {
       httpPort: 80,
       httpsPort: 443,
-      nginxConfig: "./nginx.conf",
+      nginxConfig: './nginx.conf',
       env: {
-        DEFAULT_HOST: "www.lourd.top",
-        LETSENCRYPT_HOST: "www.lourd.top",
-        LETSENCRYPT_EMAIL: "z1309014381@gmail.com",
+        DEFAULT_HOST: 'hope.lourd.top'
       },
     },
-    domains: "www.lourd.top",
+    domains: 'hope.lourd.top',
     ssl: {
       forceSSL: true,
-      letsEncryptEmail: "z1309014381@gmail.com",
+      crt: './hope.lourd.top_bundle.crt',
+      key: './hope.lourd.top.key',
+      // letsEncryptEmail: "z1309014381@gmail.com",
     },
   },
   app: {
     // deployCheckWaitTime: 3000,
     volumes: {
-      "/avatars": "/avatars/",
-      "/storage": "/storage/",
-      "/hope": "/hope/",
+      '/home/lourd/avatars': '/avatars/',
+      '/home/lourd/storage': '/storage/',
+      '/home/lourd/hope': '/hope/',
       // "/etc/hosts": "/etc/hosts",
       // "/etc/resolve.conf": "/etc/resolve.conf",
     },
-    name: "hope-backend",
-    path: "../",
+    name: 'hope-backend',
+    path: '../',
     servers: {
       one: {
         env: {
@@ -49,11 +49,11 @@ module.exports = {
       serverOnly: true,
     },
     env: {
-      ROOT_URL: "https://www.lourd.top",
-      MONGO_URL: "mongodb://meteor:meteor@124.221.67.248:27017/meteor",
+      ROOT_URL: 'https://hope.lourd.top',
+      MONGO_URL: 'mongodb://meteor:meteor@115.159.95.166:27017/meteor',
     },
     docker: {
-      image: "zodern/meteor:root",
+      image: 'zodern/meteor:root',
       useBuildKit: true,
       prepareBundle: true,
       // bind: "127.0.0.1",
@@ -86,8 +86,8 @@ module.exports = {
         // "RUN npm config set disturl https://npm.taobao.org/dist",
         // "RUN npm install yarn -g ",
         // "RUN npm config set phantomjs_cdnurl https://npm.taobao.org/mirrors/phantomjs/",
-        "ENV NVM_NODEJS_ORG_MIRROR=https://npmmirror.com/mirrors/node",
-        "RUN npm config set registry https://registry.npmmirror.com",
+        'ENV NVM_NODEJS_ORG_MIRROR=https://npmmirror.com/mirrors/node',
+        'RUN npm config set registry https://registry.npmmirror.com',
         // "RUN npm config set disturl https://npm.taobao.org/dist ",
         // "RUN npm config set timeout 60000",
         // "RUN npm install -g source-map-support",

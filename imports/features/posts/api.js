@@ -41,7 +41,7 @@ Api.addRoute("posts", {
         return badRequest400("Not Created");
       }
     },
-  },
+  }
 });
 
 Api.addRoute("posts/:_id", {
@@ -60,12 +60,36 @@ Api.addRoute("posts/:_id", {
       }
     },
   },
+  patch: {
+    authRequired: true,
+    action: function () {
+      try {
+        const body = Meteor.checkProfanity(this.bodyParams.body, true);
+        PostsCollection.update(
+          { _id: this.urlParams._id || this.urlParams.id },
+          {
+            $set: {
+              ...this.bodyParams,
+              body,
+            }
+          }
+        );
+        let model = PostsCollection.findOne(
+          this.urlParams._id || this.urlParams.id
+        );
+        return success200(model);
+      } catch (e) {
+        console.log(e);
+        return badRequest400("Not Created");
+      }
+    },
+  },
   delete: {
     authRequired: true,
     action: function () {
       try {
         const post = PostsCollection.findOne({ _id: this.urlParams.id });
-        if(post){
+        if (post) {
           PostsCollection.remove({ _id: this.urlParams.id });
         }
         return success200(post);
@@ -144,9 +168,7 @@ Api.addRoute("posts/:_id/like", {
       }
     },
   },
-})
-
-
+});
 
 Api.addRoute("posts/:_id/comments", {
   post: {

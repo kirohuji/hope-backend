@@ -5,7 +5,7 @@
   "redisOplog": {
     "redis": {
       "port": 6379,
-      "host": "124.221.67.248",
+      "host": "115.159.95.166",
       "password": "Zyd1362848650"
     },
     "retryIntervalMs": 10000, 
