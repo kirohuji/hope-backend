@@ -1,7 +1,7 @@
 module.exports = {
   servers: {
     one: {
-      host: '192.168.50.113',
+      host: '100.109.23.12',
       username: 'lourd',
       password: 'Zyd1362848650!',
     },

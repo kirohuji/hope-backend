@@ -17,7 +17,7 @@ import "./files";
 import "./audits";
 import "./sensitiveWords";
 import "./aiModels";
-import "./bpmns";
+// import "./bpmns";
 import "./posts";
 import "./services";
 import "./memberships";
