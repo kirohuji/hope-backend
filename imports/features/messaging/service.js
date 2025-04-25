@@ -433,6 +433,7 @@ export function sendMessage({ conversationId, userId, bodyParams }) {
       body: bodyParams.body,
       contentType: bodyParams.contentType,
       conversationId,
+      excludeIds: [userId],
     });
   }
   return message;

@@ -63,13 +63,14 @@ function createNotification({
   };
 }
 
-function sendPushNotification({ contentType, body, conversationId }) {
+function sendPushNotification({ contentType, body, conversationId, excludeIds }) {
   let userIds = ConversationsCollection.findOne({ _id: conversationId })
     .participantsAsUsers()
     .map(item => item._id);
   const userTokens = PushNotificationTokenCollection.find({
     userId: {
       $in: userIds,
+      $nin: excludeIds,
     },
     status: 'deactive',
   }).fetch();
