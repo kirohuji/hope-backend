@@ -270,8 +270,8 @@ Api.addRoute("messaging/conversations/:_id/lastMessage", {
     authRequired: true,
     action: function () {
       try {
-        const message = lastMessage(this.urlParams._id);
-        if(!message){
+        const message = lastMessage(this.urlParams._id || this.bodyParams.id);
+        if(message){
           return {
             ...message,
             user: ProfilesCollection.findOne({ _id: message.userId }),
@@ -495,6 +495,7 @@ Api.addRoute("messaging/conversations/:_id/addParticipants", {
     authRequired: true,
     action: function () {
       try {
+        console.log(this.bodyParams)
         return addParticipants({
           conversationId: this.urlParams._id,
           participants: this.bodyParams.participants,
@@ -751,10 +752,12 @@ Meteor.publish(
         _id: userId,
       });
       if (user?.isParticipatingIn(conversationId)) {
-        console.log("1");
         return MessagesCollection.find(
           {
             conversationId: conversationId,
+            userId: {
+              $ne: userId,
+            },
             createdAt: {
               $gte: date,
             },

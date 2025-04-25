@@ -13,14 +13,19 @@ export function pagination(bodyParams) {
 }
 
 export function active(id) {
+  const version = VersionsCollection.findOne({ _id: id });
+  if (!version) {
+    throw new Error('Version not found');
+  }
+  
   VersionsCollection.update(
     { isActive: true },
     { $set: { isActive: false } },
     { multi: true }
   );
   return VersionsCollection.update(
-    {  _id: id },
-    { $set: {isActive: true} },
+    { _id: id },
+    { $set: { isActive: !version.isActive } }
   );
 }
 

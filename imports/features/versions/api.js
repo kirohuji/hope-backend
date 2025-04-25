@@ -32,6 +32,7 @@ Api.addRoute("versions/current", {
   },
 });
 
+
 Api.addRoute("versions/active", {
   post: function () {
     try {
@@ -45,7 +46,7 @@ Api.addRoute("versions/active", {
   },
   get: function () {
     try {
-      return getActive();
+      return getActive() || {};
     } catch (e) {
       return serverError500({
         code: 500,
