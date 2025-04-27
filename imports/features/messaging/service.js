@@ -4,11 +4,11 @@ import {
   ParticipantsCollection,
   Message,
   MessagesCollection,
-} from "meteor/socialize:messaging";
-import { ProfilesCollection } from "meteor/socialize:user-profile";
-import _ from "lodash";
-import { PushNotificationTokenCollection } from "./collection";
-import moment from "moment";
+} from 'meteor/socialize:messaging';
+import { ProfilesCollection } from 'meteor/socialize:user-profile';
+import _ from 'lodash';
+import { PushNotificationTokenCollection } from './collection';
+import moment from 'moment';
 // const firebaseAdmin = require('firebase-admin');
 // const serviceAccount = require('./hopehome-12650-firebase-adminsdk-ornad-b1abbd59c9.json');
 
@@ -17,21 +17,21 @@ import moment from "moment";
 // });
 
 const huaweiConfig = {
-  appId: "113475539",
-  appSecret: "d3036c59f4ed320bd6e7c1eb6f73ba91b62a3dba5a436a7928140020d18dd20a",
+  appId: '113475539',
+  appSecret: 'd3036c59f4ed320bd6e7c1eb6f73ba91b62a3dba5a436a7928140020d18dd20a',
 };
-const HUAWEI_TOKEN_URL = "https://oauth-login.cloud.huawei.com/oauth2/v3/token";
+const HUAWEI_TOKEN_URL = 'https://oauth-login.cloud.huawei.com/oauth2/v3/token';
 
 async function getHuaweiAccessToken() {
   try {
     const params = new URLSearchParams();
-    params.append("grant_type", "client_credentials");
-    params.append("client_id", huaweiConfig.appId);
-    params.append("client_secret", huaweiConfig.appSecret);
+    params.append('grant_type', 'client_credentials');
+    params.append('client_id', huaweiConfig.appId);
+    params.append('client_secret', huaweiConfig.appSecret);
 
     const response = await fetch(HUAWEI_TOKEN_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: params.toString(),
     });
 
@@ -42,7 +42,7 @@ async function getHuaweiAccessToken() {
     const data = await response.json();
     return data.access_token;
   } catch (error) {
-    console.error("获取华为 Access Token 失败:", error.message);
+    console.error('获取华为 Access Token 失败:', error.message);
     throw error;
   }
 }
@@ -63,10 +63,10 @@ export async function sendHuaweiPush({
       message: {
         data: JSON.stringify({
           title: profile.displayName,
-          body: contentType === "text" ? body : "对方发送了一张图片给你",
-          sound: "default",
+          body: contentType === 'text' ? body : '对方发送了一张图片给你',
+          sound: 'default',
           launchImage: profile.photoURL,
-          topic: "lourd.hope.app", // iOS app 的 bundle id
+          topic: 'lourd.hope.app', // iOS app 的 bundle id
           badge: MessagesCollection.find({
             conversationId,
             readedIds: { $nin: [userToken.userId] },
@@ -75,14 +75,14 @@ export async function sendHuaweiPush({
         token: [userToken.token],
       },
     };
-    console.log("payload", payload);
+    console.log('payload', payload);
 
     const url = `https://push-api.cloud.huawei.com/v1/${appId}/messages:send`;
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
     });
@@ -96,15 +96,15 @@ export async function sendHuaweiPush({
     }
     return true;
   } catch (error) {
-    console.error("推送失败:", error.message);
-    throw new Meteor.Error("push-failed", error.message);
+    console.error('推送失败:', error.message);
+    throw new Meteor.Error('push-failed', error.message);
   }
 }
 
 export function uuidv4() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0,
-      v = c === "x" ? r : (r & 0x3) | 0x8;
+      v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
@@ -137,7 +137,7 @@ export function updateConversations({ conversationId, label }) {
         $set: {
           label,
         },
-      }
+      },
     );
   }
   return 0;
@@ -147,7 +147,7 @@ export function updateConversations({ conversationId, label }) {
 export function getConversationsById({ userId, conversationId }) {
   let conversation = ConversationsCollection.findOne({ _id: conversationId });
   if (!conversation) {
-    throw new Error("不存在的会话!");
+    throw new Error('不存在的会话!');
   }
   const unreadCount = MessagesCollection.find({
     conversationId,
@@ -159,7 +159,7 @@ export function getConversationsById({ userId, conversationId }) {
     ...conversation,
     messages: [],
     unreadCount,
-    type: conversation?._participants.length > 2 ? "GROUP" : "ONE_TO_ONE",
+    type: conversation?._participants.length > 2 ? 'GROUP' : 'ONE_TO_ONE',
     participants: ProfilesCollection.find({
       _id: { $in: conversation._participants },
     }).fetch(),
@@ -197,7 +197,7 @@ export function findExistingConversationWithUsers({ userId, users }) {
         $set: {
           isRemove: false,
         },
-      }
+      },
     );
   }
   return conversation ? conversation._id : -1;
@@ -219,20 +219,24 @@ export function isReadOnly(conversationId) {
 
 // 获取会话的消息
 export function messages({ userId, conversationId, bodyParams }) {
-  let result = ConversationsCollection.findOne({ _id: conversationId })
-    .messages(bodyParams.options || {})
-    .map((item) => {
-      return {
-        ...item,
-        body: item.body,
-        contentType: item.contentType || "text",
-        senderId: item.userId,
-      };
-    });
+  let result = MessagesCollection.find(
+    {
+      conversationId,
+      deleteIds: { $nin: [userId] },
+    },
+    bodyParams.options,
+  ).map(item => {
+    return {
+      ...item,
+      body: item.body,
+      contentType: item.contentType || 'text',
+      senderId: item.userId,
+    };
+  });
   MessagesCollection.update(
     {
       conversationId,
-      _id: { $in: result.map((item) => item._id) },
+      _id: { $in: result.map(item => item._id) },
       readedIds: { $ne: userId },
     },
     {
@@ -240,15 +244,15 @@ export function messages({ userId, conversationId, bodyParams }) {
         readedIds: userId,
       },
     },
-    { multi: true }
+    { multi: true },
   );
   return result;
 }
 
 export function messagesWithDate({ date, conversationId, bodyParams }) {
   const dateTime = moment(date);
-  const today = moment(dateTime).startOf("day");
-  const tomorrow = moment(dateTime).endOf("day");
+  const today = moment(dateTime).startOf('day');
+  const tomorrow = moment(dateTime).endOf('day');
   let messages = MessagesCollection.find(
     {
       conversationId: conversationId,
@@ -257,12 +261,12 @@ export function messagesWithDate({ date, conversationId, bodyParams }) {
         $lt: tomorrow.toDate(),
       },
     },
-    bodyParams.options
-  ).map((item) => {
+    bodyParams.options,
+  ).map(item => {
     return {
       ...item,
       body: item.body,
-      contentType: item.contentType || "text",
+      contentType: item.contentType || 'text',
       senderId: item.userId,
     };
   });
@@ -274,7 +278,7 @@ export function attachments({ conversationId }) {
   return MessagesCollection.find({
     conversationId,
     attachments: { $exists: true, $elemMatch: { $exists: true } },
-  }).map((item) => item.attachments);
+  }).map(item => item.attachments);
 }
 
 // 获取当前会话的最后一条消息
@@ -288,7 +292,7 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
     _id: lastId,
   });
   if (!message) {
-    throw new Error("消息不存在");
+    throw new Error('消息不存在');
   }
 
   let messagesIds = MessagesCollection.find({
@@ -296,7 +300,7 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
     createdAt: {
       $gte: message.createdAt,
     },
-  }).map((msg) => msg._id);
+  }).map(msg => msg._id);
   let update = MessagesCollection.update(
     {
       _id: {
@@ -309,18 +313,18 @@ export function lastMessageByLastId({ userId, lastId, conversationId }) {
         readedIds: userId,
       },
     },
-    { multi: true }
+    { multi: true },
   );
   return MessagesCollection.find({
     conversationId,
     createdAt: {
       $gte: message.createdAt,
     },
-  }).map((item) => {
+  }).map(item => {
     return {
       ...item,
       body: item.body,
-      contentType: item.contentType || "text",
+      contentType: item.contentType || 'text',
       senderId: item.userId,
     };
   });
@@ -336,19 +340,19 @@ export function updateMessage({ label, messageId, text }) {
         label: label,
         body: text,
       },
-    }
+    },
   );
 }
 
 export function savePushNotificationToken({ userId, token, device, deviceId }) {
   check(token, String);
   const isExsist = PushNotificationTokenCollection.findOne({
-    "deviceId.identifier": deviceId?.identifier,
+    'deviceId.identifier': deviceId?.identifier,
   });
   if (isExsist && isExsist.userId !== userId) {
     return PushNotificationTokenCollection.update(
       {
-        "deviceId.identifier": deviceId?.identifier,
+        'deviceId.identifier': deviceId?.identifier,
       },
       {
         $set: {
@@ -358,7 +362,7 @@ export function savePushNotificationToken({ userId, token, device, deviceId }) {
           device,
           deviceId,
         },
-      }
+      },
     );
   } else if (!isExsist) {
     return PushNotificationTokenCollection.insert({
@@ -373,19 +377,19 @@ export function savePushNotificationToken({ userId, token, device, deviceId }) {
 export function updateDeviceStatus({ userId, status, deviceId }) {
   const isExsist = PushNotificationTokenCollection.findOne({
     userId,
-    "deviceId.identifier": deviceId?.identifier,
+    'deviceId.identifier': deviceId?.identifier,
   });
   if (isExsist) {
     PushNotificationTokenCollection.update(
       {
         userId,
-        "deviceId.identifier": deviceId?.identifier,
+        'deviceId.identifier': deviceId?.identifier,
       },
       {
         $set: {
           status,
         },
-      }
+      },
     );
   }
 }
@@ -426,10 +430,10 @@ export function sendMessage({ conversationId, userId, bodyParams }) {
       extendAutoValueContext: {
         userId,
       },
-    }
+    },
   );
   if (message) {
-    Meteor.call("queue.addNotification", {
+    Meteor.call('queue.addNotification', {
       body: bodyParams.body,
       contentType: bodyParams.contentType,
       conversationId,
@@ -477,7 +481,7 @@ export function createNewConversations({
         $set: {
           isRemove: false,
         },
-      }
+      },
     );
     return conversation;
   }
@@ -494,7 +498,7 @@ export function createNewConversations({
           sessionId: uuidv4(),
           createdBy: userId,
         },
-      }
+      },
     );
   } else {
     ConversationsCollection.update(
@@ -505,7 +509,7 @@ export function createNewConversations({
         $set: {
           createdBy: userId,
         },
-      }
+      },
     );
   }
   const users = Meteor.users.find({ _id: { $in: participants } }).fetch();
@@ -524,7 +528,7 @@ export function getConversationsByCurrentUser(user, ids) {
       $or: [{ isRemove: false }, { isRemove: { $exists: false } }],
     })
       .fetch()
-      .map((item) => {
+      .map(item => {
         return {
           ...item,
           messages: [
@@ -536,7 +540,7 @@ export function getConversationsByCurrentUser(user, ids) {
               $nin: [user._id],
             },
           }).count(),
-          type: item._participants.length > 2 ? "GROUP" : "ONE_TO_ONE",
+          type: item._participants.length > 2 ? 'GROUP' : 'ONE_TO_ONE',
           participants: ProfilesCollection.find(
             { _id: { $in: item._participants } },
             {
@@ -549,7 +553,7 @@ export function getConversationsByCurrentUser(user, ids) {
                 address: 1,
                 phoneNumber: 1,
               },
-            }
+            },
           ).fetch(),
         };
       });
@@ -565,7 +569,7 @@ export function getConversationsByCurrentUser(user, ids) {
     },
   })
     .fetch()
-    .map((item) => {
+    .map(item => {
       return {
         ...item,
         messages: [
@@ -577,7 +581,7 @@ export function getConversationsByCurrentUser(user, ids) {
             $nin: [user._id],
           },
         }).count(),
-        type: item._participants.length > 2 ? "GROUP" : "ONE_TO_ONE",
+        type: item._participants.length > 2 ? 'GROUP' : 'ONE_TO_ONE',
         participants: ProfilesCollection.find(
           { _id: { $in: item._participants } },
           {
@@ -590,7 +594,7 @@ export function getConversationsByCurrentUser(user, ids) {
               address: 1,
               phoneNumber: 1,
             },
-          }
+          },
         ).fetch(),
       };
     });
@@ -605,10 +609,23 @@ export function updateReadState({ conversationId, status }) {
 
 // 根据会话 id添加一组参与者
 export function addParticipants({ conversationId, participants }) {
+  const conversation = ConversationsCollection.findOne({ _id: conversationId });
+  if (!conversation) {
+    throw new Error('会话不存在');
+  }
+
   const users = Meteor.users.find({ _id: { $in: participants } }).fetch();
-  return ConversationsCollection.findOne({
-    _id: conversationId,
-  }).addParticipants(users);
+  if (!users || users.length === 0) {
+    throw new Error('用户不存在');
+  }
+
+  // 检查是否所有参与者都找到了
+  if (users.length !== participants.length) {
+    throw new Error('部分用户不存在');
+  }
+
+  conversation.addParticipants(users);
+  return true;
 }
 
 // 根据会话 id添加参与者
@@ -655,9 +672,9 @@ export function participantsAsUsers(conversationId) {
     _id: {
       $in: ConversationsCollection.findOne({ _id: conversationId })
         .participantsAsUsers()
-        .map((item) => item._id),
+        .map(item => item._id),
     },
-  }).map((item) => {
+  }).map(item => {
     return {
       ...item,
       // status: "busy",
@@ -690,14 +707,14 @@ export function getConversations(userId) {
   return Meteor.users
     .findOne({ _id: userId })
     .fetch()
-    .map((item) => {
+    .map(item => {
       return {
         ...item,
         messages: [
           ConversationsCollection.findOne({ _id: item._id }).lastMessage(),
         ],
         unreadCount: 0,
-        type: item._participants.length > 2 ? "GROUP" : "ONE_TO_ONE",
+        type: item._participants.length > 2 ? 'GROUP' : 'ONE_TO_ONE',
         participants: ProfilesCollection.find({
           _id: { $in: item._participants },
         }).fetch(),
@@ -716,17 +733,37 @@ export function isParticipatingIn({ participantId, userId }) {
 }
 
 // 软删除会话
-export function softRemoveConversation(conversationId) {
-  return ConversationsCollection.update(
-    {
-      _id: conversationId,
-    },
-    {
-      $set: {
-        isRemove: true,
+export function softRemoveConversation(conversationId, userId) {
+  const conversation = ConversationsCollection.findOne({ _id: conversationId });
+  if (!conversation) {
+    throw new Error('会话不存在');
+  }
+  if (conversation._participants.length > 2) {
+    return removeConversations(conversationId);
+  } else {
+    MessagesCollection.update(
+      {
+        conversationId,
       },
-    }
-  );
+      {
+        $addToSet: {
+          deleteIds: userId,
+        },
+      },
+      { multi: true },
+    );
+
+    return ConversationsCollection.update(
+      {
+        _id: conversationId,
+      },
+      {
+        $set: {
+          isRemove: true,
+        },
+      },
+    );
+  }
 }
 
 // 软删除会话
@@ -741,7 +778,7 @@ export function getConversationsByParticipantIds({
     _participants: {
       $all: _.uniq([...participants, userId]),
     },
-  }).map((item) => ({
+  }).map(item => ({
     ...item,
     participants: ProfilesCollection.find(
       { _id: { $in: _.uniq([...participants, userId]) } },
@@ -755,7 +792,7 @@ export function getConversationsByParticipantIds({
           address: 1,
           phoneNumber: 1,
         },
-      }
+      },
     ).fetch(),
   }));
 }

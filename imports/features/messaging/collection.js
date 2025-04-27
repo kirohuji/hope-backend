@@ -68,6 +68,13 @@ Message.attachSchema({
   "readedIds.$": {
     type: String,
   },
+  deleteIds: {
+    type: Array,
+    optional: true,
+  },
+  "deleteIds.$": {
+    type: String,
+  },
   attachments: {
     type: Array,
     optional: true,

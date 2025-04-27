@@ -214,7 +214,12 @@ Api.addRoute("messaging/conversations/:_id/messages", {
         return messages({
           userId: this.userId,
           conversationId: this.urlParams._id,
-          bodyParams: this.bodyParams,
+          bodyParams: {
+            ...this.bodyParams,
+            deleteIds: {
+              $nin: [this.userId],
+            }
+          },
         });
       } catch (e) {
         return serverError500({
@@ -495,7 +500,6 @@ Api.addRoute("messaging/conversations/:_id/addParticipants", {
     authRequired: true,
     action: function () {
       try {
-        console.log(this.bodyParams)
         return addParticipants({
           conversationId: this.urlParams._id,
           participants: this.bodyParams.participants,
@@ -722,7 +726,7 @@ Api.addRoute("messaging/conversations/delete/:_id", {
     authRequired: true,
     action: function () {
       try {
-        return softRemoveConversation(this.urlParams._id);
+        return softRemoveConversation(this.urlParams._id, this.userId);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -732,12 +736,6 @@ Api.addRoute("messaging/conversations/delete/:_id", {
     },
   },
 });
-
-const optionsArgumentCheck = {
-  limit: Match.Optional(Number),
-  skip: Match.Optional(Number),
-  sort: Match.Optional(Object),
-};
 
 Meteor.publish(
   "socialize.messagesFor2",
@@ -760,6 +758,9 @@ Meteor.publish(
             },
             createdAt: {
               $gte: date,
+            },
+            deleteIds: {
+              $nin: [userId],
             },
           },
           {
@@ -785,6 +786,9 @@ Meteor.publish("socialize.unreadCount", function publishMessageFor(userId) {
         conversationId: item._id,
         unreadCount: MessagesCollection.find({
           conversationId: item._id,
+          deleteIds: {
+            $nin: [userId],
+          },
           readedIds: {
             $nin: [user._id],
           },
