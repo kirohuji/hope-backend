@@ -111,6 +111,8 @@ export function uuidv4() {
 
 // 删除会话
 export function removeConversations(conversationId) {
+  MessagesCollection.remove({ conversationId });
+  ParticipantsCollection.remove({ conversationId });
   return ConversationsCollection.remove({ _id: conversationId });
 }
 

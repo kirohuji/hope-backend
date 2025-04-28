@@ -450,6 +450,7 @@ Api.addRoute('roles/getChildrenRoleNamesWithUser', {
           .find({
             type: this.bodyParams.type,
             root: true,
+            scope: this.bodyParams._id
           })
           .fetch();
         return roles;
