@@ -6,7 +6,7 @@ import { ArticleUserCollection } from "../articles/collection";
 import { BookUserCollection } from "../books/collection";
 import { BroadcastUserCollection } from "../broadcasts/collection";
 import { EventUserCollection } from "../events/collection";
-import { MembershipCollection } from "../memberships/collection";
+import { MembershipCollection, MembershipTypeCollection } from "../memberships/collection";
 import { NotificationUserCollection } from "../notifications/collection";
 import _ from "lodash";
 
@@ -129,13 +129,19 @@ export function infoByCurrent({ userId, user }) {
     )
     .fetch();
   const permissions = roles.filter((item) => item.type === "permission");
-  const membership = MembershipCollection.findOne({ _id: userId }) || {};
+  const membership = MembershipCollection.findOne({ userId: userId }) || {};
+  const membershipType = MembershipTypeCollection.findOne({
+    _id: membership.membershipTypeId,
+  }) || {};
   return {
     user: _.omit(user, ["services"]),
     profile: user.profile(),
     roles: roles.filter((item) => item.type !== "permission"),
     permissions: permissions.map((item) => item),
-    membership: membership,
+    membership: {
+      ...membership,
+      membershipType: membershipType,
+    },
   };
 }
 

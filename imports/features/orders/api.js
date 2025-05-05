@@ -5,7 +5,7 @@ import Model, {
   OrderItemCollection,
   OrderCollection,
 } from "./collection";
-import { pagination, info } from "./service";
+import { pagination, info, getUserOrders } from "./service";
 import _ from "lodash";
 
 Api.addCollection(OrderCollection, {
@@ -43,5 +43,21 @@ Api.addRoute("orders/:_id", {
         message: e.message,
       });
     }
+  },
+});
+
+Api.addRoute("orders/info", {
+  get: {
+    authRequired: true,
+    action: function () {
+      try {
+        return getUserOrders(this.userId);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
   },
 });

@@ -49,6 +49,39 @@ export default Class.create({
       type: String,
       default: "",
     },
+    type: {
+      type: String,
+      optional: true,
+    },
+    amount: {
+      type: Number,
+      optional: true,
+    },
+    currency: {
+      type: String,
+      default: "CNY",
+      optional: true,
+    },
+    paymentMethod: {
+      type: String,
+      optional: true,
+    },
+    transactionId: {
+      type: String,
+      optional: true,
+    },
+    metadata: {
+      type: Object,
+      optional: true,
+    },
+    membershipId: {
+      type: String,
+      optional: true,
+    },
+    membershipType: {
+      type: String,
+      optional: true,
+    },
   },
   behaviors: {
     timestamp: {
