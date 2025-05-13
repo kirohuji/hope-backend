@@ -4305,6 +4305,231 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Notifications(通知)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/notifications/pagination",
+							"host": ["{{server}}"],
+							"path": ["notifications", "pagination"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Model",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/notifications/model",
+							"host": ["{{server}}"],
+							"path": ["notifications", "model"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Files(文件)",
+			"item": [
+				{
+					"name": "current",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/files/current",
+							"host": ["{{server}}"],
+							"path": ["files", "current"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"test file\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/files/current",
+							"host": ["{{server}}"],
+							"path": ["files", "current"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"updated file\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/files/current/{{file_id}}",
+							"host": ["{{server}}"],
+							"path": ["files", "current", "{{file_id}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/files/current/{{file_id}}",
+							"host": ["{{server}}"],
+							"path": ["files", "current", "{{file_id}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "check",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"test file\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/files/check",
+							"host": ["{{server}}"],
+							"path": ["files", "check"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Events(日程)",
+			"item": [
+				{
+					"name": "current",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/events/current",
+							"host": ["{{server}}"],
+							"path": ["events", "current"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Event\",\n    \"startDate\": \"2024-03-20T00:00:00Z\",\n    \"endDate\": \"2024-03-21T00:00:00Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/events/current",
+							"host": ["{{server}}"],
+							"path": ["events", "current"]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }

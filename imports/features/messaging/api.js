@@ -2,12 +2,8 @@ import Api from "../../api";
 import _ from "lodash";
 import {
   ConversationsCollection,
-  ParticipantsCollection,
   MessagesCollection,
 } from "meteor/socialize:messaging";
-import { ProfilesCollection } from "meteor/socialize:user-profile";
-import { publishComposite } from "meteor/reywood:publish-composite";
-import { User } from "meteor/socialize:user-model";
 import {
   handleConversationDelete,
   handleConversationUpdate,

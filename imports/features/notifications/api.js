@@ -11,7 +11,12 @@ import { ProfilesCollection } from 'meteor/socialize:user-profile';
 import Constructor from '../base/api';
 import _ from 'lodash';
 import { serverError500 } from '../base/api';
-import { pagination } from './service';
+import { 
+  handlePagination,
+  handleCurrentPagination,
+  handleCheckRead,
+  handleGetOverview,
+} from './service';
 import { publishComposite } from 'meteor/reywood:publish-composite';
 import { PushNotificationTokenCollection } from '../messaging/collection';
 import Bull from 'bull';
@@ -117,11 +122,11 @@ queue.process(async job => {
   sendPushNotification({ ...job.data });
 });
 
-Meteor.methods({
-  'queue.addNotification'(data) {
-    queue.add(data);
-  },
-});
+// Meteor.methods({
+//   'queue.addNotification'(data) {
+//     queue.add(data);
+//   },
+// });
 
 Api.addCollection(NotificationCollection);
 
@@ -130,7 +135,7 @@ Constructor('notifications', Model);
 Api.addRoute('notifications/pagination', {
   post: function () {
     try {
-      return pagination(this.bodyParams);
+      return handlePagination(this.bodyParams);
     } catch (e) {
       return serverError500({
         code: 500,
@@ -145,40 +150,11 @@ Api.addRoute('notifications/current/pagination', {
     authRequired: true,
     action: function () {
       try {
-        const notificationUsers = NotificationUserCollection.find(
-          {
-            userId: this.userId,
-            isRemove: false,
-            ...this.bodyParams.selector,
-          },
-          {
-            ...this.bodyParams.options,
-            fields: { notificationId: 1, isUnRead: 1, isRemove: 1 },
-          },
-        ).fetch();
-
-        console.log('notificationUsers', notificationUsers);
-        const notificationIds = notificationUsers.map(
-          item => item.notificationId,
-        );
-
-        const notifications = NotificationCollection.find(
-          {
-            _id: { $in: notificationIds },
-          },
-          {
-            ...this.bodyParams.options,
-          },
-        ).map(notification => {
-          const notificationUser = notificationUsers.find(
-            item => item.notificationId === notification._id,
-          );
-          return {
-            ...notification,
-            isUnRead: notificationUser.isUnRead,
-          };
+        return handleCurrentPagination({
+          userId: this.userId,
+          selector: this.bodyParams.selector,
+          options: this.bodyParams.options
         });
-        return notifications;
       } catch (e) {
         return serverError500({
           code: 500,
@@ -194,17 +170,10 @@ Api.addRoute('notifications/current/checkRead/:_id', {
     authRequired: true,
     action: function () {
       try {
-        return NotificationUserCollection.update(
-          {
-            notificationId: this.urlParams._id,
-            userId: this.userId,
-          },
-          {
-            $set: {
-              isUnRead: false,
-            },
-          },
-        );
+        return handleCheckRead({
+          notificationId: this.urlParams._id,
+          userId: this.userId
+        });
       } catch (e) {
         return serverError500({
           code: 500,
@@ -220,28 +189,7 @@ Api.addRoute('notifications/current/overview', {
     authRequired: true,
     action: function () {
       try {
-        return NotificationUserCollection.rawCollection()
-          .aggregate([
-            {
-              $match: { userId: this.userId, isRemove: false },
-            },
-            {
-              $group: {
-                _id: '$isUnRead',
-                count: { $sum: 1 },
-              },
-            },
-            {
-              $project: {
-                _id: 0,
-                value: {
-                  $cond: { if: '$_id', then: 'unread', else: 'archived' },
-                },
-                count: 1,
-              },
-            },
-          ])
-          .toArray();
+        return handleGetOverview(this.userId);
       } catch (e) {
         return serverError500({
           code: 500,
