@@ -798,3 +798,362 @@ export function getConversationsByParticipantIds({
     ).fetch(),
   }));
 }
+
+// API service functions with error handling
+export const handleConversationDelete = (conversationId) => {
+  try {
+    return removeConversations(conversationId);
+  } catch (error) {
+    throw new Error(`Failed to delete conversation: ${error.message}`);
+  }
+};
+
+export const handleConversationUpdate = ({ conversationId, ...updateData }) => {
+  try {
+    return updateConversations({
+      conversationId,
+      ...updateData
+    });
+  } catch (error) {
+    throw new Error(`Failed to update conversation: ${error.message}`);
+  }
+};
+
+export const handleGetConversationById = ({ userId, conversationId }) => {
+  try {
+    return getConversationsById({
+      userId,
+      conversationId
+    });
+  } catch (error) {
+    throw new Error(`Failed to get conversation: ${error.message}`);
+  }
+};
+
+export const handleUnreadConversations = ({ user, bodyParams }) => {
+  try {
+    return unreadConversations({
+      user,
+      bodyParams
+    });
+  } catch (error) {
+    throw new Error(`Failed to get unread conversations: ${error.message}`);
+  }
+};
+
+export const handleNewestConversation = ({ user }) => {
+  try {
+    return newestConversation({ user });
+  } catch (error) {
+    throw new Error(`Failed to get newest conversation: ${error.message}`);
+  }
+};
+
+export const handleIsObserving = ({ user, _id }) => {
+  try {
+    return isObserving({ user, _id });
+  } catch (error) {
+    throw new Error(`Failed to check observing status: ${error.message}`);
+  }
+};
+
+export const handleFindExistingConversation = ({ userId, users }) => {
+  try {
+    return findExistingConversationWithUsers({ userId, users });
+  } catch (error) {
+    throw new Error(`Failed to find existing conversation: ${error.message}`);
+  }
+};
+
+export const handleIsUnread = ({ conversationId, userId }) => {
+  try {
+    return isUnread({ conversationId, userId });
+  } catch (error) {
+    throw new Error(`Failed to check unread status: ${error.message}`);
+  }
+};
+
+export const handleIsReadOnly = (conversationId) => {
+  try {
+    return isReadOnly(conversationId);
+  } catch (error) {
+    throw new Error(`Failed to check read-only status: ${error.message}`);
+  }
+};
+
+export const handleGetMessages = ({ userId, conversationId, bodyParams }) => {
+  try {
+    return messages({
+      userId,
+      conversationId,
+      bodyParams
+    });
+  } catch (error) {
+    throw new Error(`Failed to get messages: ${error.message}`);
+  }
+};
+
+export const handleGetMessagesWithDate = ({ date, conversationId, bodyParams }) => {
+  try {
+    return messagesWithDate({
+      date,
+      conversationId,
+      bodyParams
+    });
+  } catch (error) {
+    throw new Error(`Failed to get messages with date: ${error.message}`);
+  }
+};
+
+export const handleGetAttachments = (conversationId) => {
+  try {
+    return attachments(conversationId);
+  } catch (error) {
+    throw new Error(`Failed to get attachments: ${error.message}`);
+  }
+};
+
+export const handleGetLastMessage = (conversationId) => {
+  try {
+    const message = lastMessage(conversationId);
+    if (message) {
+      return {
+        ...message,
+        user: ProfilesCollection.findOne({ _id: message.userId })
+      };
+    }
+    return { user: {} };
+  } catch (error) {
+    throw new Error(`Failed to get last message: ${error.message}`);
+  }
+};
+
+export const handleGetLastMessageByLastId = ({ userId, lastId, conversationId }) => {
+  try {
+    return lastMessageByLastId({
+      userId,
+      lastId,
+      conversationId
+    });
+  } catch (error) {
+    throw new Error(`Failed to get last message by last ID: ${error.message}`);
+  }
+};
+
+export const handleSendMessage = ({ conversationId, userId, bodyParams }) => {
+  try {
+    const messageId = sendMessage({
+      conversationId,
+      userId,
+      bodyParams
+    });
+    if (messageId) {
+      const message = MessagesCollection.findOne({ _id: messageId });
+      return {
+        ...message,
+        senderId: message.userId
+      };
+    }
+  } catch (error) {
+    throw new Error(`Failed to send message: ${error.message}`);
+  }
+};
+
+export const handleSavePushToken = ({ userId, token, device, deviceId }) => {
+  try {
+    return savePushNotificationToken({
+      userId,
+      token,
+      device,
+      deviceId
+    });
+  } catch (error) {
+    throw new Error(`Failed to save push token: ${error.message}`);
+  }
+};
+
+export const handleUpdateDeviceStatus = ({ userId, status, deviceId }) => {
+  try {
+    return updateDeviceStatus({
+      userId,
+      status,
+      deviceId
+    });
+  } catch (error) {
+    throw new Error(`Failed to update device status: ${error.message}`);
+  }
+};
+
+export const handleCreateConversation = ({ isSession, sessionId, participants, userId }) => {
+  try {
+    return createNewConversations({
+      isSession,
+      sessionId,
+      participants,
+      userId
+    });
+  } catch (error) {
+    throw new Error(`Failed to create conversation: ${error.message}`);
+  }
+};
+
+export const handleGetConversationsByParticipantIds = ({ participants, userId, isSession }) => {
+  try {
+    return getConversationsByParticipantIds({
+      participants,
+      userId,
+      isSession
+    });
+  } catch (error) {
+    throw new Error(`Failed to get conversations by participant IDs: ${error.message}`);
+  }
+};
+
+export const handleGetConversationsByCurrentUser = (user, ids) => {
+  try {
+    return getConversationsByCurrentUser(user, ids);
+  } catch (error) {
+    throw new Error(`Failed to get conversations by current user: ${error.message}`);
+  }
+};
+
+export const handleUpdateReadState = ({ conversationId, status }) => {
+  try {
+    return updateReadState({
+      conversationId,
+      status
+    });
+  } catch (error) {
+    throw new Error(`Failed to update read state: ${error.message}`);
+  }
+};
+
+export const handleAddParticipants = ({ conversationId, participants }) => {
+  try {
+    return addParticipants({
+      conversationId,
+      participants
+    });
+  } catch (error) {
+    throw new Error(`Failed to add participants: ${error.message}`);
+  }
+};
+
+export const handleRemoveParticipants = ({ conversationId, participants }) => {
+  try {
+    return removeParticipants({
+      conversationId,
+      participants
+    });
+  } catch (error) {
+    throw new Error(`Failed to remove participants: ${error.message}`);
+  }
+};
+
+export const handleAddParticipant = ({ conversationId, participant }) => {
+  try {
+    return addParticipant({
+      conversationId,
+      participant
+    });
+  } catch (error) {
+    throw new Error(`Failed to add participant: ${error.message}`);
+  }
+};
+
+export const handleRemoveParticipant = ({ conversationId, participant }) => {
+  try {
+    return removeParticipant({
+      conversationId,
+      participant
+    });
+  } catch (error) {
+    throw new Error(`Failed to remove participant: ${error.message}`);
+  }
+};
+
+export const handleGetParticipants = (conversationId) => {
+  try {
+    return participants(conversationId);
+  } catch (error) {
+    throw new Error(`Failed to get participants: ${error.message}`);
+  }
+};
+
+export const handleGetParticipantsAsUsers = (conversationId) => {
+  try {
+    return participantsAsUsers(conversationId);
+  } catch (error) {
+    throw new Error(`Failed to get participants as users: ${error.message}`);
+  }
+};
+
+export const handleGetConversationByParticipantId = (participantId) => {
+  try {
+    return conversationByParticipantId(participantId);
+  } catch (error) {
+    throw new Error(`Failed to get conversation by participant ID: ${error.message}`);
+  }
+};
+
+export const handleGetUserByParticipantId = (participantId) => {
+  try {
+    return userByParticipantId(participantId);
+  } catch (error) {
+    throw new Error(`Failed to get user by participant ID: ${error.message}`);
+  }
+};
+
+export const handleGetNumUnreadConversationsByCurrentUser = (user) => {
+  try {
+    return numUnreadConversationsByCurrentUser(user);
+  } catch (error) {
+    throw new Error(`Failed to get number of unread conversations: ${error.message}`);
+  }
+};
+
+export const handleGetNumUnreadConversations = (userId) => {
+  try {
+    return numUnreadConversations(userId);
+  } catch (error) {
+    throw new Error(`Failed to get number of unread conversations: ${error.message}`);
+  }
+};
+
+export const handleGetConversations = (userId) => {
+  try {
+    return getConversations(userId);
+  } catch (error) {
+    throw new Error(`Failed to get conversations: ${error.message}`);
+  }
+};
+
+export const handleIsParticipatingInByCurrentUser = ({ participantId, user }) => {
+  try {
+    return isParticipatingInByCurrentUser({
+      participantId,
+      user
+    });
+  } catch (error) {
+    throw new Error(`Failed to check participation status: ${error.message}`);
+  }
+};
+
+export const handleIsParticipatingIn = ({ participantId, userId }) => {
+  try {
+    return isParticipatingIn({
+      participantId,
+      userId
+    });
+  } catch (error) {
+    throw new Error(`Failed to check participation status: ${error.message}`);
+  }
+};
+
+export const handleSoftRemoveConversation = (conversationId, userId) => {
+  try {
+    return softRemoveConversation(conversationId, userId);
+  } catch (error) {
+    throw new Error(`Failed to soft remove conversation: ${error.message}`);
+  }
+};

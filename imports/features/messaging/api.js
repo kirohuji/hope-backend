@@ -9,42 +9,42 @@ import { ProfilesCollection } from "meteor/socialize:user-profile";
 import { publishComposite } from "meteor/reywood:publish-composite";
 import { User } from "meteor/socialize:user-model";
 import {
-  removeConversations,
-  findExistingConversationWithUsers,
-  isObserving,
-  getConversationsById,
-  newestConversation,
-  unreadConversations,
-  isUnread,
-  isReadOnly,
-  messages,
-  messagesWithDate,
-  attachments,
-  lastMessage,
-  lastMessageByLastId,
-  sendMessage,
-  savePushNotificationToken,
-  updateDeviceStatus,
-  createNewConversations,
-  getConversationsByCurrentUser,
-  getConversations,
-  getConversationsByParticipantIds,
-  updateConversations,
-  updateReadState,
-  addParticipants,
-  addParticipant,
-  removeParticipant,
-  removeParticipants,
-  participants,
-  participantsAsUsers,
-  conversationByParticipantId,
-  userByParticipantId,
-  numUnreadConversations,
-  numUnreadConversationsByCurrentUser,
-  isParticipatingInByCurrentUser,
-  isParticipatingIn,
-  softRemoveConversation,
-  sendHuaweiPush,
+  handleConversationDelete,
+  handleConversationUpdate,
+  handleGetConversationById,
+  handleUnreadConversations,
+  handleNewestConversation,
+  handleIsObserving,
+  handleFindExistingConversation,
+  handleIsUnread,
+  handleIsReadOnly,
+  handleGetMessages,
+  handleGetMessagesWithDate,
+  handleGetAttachments,
+  handleGetLastMessage,
+  handleGetLastMessageByLastId,
+  handleSendMessage,
+  handleSavePushToken,
+  handleUpdateDeviceStatus,
+  handleCreateConversation,
+  handleGetConversationsByParticipantIds,
+  handleGetConversationsByCurrentUser,
+  handleUpdateReadState,
+  handleAddParticipants,
+  handleRemoveParticipants,
+  handleAddParticipant,
+  handleRemoveParticipant,
+  handleGetParticipants,
+  handleGetParticipantsAsUsers,
+  handleGetConversationByParticipantId,
+  handleGetUserByParticipantId,
+  handleGetNumUnreadConversationsByCurrentUser,
+  handleGetNumUnreadConversations,
+  handleGetConversations,
+  handleIsParticipatingInByCurrentUser,
+  handleIsParticipatingIn,
+  handleSoftRemoveConversation,
+  sendHuaweiPush
 } from "./service";
 import { serverError500 } from "../base/api";
 
@@ -53,7 +53,7 @@ Api.addRoute("messaging/conversations/:_id", {
     authRequired: true,
     action: function () {
       try {
-        return removeConversations(this.urlParams._id);
+        return handleConversationDelete(this.urlParams._id);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -66,7 +66,7 @@ Api.addRoute("messaging/conversations/:_id", {
     authRequired: true,
     action: function () {
       try {
-        return updateConversations({
+        return handleConversationUpdate({
           conversationId: this.urlParams._id,
           ...this.bodyParams,
         });
@@ -82,7 +82,7 @@ Api.addRoute("messaging/conversations/:_id", {
     authRequired: true,
     action: function () {
       try {
-        return getConversationsById({
+        return handleGetConversationById({
           conversationId: this.urlParams._id,
           userId: this.userId,
         });
@@ -101,7 +101,7 @@ Api.addRoute("messaging/unreadConversations", {
     authRequired: true,
     action: function () {
       try {
-        return unreadConversations({
+        return handleUnreadConversations({
           user: this.user,
           bodyParams: this.bodyParams,
         });
@@ -120,7 +120,7 @@ Api.addRoute("messaging/newestConversation", {
     authRequired: true,
     action: function () {
       try {
-        return newestConversation({
+        return handleNewestConversation({
           user: this.user,
         });
       } catch (e) {
@@ -138,7 +138,7 @@ Api.addRoute("messaging/isObserving/:_id", {
     authRequired: true,
     action: function () {
       try {
-        return isObserving({
+        return handleIsObserving({
           user: this.user,
           _id: this.urlParams._id,
         });
@@ -157,7 +157,7 @@ Api.addRoute("messaging/findExistingConversationWithUsers", {
     authRequired: true,
     action: function () {
       try {
-        return findExistingConversationWithUsers({
+        return handleFindExistingConversation({
           userId: this.userId,
           users: this.bodyParams.users,
         });
@@ -176,7 +176,7 @@ Api.addRoute("messaging/conversations/:_id/isUnread", {
     authRequired: true,
     action: function () {
       try {
-        return isUnread({
+        return handleIsUnread({
           conversationId: this.urlParams._id,
           userId: this.userId,
         });
@@ -195,7 +195,7 @@ Api.addRoute("messaging/conversations/:_id/isReadOnly", {
     authRequired: true,
     action: function () {
       try {
-        return isReadOnly(this.urlParams._id);
+        return handleIsReadOnly(this.urlParams._id);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -211,7 +211,7 @@ Api.addRoute("messaging/conversations/:_id/messages", {
     authRequired: true,
     action: function () {
       try {
-        return messages({
+        return handleGetMessages({
           userId: this.userId,
           conversationId: this.urlParams._id,
           bodyParams: {
@@ -236,7 +236,7 @@ Api.addRoute("messaging/conversations/:_id/messages/date", {
     authRequired: true,
     action: function () {
       try {
-        return messagesWithDate({
+        return handleGetMessagesWithDate({
           date: this.bodyParams.date,
           userId: this.userId,
           conversationId: this.urlParams._id,
@@ -257,9 +257,7 @@ Api.addRoute("messaging/conversations/:_id/messages/attachments", {
     authRequired: true,
     action: function () {
       try {
-        return attachments({
-          conversationId: this.urlParams._id,
-        });
+        return handleGetAttachments(this.urlParams._id);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -275,17 +273,7 @@ Api.addRoute("messaging/conversations/:_id/lastMessage", {
     authRequired: true,
     action: function () {
       try {
-        const message = lastMessage(this.urlParams._id || this.bodyParams.id);
-        if(message){
-          return {
-            ...message,
-            user: ProfilesCollection.findOne({ _id: message.userId }),
-          };
-        } else {
-          return {
-            user: {}
-          };
-        }
+        return handleGetLastMessage(this.urlParams._id || this.bodyParams.id);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -301,7 +289,7 @@ Api.addRoute("messaging/conversations/:_id/lastMessage/:lastId", {
     authRequired: true,
     action: function () {
       try {
-        return lastMessageByLastId({
+        return handleGetLastMessageByLastId({
           userId: this.userId,
           lastId: this.urlParams.lastId,
           conversationId: this.urlParams._id,
@@ -321,20 +309,11 @@ Api.addRoute("messaging/conversations/:_id/sendMessage", {
     authRequired: true,
     action: function () {
       try {
-        let messageId = sendMessage({
+        return handleSendMessage({
           conversationId: this.urlParams._id,
           userId: this.userId,
           bodyParams: this.bodyParams,
         });
-        if (messageId) {
-          const message = MessagesCollection.findOne({
-            _id: messageId,
-          });
-          return {
-            ...message,
-            senderId: message.userId,
-          };
-        }
       } catch (e) {
         return serverError500({
           code: 500,
@@ -350,13 +329,12 @@ Api.addRoute("messaging/conversations/savePushNotificationToken", {
     authRequired: true,
     action: function () {
       try {
-        savePushNotificationToken({
+        return handleSavePushToken({
           userId: this.userId,
           token: this.bodyParams.token,
           device: this.bodyParams.device,
           deviceId: this.bodyParams.deviceId,
         });
-        return true;
       } catch (e) {
         return serverError500({
           code: 500,
@@ -372,12 +350,11 @@ Api.addRoute("messaging/conversations/updateDeviceStatus", {
     authRequired: true,
     action: function () {
       try {
-        updateDeviceStatus({
+        return handleUpdateDeviceStatus({
           userId: this.userId,
           status: this.bodyParams.status,
           deviceId: this.bodyParams.deviceId,
         });
-        return true;
       } catch (e) {
         return serverError500({
           code: 500,
@@ -412,7 +389,7 @@ Api.addRoute("messaging/conversations/room", {
     authRequired: true,
     action: function () {
       try {
-        return createNewConversations({
+        return handleCreateConversation({
           participants: this.bodyParams.participants,
           sessionId: this.bodyParams.sessionId,
           isSession: this.bodyParams.isSession,
@@ -427,12 +404,13 @@ Api.addRoute("messaging/conversations/room", {
     },
   },
 });
+
 Api.addRoute("messaging/users/conversations/participants", {
   post: {
     authRequired: true,
     action: function () {
       try {
-        return getConversationsByParticipantIds({
+        return handleGetConversationsByParticipantIds({
           participants: this.bodyParams.participants,
           userId: this.userId,
           isSession: this.bodyParams.isSession,
@@ -452,7 +430,7 @@ Api.addRoute("messaging/users/conversations", {
     authRequired: true,
     action: function () {
       try {
-        return getConversationsByCurrentUser(this.user);
+        return handleGetConversationsByCurrentUser(this.user);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -465,7 +443,7 @@ Api.addRoute("messaging/users/conversations", {
     authRequired: true,
     action: function () {
       try {
-        return getConversationsByCurrentUser(this.user, this.bodyParams.ids);
+        return handleGetConversationsByCurrentUser(this.user, this.bodyParams.ids);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -481,7 +459,7 @@ Api.addRoute("messaging/conversations/:_id/updateReadState/:_status", {
     authRequired: true,
     action: function () {
       try {
-        return updateReadState({
+        return handleUpdateReadState({
           conversationId: this.urlParams._id,
           status: this.urlParams._status,
         });
@@ -500,7 +478,7 @@ Api.addRoute("messaging/conversations/:_id/addParticipants", {
     authRequired: true,
     action: function () {
       try {
-        return addParticipants({
+        return handleAddParticipants({
           conversationId: this.urlParams._id,
           participants: this.bodyParams.participants,
         });
@@ -519,7 +497,7 @@ Api.addRoute("messaging/conversations/:_id/removeParticipants", {
     authRequired: true,
     action: function () {
       try {
-        return removeParticipants({
+        return handleRemoveParticipants({
           conversationId: this.urlParams._id,
           participants: this.bodyParams.participants,
         });
@@ -538,7 +516,7 @@ Api.addRoute("messaging/conversations/:_id/addParticipant", {
     authRequired: true,
     action: function () {
       try {
-        return addParticipant({
+        return handleAddParticipant({
           conversationId: this.urlParams._id,
           participant: this.bodyParams.participant,
         });
@@ -557,7 +535,7 @@ Api.addRoute("messaging/conversations/:_id/removeParticipant", {
     authRequired: true,
     action: function () {
       try {
-        return removeParticipant({
+        return handleRemoveParticipant({
           conversationId: this.urlParams._id,
           participant: this.bodyParams.participant,
         });
@@ -576,7 +554,7 @@ Api.addRoute("messaging/conversations/:_id/participants", {
     authRequired: true,
     action: function () {
       try {
-        return participants(this.urlParams._id);
+        return handleGetParticipants(this.urlParams._id);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -592,7 +570,7 @@ Api.addRoute("messaging/conversations/:_id/participantsAsUsers", {
     authRequired: true,
     action: function () {
       try {
-        return participantsAsUsers(this.urlParams._id);
+        return handleGetParticipantsAsUsers(this.urlParams._id);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -608,7 +586,7 @@ Api.addRoute("messaging/participants/conversation/:_id", {
     authRequired: true,
     action: function () {
       try {
-        return conversationByParticipantId(this.urlParams._id);
+        return handleGetConversationByParticipantId(this.urlParams._id);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -624,7 +602,7 @@ Api.addRoute("messaging/participants/user/:_id", {
     authRequired: true,
     action: function () {
       try {
-        return userByParticipantId(this.urlParams._id);
+        return handleGetUserByParticipantId(this.urlParams._id);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -640,7 +618,7 @@ Api.addRoute("messaging/users/numUnreadConversations", {
     authRequired: true,
     action: function () {
       try {
-        return numUnreadConversationsByCurrentUser(this.user);
+        return handleGetNumUnreadConversationsByCurrentUser(this.user);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -656,7 +634,7 @@ Api.addRoute("messaging/users/numUnreadConversations/:_id", {
     authRequired: true,
     action: function () {
       try {
-        return numUnreadConversations(this.urlParams._id);
+        return handleGetNumUnreadConversations(this.urlParams._id);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -672,7 +650,7 @@ Api.addRoute("messaging/users/conversations/:_id", {
     authRequired: true,
     action: function () {
       try {
-        return getConversations(this.urlParams._id);
+        return handleGetConversations(this.urlParams._id);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -688,7 +666,7 @@ Api.addRoute("messaging/conversations/:_id/isParticipatingIn", {
     authRequired: true,
     action: function () {
       try {
-        return isParticipatingInByCurrentUser({
+        return handleIsParticipatingInByCurrentUser({
           participantId: this.urlParams._id,
           user: this.user,
         });
@@ -707,7 +685,7 @@ Api.addRoute("messaging/conversations/:_id/isParticipatingIn/:_userId", {
     authRequired: true,
     action: function () {
       try {
-        return isParticipatingIn({
+        return handleIsParticipatingIn({
           participantId: this.urlParams._id,
           user: this.urlParams._userId,
         });
@@ -726,7 +704,7 @@ Api.addRoute("messaging/conversations/delete/:_id", {
     authRequired: true,
     action: function () {
       try {
-        return softRemoveConversation(this.urlParams._id, this.userId);
+        return handleSoftRemoveConversation(this.urlParams._id, this.userId);
       } catch (e) {
         return serverError500({
           code: 500,
