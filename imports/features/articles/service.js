@@ -6,8 +6,9 @@ import Model, {
 } from "./collection";
 import _ from "lodash";
 import moment from "moment";
+
 // 分页查询数据
-export async function pagination(bodyParams) {
+export function pagination(bodyParams) {
   let book_id = bodyParams.selector.book_id;
   if (book_id) {
     let match = {
@@ -17,7 +18,7 @@ export async function pagination(bodyParams) {
     if (bodyParams.selector && bodyParams.selector.published === "") {
       delete match["article.published"];
     }
-    let bookArticles = await BookArticleCollection.rawCollection()
+    let bookArticles = BookArticleCollection.rawCollection()
       .aggregate([
         { $match: { book_id: bodyParams.selector.book_id } },
         {
@@ -49,7 +50,7 @@ export async function pagination(bodyParams) {
         { $limit: bodyParams.options.limit },
       ])
       .toArray();
-    let total = await BookArticleCollection.rawCollection()
+    let total = BookArticleCollection.rawCollection()
       .aggregate([
         { $match: { book_id: bodyParams.selector.book_id } },
         {
@@ -92,6 +93,48 @@ export async function pagination(bodyParams) {
   }
 }
 
+// 获取文章内容
+export function getArticleContent(articleId) {
+  const article = ArticleCollection.findOne({
+    _id: articleId,
+  });
+  const profile = Meteor.users.findOne({ _id: article.author_id }).profile();
+
+  return {
+    ...article,
+    comments: ArticleCommentCollection.find({
+      artcle_id: articleId,
+    }).fetch(),
+    author: {
+      name: profile.displayName,
+      avatarUrl: profile.photoURL,
+    },
+  };
+}
+
+// 创建文章评论
+export function createArticleComment({ userId, ...bodyParams }) {
+  return ArticleCommentCollection.insert({
+    user_id: userId,
+    ...bodyParams,
+  });
+}
+
+// 获取用户文章信息
+export function getArticleUser({ articleId, userId }) {
+  const articleUser = ArticleUserCollection.findOne({
+    article_id: articleId,
+    user_id: userId,
+  });
+  return (
+    articleUser || {
+      article_id: articleId,
+      user_id: userId,
+      answers: [],
+    }
+  );
+}
+
 // 书籍和文章的关联
 export function associateBookAndArticle({ book_id, bodyParams, user }) {
   const bookArticle = BookArticleCollection.findOne({
@@ -130,7 +173,7 @@ export function associateBookAndArticle({ book_id, bodyParams, user }) {
   }
 }
 
-// 书籍和文章的关联
+// 书籍和文章的关联更新
 export function associateBookAndArticleByUpdate({
   book_id,
   article_id,

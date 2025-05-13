@@ -2,13 +2,13 @@ import Model, { AuditCollection } from "./collection";
 import Api from "../../api";
 import { serverError500 } from "../base/api";
 import Constructor from "../base/api";
-import { current, createEvent, pagination, moderation } from "./service";
-import _ from "lodash";
+import { pagination, moderation } from "./service";
 
 Api.addCollection(AuditCollection);
 
 Constructor("audits", Model);
 
+// 分页查询数据
 Api.addRoute("audits/pagination", {
   post: function () {
     try {
@@ -22,10 +22,14 @@ Api.addRoute("audits/pagination", {
   },
 });
 
+// 审核操作
 Api.addRoute("audits/:_id/moderation", {
   post: function () {
     try {
-      return moderation(this.bodyParams);
+      return moderation({
+        _id: this.urlParams._id,
+        ...this.bodyParams,
+      });
     } catch (e) {
       return serverError500({
         code: 500,

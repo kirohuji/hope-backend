@@ -1,12 +1,6 @@
 import Api from "../../api";
 import Constructor, { serverError500 } from "../base/api";
-import { ProfilesCollection } from "meteor/socialize:user-profile";
 import Model, { BookCollection, BookUserCollection } from "./collection";
-import {
-  BookArticleCollection,
-  ArticleCollection,
-  ArticleUserCollection,
-} from "../articles/collection";
 import {
   pagination,
   publish,
@@ -16,9 +10,13 @@ import {
   play,
   getCurrentReadBook,
   select,
+  getBookDates,
+  getBookStartArticle,
+  signInArticle,
+  getBookUserDetails,
+  getBookSummarize,
+  getBookArticles,
 } from "./service";
-import moment from "moment";
-import _ from "lodash";
 
 Api.addCollection(BookUserCollection, {
   path: "books/users",
@@ -45,9 +43,14 @@ Api.addRoute("books/:bookId/dates", {
   post: {
     authRequired: true,
     action: function () {
-      return BookArticleCollection.find({
-        book_id: this.urlParams.bookId,
-      }).map((item) => moment(item.date).format("YYYY/MM/DD"));
+      try {
+        return getBookDates(this.urlParams.bookId);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
     },
   },
 });
@@ -56,17 +59,17 @@ Api.addRoute("books/users/current/start", {
   post: {
     authRequired: true,
     action: function () {
-      let bookUser = BookUserCollection.findOne({
-        user_id: this.userId,
-        status: "active",
-      });
-      let article = BookArticleCollection.findOne({
-        book_id: bookUser?.book_id,
-        date:
-          this.bodyParams.date &&
-          moment(this.bodyParams.date).format("YYYY/MM/DD"),
-      });
-      return article || false;
+      try {
+        return getBookStartArticle({
+          userId: this.userId,
+          date: this.bodyParams.date,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
     },
   },
 });
@@ -75,30 +78,16 @@ Api.addRoute("books/users/current/signIn/:_id", {
   post: {
     authRequired: true,
     action: function () {
-      let articleUser = ArticleUserCollection.findOne({
-        article_id: this.urlParams._id,
-        user_id: this.userId,
-      });
-      let signIn = ArticleUserCollection.update(
-        {
-          article_id: this.urlParams._id,
-          user_id: this.userId,
-        },
-        {
-          ...articleUser,
-          signIn: true,
-        }
-      );
-      if (signIn) {
-        Meteor.notifications.insert({
-          type: "training",
-          title: "<p>签到成功</p>",
-          isUnRead: true,
-          publisher_id: this.userId,
-          createdAt: new Date(),
-          category: "Training",
+      try {
+        return signInArticle({
+          articleId: this.urlParams._id,
+          userId: this.userId,
         });
-        return true;
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
       }
     },
   },
@@ -157,35 +146,32 @@ Api.addRoute("books/users/current/:bookId", {
   delete: {
     authRequired: true,
     action: function () {
-      return BookUserCollection.remove({
-        user_id: this.userId,
-        book_id: this.urlParams.bookId,
-      });
+      try {
+        return BookUserCollection.remove({
+          user_id: this.userId,
+          book_id: this.urlParams.bookId,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
     },
   },
   get: {
     authRequired: true,
     action: function () {
-      let bookUser = BookUserCollection.find({
-        user_id: this.userId,
-        book_id: this.urlParams.bookId,
-      });
-      if (bookUser) {
-        return bookUser.map((item) => {
-          let book = BookCollection.findOne({
-            _id: item.book_id,
-          });
-          return {
-            ...book,
-            createdUser: ProfilesCollection.findOne(
-              { _id: book.createdBy },
-              { fields: { realName: 1, displayName: 1 } }
-            ),
-            currentStatus: item.status,
-          };
+      try {
+        return getBookUserDetails({
+          userId: this.userId,
+          bookId: this.urlParams.bookId,
         });
-      } else {
-        return [];
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
       }
     },
   },
@@ -195,59 +181,16 @@ Api.addRoute("books/users/current/:bookId/summarize", {
   get: {
     authRequired: true,
     action: function () {
-      let bookUser = BookUserCollection.findOne({
-        user_id: this.userId,
-        book_id: this.urlParams.bookId,
-      });
-      if (bookUser) {
-        book = BookCollection.findOne(
-          { _id: this.urlParams.bookId },
-          {
-            fields: {
-              label: 1,
-              cover: 1,
-            },
-          }
-        );
-        if (book) {
-          const total = BookArticleCollection.find({
-            book_id: this.urlParams.bookId,
-          });
-
-          let selector = {
-            article_id: { $in: total.map((i) => i.article_id) },
-            user_id: this.userId,
-            completedDate: {
-              $exists: true,
-            },
-            // $where: "this.answers.length>0",
-          };
-          let articleUser = ArticleUserCollection.find(selector);
-          const completeArticle = ArticleCollection.find({
-            published: true,
-            _id: {
-              $in: articleUser.fetch().map((item) => item.article_id),
-            },
-          })
-            .fetch()
-            .map((item) => moment(item.date).format("YYYY/MM/DD"));
-
-          return {
-            total: total.count(),
-            inProcess: articleUser.count(),
-            days: completeArticle || [],
-          };
-        } else {
-          return {
-            total: 0,
-            inProcess: 0,
-          };
-        }
-      } else {
-        return {
-          total: 0,
-          inProcess: 0,
-        };
+      try {
+        return getBookSummarize({
+          userId: this.userId,
+          bookId: this.urlParams.bookId,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
       }
     },
   },
@@ -276,19 +219,16 @@ Api.addRoute("books/articles/pagination", {
   post: {
     authRequired: true,
     action: function () {
-      let articles = BookArticleCollection.find({
-        book_id: this.bodyParams.book_id,
-      }).map((item) => item.article_id);
-      return ArticleCollection.find(
-        {
-          _id: { $in: articles },
-        },
-        {
-          sort: {
-            date: 1,
-          },
-        }
-      ).fetch();
+      try {
+        return getBookArticles({
+          bookId: this.bodyParams.book_id,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
     },
   },
 });

@@ -6,6 +6,13 @@ import BroadcastCollection, {
 import _ from "lodash";
 import moment from "moment";
 
+// 获取今日广播
+export function getBroadcastByDate() {
+  return BroadcastCollection.findOne({
+    modifiedDate: moment(new Date()).format("YYYY/MM/DD"),
+  });
+}
+
 // 分页查询数据
 export function pagination(bodyParams) {
   let data = BroadcastCollection.find(
@@ -73,6 +80,7 @@ export function users(broadcast_id) {
           profile: user,
         };
       }
+      return null;
     })
   );
 }
@@ -129,7 +137,7 @@ export function publish(broadcast_id) {
   );
 }
 
-// 发布
+// 取消发布
 export function unPublish(broadcast_id) {
   return BroadcastCollection.update(
     {
@@ -143,6 +151,7 @@ export function unPublish(broadcast_id) {
   );
 }
 
+// 添加用户
 export function addUsers({ broadcast_id, users_id, currentUserId }) {
   if (Array.isArray(users_id) && users_id.length > 0) {
     return _.compact(
@@ -181,22 +190,16 @@ export function addUsers({ broadcast_id, users_id, currentUserId }) {
             };
           }
         }
+        return null;
       })
     );
-  } else {
-    return [];
   }
-  // return BroadcastCollection.update({
-  //   _id: broadcast_id,
-  // }, {
-  //   $set: {
-  //     published: false
-  //   }
-  // })
+  return [];
 }
 
-export function recent(bodyParams){
-  const oneMonthAgo = moment().subtract(1, "months").toDate(); // 计算一个月前的时间
+// 获取最近广播
+export function recent(bodyParams) {
+  const oneMonthAgo = moment().subtract(1, "months").toDate();
   return BroadcastCollection.find({
     createdAt: { $gte: oneMonthAgo },
   }).fetch();

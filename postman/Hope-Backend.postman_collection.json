@@ -1,0 +1,4310 @@
+{
+	"info": {
+		"_postman_id": "0e7e4a6c-8470-452b-a867-688fb5672095",
+		"name": "Hope-Backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1533305",
+		"_collection_link": "https://speeding-firefly-415641.postman.co/workspace/My-Workspace~78140e5d-172b-44d8-81b3-a3857ced25d1/collection/1533305-0e7e4a6c-8470-452b-a867-688fb5672095?action=share&source=collection_link&creator=1533305"
+	},
+	"item": [
+		{
+			"name": "Auth(权限)",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {",
+									"    console.log( pm.response.json())",
+									"    var jsonData = pm.response.json();",
+									"    pm.globals.set(\"access_token\", jsonData.authToken);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"email\": \"admin@example.com\",\n    \"password\": \"654321\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/login",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/logout",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users(用户列表)",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/users",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/users/hi8g7atg4k5k3R7yD",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"users",
+								"hi8g7atg4k5k3R7yD"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"demo\",\n    \"email\": \"demo@minimals.cc\",\n    \"password\": \"demo1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/users",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "changePassword",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"oldPassword\": \"1234567\",\n    \"newPassword\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/users/changePassword",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"users",
+								"changePassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/users/info",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"users",
+								"info"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/users/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"users",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "model",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/users/model",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"users",
+								"model"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Storage(文件上传)",
+			"item": [
+				{
+					"name": "upload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/lourd/Pictures/pap.er/fymO78sQXFE.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{fileServer}}/storage/upload?authToken={{access_token}}",
+							"host": [
+								"{{fileServer}}"
+							],
+							"path": [
+								"storage",
+								"upload"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "头像上传",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/lourd/Pictures/pap.er/_Xv52Y0r47k.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{fileServer}}/storage/avatars/upload?authToken={{access_token}}",
+							"host": [
+								"{{fileServer}}"
+							],
+							"path": [
+								"storage",
+								"avatars",
+								"upload"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "文章封面上传",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/lourd/Desktop/tLMvrh57LTvZ65TxN.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{fileServer}}/storage/books/upload?authToken={{access_token}}",
+							"host": [
+								"{{fileServer}}"
+							],
+							"path": [
+								"storage",
+								"books",
+								"upload"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "消息上传",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/lourd/Pictures/pap.er/u3WYe_yDH9Y.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{fileServer}}/storage/messages/upload?authToken={{access_token}}",
+							"host": [
+								"{{fileServer}}"
+							],
+							"path": [
+								"storage",
+								"messages",
+								"upload"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "excel",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/lourd/Desktop/希望之家数据备份/第五阶段.xlsx"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{fileServer}}/storage/excel?authToken={{access_token}}",
+							"host": [
+								"{{fileServer}}"
+							],
+							"path": [
+								"storage",
+								"excel"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Profile(基本信息)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/profiles/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"profiles",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"chatgpt3.5\",\n    \"displayName\": \"chatgpt3.5\",\n    \"email\": \"chatgpt3.5@openai.com\",\n    \"phoneNumber\": \"13588191030\",\n    \"address\": \"中国\",\n    \"age\": \"5\",\n    \"gender\": \"male\",\n    \"available\": \"active\",\n    \"scope\": \"KtTLuJQbpe3ixKfLq\",\n    \"realName\": \"openai\",\n    \"baptized\": false,\n    \"robot\": true,\n    \"photoURL\": \"https://www.lourd.top/storage/avatars/storage:avatars/pdb4SMypY4S9PBuvh/original/pdb4SMypY4S9PBuvh.png\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/profiles/a5u9kNTzKAdghpr55",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"profiles",
+								"a5u9kNTzKAdghpr55"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/profiles",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Model",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/profiles/model",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"profiles",
+								"model"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Roles(权限)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getInheritedRoleNames",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"_id\": \"KtTLuJQbpe3ixKfLq\",\n    \"type\": \"org\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/getInheritedRoleNames",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"getInheritedRoleNames"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getChildrenRoleNames",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"_id\": \"KtTLuJQbpe3ixKfLq\",\n    \"type\": \"org\",\n    \"scope\": \"KtTLuJQbpe3ixKfLq\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/getChildrenRoleNames",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"getChildrenRoleNames"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getChildrenRoleNamesWithUser",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"_id\": \"KtTLuJQbpe3ixKfLq\",\n    \"type\": \"org\",\n    \"scope\": \"KtTLuJQbpe3ixKfLq\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/getChildrenRoleNamesWithUser",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"getChildrenRoleNamesWithUser"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getInheritedRoleNamesOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"_id\": \"KtTLuJQbpe3ixKfLq\",\n    \"type\": \"org\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/getInheritedRoleNamesOnly",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"getInheritedRoleNamesOnly"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRolesTreeByCurrentUser(根据当前用户获取权限架构)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {\n        \"scope\": \"KtTLuJQbpe3ixKfLq\",\n        \"type\": \"org\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/getRolesTreeByCurrentUser",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"getRolesTreeByCurrentUser"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getWithUser",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {\n        \"scope\": \"KtTLuJQbpe3ixKfLq\",\n        \"type\": \"org\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/getWithUser",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"getWithUser"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUsersInRole",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roles\": \"admin\",\n    \"options\": {\n        \n    },\n    \"queryOptions\": {}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/getUsersInRole",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"getUsersInRole"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUsersInRole Copy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {\n        \"scope\": \"SAC5MTbbPzps4N27E\",\n        \"type\": \"org\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/getRolesTreeByCurrentUser",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"getRolesTreeByCurrentUser"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"value\": \"test\",\n   \"name\": \"测试\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addRules",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roleName\": \"b9cb9b03-ed2e-4abf-88bf-7496d6393fd2\",\n    \"rules\": [\n        {\n            \"route\": \"users\",\n            \"rule\": \"test\",\n            \"params\": \"\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/addRules",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"addRules"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"value\": \"test1\",\n   \"name\": \"测试\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/scopes/get",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"scopes",
+								"get"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Model",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/roles/model",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"model"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRole",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {\n       \"scope\": \"BaGCFbhYhcaiE2hh3\",\n       \"type\":\"org\"\n    },\n    \"queryOptions\": {}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/roles/get",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"roles",
+								"get"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tags(标签)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/profiles/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"profiles",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/profiles",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mdel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/tags/model",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"tags",
+								"model"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Friendships(好友管理)",
+			"item": [
+				{
+					"name": "friends",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/friendships/friends",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"friendships",
+								"friends"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "friendsAsUsers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/friendships/friendsAsUsers",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"friendships",
+								"friendsAsUsers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "friendRequests",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/friendships/friendRequests",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"friendships",
+								"friendRequests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "numFriendRequests",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/friendships/numFriendRequests",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"friendships",
+								"numFriendRequests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "unfriend",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/friendships/unfriend/{{friend_id}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"friendships",
+								"unfriend",
+								"{{friend_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requestFriendship",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/friendships/requestFriendship/{{friend_id}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"friendships",
+								"requestFriendship",
+								"{{friend_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "acceptFriendshipRequest",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/friendships/acceptFriendshipRequest/qRghf5qBbhjTDAC8i",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"friendships",
+								"acceptFriendshipRequest",
+								"qRghf5qBbhjTDAC8i"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "denyFriendshipRequest",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/friendships/denyFriendshipRequest/qRghf5qBbhjTDAC8i",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"friendships",
+								"denyFriendshipRequest",
+								"qRghf5qBbhjTDAC8i"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/profiles",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mdel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/trees/model",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"trees",
+								"model"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Messaging(聊天)",
+			"item": [
+				{
+					"name": "conversations",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/conversations",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"conversations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getConversationsByParticipantIds",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"participants\": [\n        \"pThW5Mvd49EuKasdC\",\n        \"a5u9kNTzKAdghpr55\"\n    ],\n    \"isSession\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/users/conversations/participants",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"users",
+								"conversations",
+								"participants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createNewConversations",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"participants\": [\"a5u9kNTzKAdghpr55\"],\n    \"isSession\": true,\n    \"sessionId\": \"0cab7301-dc2e-4b1c-b9d5-cbe0dba5d5da\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/conversations/room",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"conversations",
+								"room"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "conversations Copy",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/conversations/94s8Xt5Nc9WnQn6DN",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"conversations",
+								"94s8Xt5Nc9WnQn6DN"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"participants\": [\"i23BfGaxPezc94mQW\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/conversations/room",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"conversations",
+								"room"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sendMessage",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Hello 🌍 1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/conversations/NR58qo6FvEZuzYGBp/sendMessage",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"conversations",
+								"NR58qo6FvEZuzYGBp",
+								"sendMessage"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "participantsAsUsers",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"Hello 🌍 \"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/conversations/NR58qo6FvEZuzYGBp/participantsAsUsers",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"conversations",
+								"NR58qo6FvEZuzYGBp",
+								"participantsAsUsers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "messages",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/conversations/NR58qo6FvEZuzYGBp/messages",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"conversations",
+								"NR58qo6FvEZuzYGBp",
+								"messages"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "numUnreadConversations",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/numUnreadConversations",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"numUnreadConversations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "newestConversation",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/newestConversation",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"newestConversation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "findExistingConversationWithUsers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"users\": [\"i23BfGaxPezc94mQW\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/findExistingConversationWithUsers",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"findExistingConversationWithUsers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "users/conversations",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ids\": [\n        \"s46PsgBRiGb9bXD8k\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/users/conversations",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"users",
+								"conversations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "users/conversations/_id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/messaging/users/conversations/i23BfGaxPezc94mQW",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"messaging",
+								"users",
+								"conversations",
+								"i23BfGaxPezc94mQW"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/profiles",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mdel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/trees/model",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"trees",
+								"model"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Scopes(作用域)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {},\n    \"options\": {\n        \"skip\": 0,\n        \"limit\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/scopes/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"scopes",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/scopes",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"scopes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Model",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/scopes/model",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"scopes",
+								"model"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dictionares(字典管理)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {},\n    \"options\": {\n        \"skip\": 0,\n        \"limit\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/dictionaries/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"dictionaries",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/routes/all/1",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"all",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mdel",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\n     \"_id\": \"JYfd4FW6GTpwNRxBk\",\n     \"version\": 1\n}\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/dictionaries/sync",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"dictionaries",
+								"sync"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Order(订单管理)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {},\n    \"options\": {\n        \"skip\": 0,\n        \"limit\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/orders/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"orders",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/routes/all/1",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"all",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"pThW5Mvd49EuKasdC\",\n    \"orderNumber\": \"1\",\n    \"taxes\": \"0\",\n    \"status\": \"pending\",\n    \"totalQuantity\": 1,\n    \"scope\": \"KtTLuJQbpe3ixKfLq\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/orders",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OrderItem(订单项管理)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {},\n    \"options\": {\n        \"skip\": 0,\n        \"limit\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/orders/items/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"orders",
+								"items",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/routes/all/1",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"all",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"orderId\": \"1\",\n    \"linkedObjectId\": \"GoFt28Mn54BQedfgx\",\n    \"objectType\": \"memberships_types\",\n    \"quantity\": 1,\n    \"unitPrice\": \"1\",\n    \"scope\": \"KtTLuJQbpe3ixKfLq\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/orders/items",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"orders",
+								"items"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Routes(路由)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {},\n    \"options\": {\n        \"skip\": 0,\n        \"limit\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/routes/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "generate",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/routes/generate",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"generate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "generate Copy",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/routes/refresh",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/routes/all/1",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"all",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mdel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/scopes/model",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"scopes",
+								"model"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Posts(贴子)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {},\n    \"options\": {\n        \"skip\": 0,\n        \"limit\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/posts/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"posts",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "posts",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"如何优化文章数据库结构\",\n  \"body\": \"本文介绍了如何优化博客和短文的数据库结构，以提升查询效率。\",\n  \"content\": \"在设计文章数据库时，我们需要考虑存储结构、索引优化以及查询性能......\",\n  \"coverUrl\": \"https://example.com/image.jpg\",\n  \"category\": [\"数据库\", \"优化\", \"开发\"],\n  \"published\": true,\n  \"commented\": false,\n  \"metaTitle\": \"优化文章数据库结构 | 技术博客\",\n  \"metaDescription\": \"本篇文章详细讲解如何优化博客和短文的数据存储，提高查询速度和可扩展性。\",\n    \"scope\": \"KtTLuJQbpe3ixKfLq\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/posts",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"posts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "like",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"hello world!\",\n    \"posterId\": \"pThW5Mvd49EuKasdC\",\n    \"linkedObjectId\": \"pThW5Mvd49EuKasdC\",\n    \"objectType\": \"users\",\n    \"_id\": \"A3HNdHqgcySWcGqXg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/posts/like",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"posts",
+								"like"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "unlike",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"hello world!\",\n    \"posterId\": \"pThW5Mvd49EuKasdC\",\n    \"linkedObjectId\": \"pThW5Mvd49EuKasdC\",\n    \"objectType\": \"users\",\n    \"_id\": \"A3HNdHqgcySWcGqXg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/posts/unlike",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"posts",
+								"unlike"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "comments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"你好\",\n    \"_id\": \"XTnQWy7pJPverymXL\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/posts/XTnQWy7pJPverymXL/comments",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"posts",
+								"XTnQWy7pJPverymXL",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "generate Copy",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/routes/refresh",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/routes/all/1",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"all",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mdel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/scopes/model",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"scopes",
+								"model"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Membership(会员)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {},\n    \"options\": {\n        \"skip\": 0,\n        \"limit\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/posts/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"posts",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"pThW5Mvd49EuKasdC\",\n    \"membershipType\": \"Gold\",\n    \"status\": \"active\",\n    \"startDate\": \"2024-01-01T00:00:00Z\",\n    \"endDate\": \"2025-01-01T00:00:00Z\",\n    \"autoRenew\": true,\n    \"price\": 199.99,\n    \"discount\": 10,\n    \"points\": 500,\n    \"paymentMethod\": \"Credit Card\",\n    \"orderId\": \"order_1001\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/memberships",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"memberships"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "like",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"hello world!\",\n    \"posterId\": \"pThW5Mvd49EuKasdC\",\n    \"linkedObjectId\": \"pThW5Mvd49EuKasdC\",\n    \"objectType\": \"users\",\n    \"_id\": \"A3HNdHqgcySWcGqXg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/posts/like",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"posts",
+								"like"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "unlike",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"hello world!\",\n    \"posterId\": \"pThW5Mvd49EuKasdC\",\n    \"linkedObjectId\": \"pThW5Mvd49EuKasdC\",\n    \"objectType\": \"users\",\n    \"_id\": \"A3HNdHqgcySWcGqXg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/posts/unlike",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"posts",
+								"unlike"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "comments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"body\": \"你好\",\n    \"_id\": \"XTnQWy7pJPverymXL\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/posts/XTnQWy7pJPverymXL/comments",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"posts",
+								"XTnQWy7pJPverymXL",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "generate Copy",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/routes/refresh",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/routes/all/1",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"all",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mdel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/scopes/model",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"scopes",
+								"model"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Rules(规则)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {},\n    \"options\": {\n        \"skip\": 0,\n        \"limit\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/rules/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"rules",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "generate",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/routes/generate",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"generate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "generate Copy",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/routes/refresh",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/routes/all/1",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"routes",
+								"all",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mdel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/scopes/model",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"scopes",
+								"model"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mdel Copy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"test\":1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/api/v2/api2?test=1",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v2",
+								"api2"
+							],
+							"query": [
+								{
+									"key": "test",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bpmn(流程管理)",
+			"item": [
+				{
+					"name": "execute",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {",
+									"    console.log( pm.response.json())",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"current_id\", jsonData);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"source\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<bpmn2:definitions xmlns:xsi=\\\"http://www.w3.org/2001/XMLSchema-instance\\\" xmlns:bpmn2=\\\"http://www.omg.org/spec/BPMN/20100524/MODEL\\\" xmlns:bpmndi=\\\"http://www.omg.org/spec/BPMN/20100524/DI\\\" xmlns:dc=\\\"http://www.omg.org/spec/DD/20100524/DC\\\" xmlns:di=\\\"http://www.omg.org/spec/DD/20100524/DI\\\" xmlns:camunda=\\\"http://camunda.org/schema/1.0/bpmn\\\" xmlns:zeebe=\\\"http://camunda.org/schema/zeebe/1.0\\\" id=\\\"sample-diagram\\\" targetNamespace=\\\"http://bpmn.io/schema/bpmn\\\" exporter=\\\"bpmn-js-token-simulation\\\" exporterVersion=\\\"0.37.0\\\" xsi:schemaLocation=\\\"http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd\\\">\\n  <bpmn2:process id=\\\"Process_1\\\" isExecutable=\\\"true\\\">\\n    <bpmn2:startEvent id=\\\"StartEvent_1\\\">\\n      <bpmn2:outgoing>Flow_1xgrhj5</bpmn2:outgoing>\\n    </bpmn2:startEvent>\\n    <bpmn2:sequenceFlow id=\\\"Flow_1xgrhj5\\\" sourceRef=\\\"StartEvent_1\\\" targetRef=\\\"Activity_1ne0crl\\\" />\\n    <bpmn2:endEvent id=\\\"Event_14cc0d4\\\">\\n      <bpmn2:extensionElements>\\n        <camunda:inputOutput />\\n      </bpmn2:extensionElements>\\n      <bpmn2:incoming>Flow_01rzb02</bpmn2:incoming>\\n    </bpmn2:endEvent>\\n    <bpmn2:sequenceFlow id=\\\"Flow_01rzb02\\\" sourceRef=\\\"Activity_1ne0crl\\\" targetRef=\\\"Event_14cc0d4\\\" />\\n    <bpmn2:serviceTask id=\\\"Activity_1ne0crl\\\" camunda:expression=\\\"${environment.services.rest}\\\" camunda:resultVariable=\\\"result\\\">\\n      <bpmn2:extensionElements>\\n        <camunda:inputOutput>\\n          <camunda:inputParameter name=\\\"label\\\">你好</camunda:inputParameter>\\n          <camunda:inputParameter name=\\\"body\\\">ab</camunda:inputParameter>\\n          <camunda:outputParameter name=\\\"out\\\">out</camunda:outputParameter>\\n        </camunda:inputOutput>\\n        <camunda:properties>\\n          <camunda:property />\\n        </camunda:properties>\\n      </bpmn2:extensionElements>\\n      <bpmn2:incoming>Flow_1xgrhj5</bpmn2:incoming>\\n      <bpmn2:outgoing>Flow_01rzb02</bpmn2:outgoing>\\n    </bpmn2:serviceTask>\\n  </bpmn2:process>\\n  <bpmndi:BPMNDiagram id=\\\"BPMNDiagram_1\\\">\\n    <bpmndi:BPMNPlane id=\\\"BPMNPlane_1\\\" bpmnElement=\\\"Process_1\\\">\\n      <bpmndi:BPMNShape id=\\\"_BPMNShape_StartEvent_2\\\" bpmnElement=\\\"StartEvent_1\\\">\\n        <dc:Bounds x=\\\"272\\\" y=\\\"262\\\" width=\\\"36\\\" height=\\\"36\\\" />\\n      </bpmndi:BPMNShape>\\n      <bpmndi:BPMNShape id=\\\"Event_14cc0d4_di\\\" bpmnElement=\\\"Event_14cc0d4\\\">\\n        <dc:Bounds x=\\\"632\\\" y=\\\"262\\\" width=\\\"36\\\" height=\\\"36\\\" />\\n      </bpmndi:BPMNShape>\\n      <bpmndi:BPMNShape id=\\\"Activity_19rmfls_di\\\" bpmnElement=\\\"Activity_1ne0crl\\\">\\n        <dc:Bounds x=\\\"370\\\" y=\\\"240\\\" width=\\\"100\\\" height=\\\"80\\\" />\\n      </bpmndi:BPMNShape>\\n      <bpmndi:BPMNEdge id=\\\"Flow_1xgrhj5_di\\\" bpmnElement=\\\"Flow_1xgrhj5\\\">\\n        <di:waypoint x=\\\"308\\\" y=\\\"280\\\" />\\n        <di:waypoint x=\\\"370\\\" y=\\\"280\\\" />\\n      </bpmndi:BPMNEdge>\\n      <bpmndi:BPMNEdge id=\\\"Flow_01rzb02_di\\\" bpmnElement=\\\"Flow_01rzb02\\\">\\n        <di:waypoint x=\\\"470\\\" y=\\\"280\\\" />\\n        <di:waypoint x=\\\"632\\\" y=\\\"280\\\" />\\n      </bpmndi:BPMNEdge>\\n    </bpmndi:BPMNPlane>\\n  </bpmndi:BPMNDiagram>\\n</bpmn2:definitions>\\n\",\n    \"variables\": {}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/bpmns/execute",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"bpmns",
+								"execute"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {",
+									"    console.log( pm.response.json())",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"current_id\", jsonData);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/bpmns",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"bpmns"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {",
+									"    console.log( pm.response.json())",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"current_id\", jsonData);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {\n        \"_id\": \"Py82qQ5fpLscc3k9t\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/bpmns/findOne",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"bpmns",
+								"findOne"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {",
+									"    console.log( pm.response.json())",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"current_id\", jsonData);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/bpmns/Py82qQ5fpLscc3k9t",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"bpmns",
+								"Py82qQ5fpLscc3k9t"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "continue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"instanceId\": \"{{current_id}}\",\n    \"elementId\": \"userTask\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/continue",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"continue"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getState",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/getState/{{current_id}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"getState",
+								"{{current_id}}"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "socket",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/socket",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"socket"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAll",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/deleteAll",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"deleteAll"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "resumeProcess",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/resumeProcess/{{current_id}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"resumeProcess",
+								"{{current_id}}"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Service(服务管理)",
+			"item": [
+				{
+					"name": "options",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {",
+									"    console.log( pm.response.json())",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"current_id\", jsonData);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {\n        \"scope\": \"KtTLuJQbpe3ixKfLq\",\n        \"category\": [],\n        \"status\": \"all\"\n    },\n    \"options\": {\n        \"skip\": 0,\n        \"limit\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/services/options",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"services",
+								"options"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "custom",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {",
+									"    console.log( pm.response.json())",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"current_id\", jsonData);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"target\": \"bpmns/pagination\",\n    \"selector\": {\n        \"scope\": \"KtTLuJQbpe3ixKfLq\",\n        \"category\": [],\n        \"status\": \"all\"\n    },\n    \"options\": {\n        \"skip\": 0,\n        \"limit\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/services/custom",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"services",
+								"custom"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {",
+									"    console.log( pm.response.json())",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"current_id\", jsonData);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/bpmns",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"bpmns"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {",
+									"    console.log( pm.response.json())",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"current_id\", jsonData);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {\n        \"_id\": \"Py82qQ5fpLscc3k9t\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/bpmns/findOne",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"bpmns",
+								"findOne"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Your test name\", function () {",
+									"    console.log( pm.response.json())",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"current_id\", jsonData);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/bpmns/Py82qQ5fpLscc3k9t",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"bpmns",
+								"Py82qQ5fpLscc3k9t"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "continue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"instanceId\": \"{{current_id}}\",\n    \"elementId\": \"userTask\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/continue",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"continue"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getState",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/getState/{{current_id}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"getState",
+								"{{current_id}}"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "socket",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/socket",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"socket"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAll",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/deleteAll",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"deleteAll"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "resumeProcess",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/resumeProcess/{{current_id}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"resumeProcess",
+								"{{current_id}}"
+							],
+							"query": [
+								{
+									"key": "authToken",
+									"value": "{{access_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Books(书籍)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/books/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"books",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "play",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/books/users/current/play",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"books",
+								"users",
+								"current",
+								"play"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "dates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/books/8sbrnyfpkvER7L5GY/dates",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"books",
+								"8sbrnyfpkvER7L5GY",
+								"dates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "public",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5,\n        \"scope\": \"BaGCFbhYhcaiE2hh3\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/books/v3jkftJhcMfr6Fniw/publish",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"books",
+								"v3jkftJhcMfr6Fniw",
+								"publish"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Artcles(文章)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selector\": {\n        \"book_id\": \"8sbrnyfpkvER7L5GY\"\n    },\n    \"options\": {\n        \"limit\": 5\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/articles/pagination",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"articles",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "public",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/books/8sbrnyfpkvER7L5GY/publish",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"books",
+								"8sbrnyfpkvER7L5GY",
+								"publish"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Events(日程)",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5,\n        \"scope\": \"BaGCFbhYhcaiE2hh3\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/books/posts/pagination?api=1",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"books",
+								"posts",
+								"pagination"
+							],
+							"query": [
+								{
+									"key": "api",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "public",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"limit\": 5,\n        \"scope\": \"BaGCFbhYhcaiE2hh3\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/books/v3jkftJhcMfr6Fniw/publish",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"books",
+								"v3jkftJhcMfr6Fniw",
+								"publish"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/events/all/1",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"events",
+								"all",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OpenAI",
+			"item": [
+				{
+					"name": "openai",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"prompt\": \"你好\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3030/openai",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3030",
+							"path": [
+								"openai"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "版本管理",
+			"item": [
+				{
+					"name": "获取当前激活版本",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/versions/active",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"versions",
+								"active"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

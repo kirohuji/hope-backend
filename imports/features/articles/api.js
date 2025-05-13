@@ -9,9 +9,11 @@ import {
   addAnswer,
   associateBookAndArticle,
   associateBookAndArticleByUpdate,
+  getArticleContent,
+  getArticleUser,
+  createArticleComment,
 } from "./service";
 import Constructor, { serverError500 } from "../base/api";
-import _ from "lodash";
 
 Api.addCollection(ArticleCollection, {
   path: "articles",
@@ -40,53 +42,53 @@ Api.addRoute("articles/pagination", {
 // 查询文章详情
 Api.addRoute("articles/content/:_id", {
   get: function () {
-    const artcle = ArticleCollection.findOne({
-      _id: this.urlParams._id,
-    });
-    const profile = Meteor.users.findOne({ _id: artcle.author_id }).profile();
-
-    return {
-      ...artcle,
-      comments: ArticleCommentCollection.find({
-        artcle_id: this.urlParams._id,
-      }).fetch(),
-      author: {
-        name: profile.displayName,
-        avatarUrl: profile.photoURL,
-      },
-    };
+    try {
+      return getArticleContent(this.urlParams._id);
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message,
+      });
+    }
   },
 });
 
-// 查询文章详情
+// 创建文章评论
 Api.addRoute("articles/comments/users/current", {
   post: {
     authRequired: true,
     action: function () {
-      return ArticleCommentCollection.insert({
-        user_id: this.userId,
-        ...this.bodyParams,
-      });
+      try {
+        return createArticleComment({
+          userId: this.userId,
+          ...this.bodyParams,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
     },
   },
 });
 
-// 查询文章详情
+// 获取用户文章信息
 Api.addRoute("articles/users/current/:_id", {
   get: {
     authRequired: true,
     action: function () {
-      const artcleUser = ArticleUserCollection.findOne({
-        article_id: this.urlParams._id,
-        user_id: this.userId,
-      });
-      return (
-        artcleUser || {
-          article_id: this.urlParams._id,
-          user_id: this.userId,
-          answers: [],
-        }
-      );
+      try {
+        return getArticleUser({
+          articleId: this.urlParams._id,
+          userId: this.userId,
+        });
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
     },
   },
 });
@@ -136,7 +138,7 @@ Api.addRoute("books/:_id/article", {
   },
 });
 
-// 书籍和文章的关联
+// 书籍和文章的关联更新
 Api.addRoute("books/:_id/article/update", {
   post: {
     authRequired: true,

@@ -5,8 +5,13 @@ import Model, {
   DictionaryCollection,
   DictionaryOptionCollection,
 } from "./collection";
-import { pagination, sync } from "./service";
-import _ from "lodash";
+import {
+  pagination,
+  sync,
+  getDictionaryOptions,
+  generateDictionaryTree,
+  getDictionaryByValue,
+} from "./service";
 
 Api.addCollection(DictionaryCollection);
 
@@ -18,6 +23,7 @@ Api.addCollection(DictionaryOptionCollection, {
 
 Constructor("dictionaries/options", DictionaryOption);
 
+// 分页查询字典
 Api.addRoute("dictionaries/pagination", {
   post: function () {
     try {
@@ -31,91 +37,55 @@ Api.addRoute("dictionaries/pagination", {
   },
 });
 
+// 分页查询字典选项
 Api.addRoute("dictionaries/options/pagination", {
   post: function () {
-    return {
-      data: DictionaryOption.find(
-        this.bodyParams.selector || {},
-        this.bodyParams.options
-      ).fetch(),
-      total: DictionaryOption.find().count(),
-    };
-  },
-});
-
-function generate(dictioanry) {
-  const nodes = [];
-  getData(nodes, dictioanry._id, dictioanry._id);
-  return nodes;
-}
-function getData(nodes, parentId, docId) {
-  if (parentId) {
-    nodes.children = DictionaryOptionCollection.find({
-      dictionaryId: docId,
-      parentId,
-    }).fetch();
-    nodes.children.forEach((node) => {
-      getData(nodes, node.parentId, docId);
-    });
-  }
-}
-/**
- * dict: label , version
- *
- */
-Api.addRoute("dictionaries/generate", {
-  post: function () {
-    return this.bodyParams.dicts.map((dict) => {
-      if (!DictionaryCollection.findOne(dict)) {
-        const dictionaries = DictionaryCollection.find(
-          {
-            label: dict.label,
-          },
-          {
-            sort: [["version", desc]],
-            limit: 1,
-          }
-        ).fetch();
-        if (dictionaries && dictionaries[0]) {
-          if (this.bodyParams.isTree) {
-            return generate(dictionaries[0]);
-          } else {
-            DictionaryOptionCollection.find({
-              parentId: dict._id,
-              dictionaryId: dict._id,
-            }).fetch();
-          }
-        }
-      }
-    });
-  },
-});
-
-Api.addRoute("dictionaries/dict", {
-  post: function () {
-    const dictionary = DictionaryCollection.findOne({
-      value: this.bodyParams.value,
-    });
-    if (dictionary) {
-      if (this.bodyParams.isTree) {
-        return generate(dictionary);
-      } else {
-        return {
-          ...dictionary,
-          chidlren: DictionaryOptionCollection.find({
-            parentId: dictionary._id,
-            dictionaryId: dictionary._id,
-          }).fetch(),
-        };
-      }
-    } else {
-      return {
-        data: [],
-      };
+    try {
+      return getDictionaryOptions(this.bodyParams);
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message,
+      });
     }
   },
 });
 
+// 生成字典树
+Api.addRoute("dictionaries/generate", {
+  post: function () {
+    try {
+      return generateDictionaryTree({
+        dicts: this.bodyParams.dicts,
+        isTree: this.bodyParams.isTree,
+      });
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message,
+      });
+    }
+  },
+});
+
+// 获取字典
+Api.addRoute("dictionaries/dict", {
+  post: function () {
+    try {
+      return getDictionaryByValue({
+        value: this.bodyParams.value,
+        isTree: this.bodyParams.isTree,
+      });
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message,
+      });
+    }
+  },
+});
+
+// 同步字典
 Api.addRoute("dictionaries/sync", {
   post: function () {
     try {

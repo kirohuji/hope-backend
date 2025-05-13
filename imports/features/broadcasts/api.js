@@ -15,7 +15,8 @@ import {
   publish,
   unPublish,
   addUsers,
-  recent
+  recent,
+  getBroadcastByDate,
 } from "./service";
 import _ from "lodash";
 import moment from "moment";
@@ -30,19 +31,24 @@ Constructor("broadcasts/users", BroadcastUser);
 
 Constructor("broadcasts", Model);
 
-// 废弃
+// 获取今日广播
 Api.addRoute("broadcasts/book", {
   get: function () {
-    return BroadcastCollection.findOne({
-      modifiedDate: moment(new Date()).format("YYYY/MM/DD"),
-    });
+    try {
+      return getBroadcastByDate();
+    } catch (e) {
+      return serverError500({
+        code: 500,
+        message: e.message,
+      });
+    }
   },
 });
 
+// 分页查询数据
 Api.addRoute("broadcasts/pagination", {
   post: function () {
     try {
-      console.log("this.bodyParams", this.bodyParams);
       return pagination(this.bodyParams);
     } catch (e) {
       return serverError500({
@@ -53,6 +59,7 @@ Api.addRoute("broadcasts/pagination", {
   },
 });
 
+// 获取广播用户列表
 Api.addRoute("broadcasts/:_id/users", {
   get: function () {
     try {
@@ -66,6 +73,7 @@ Api.addRoute("broadcasts/:_id/users", {
   },
 });
 
+// 获取广播用户数量
 Api.addRoute("broadcasts/:_id/users/count", {
   get: function () {
     try {
@@ -79,6 +87,7 @@ Api.addRoute("broadcasts/:_id/users/count", {
   },
 });
 
+// 用户签到
 Api.addRoute("broadcasts/:_id/users/:_userId/signIn", {
   post: function () {
     try {
@@ -95,6 +104,7 @@ Api.addRoute("broadcasts/:_id/users/:_userId/signIn", {
   },
 });
 
+// 用户退出
 Api.addRoute("broadcasts/:_id/users/:_userId/signOut", {
   post: function () {
     try {
@@ -111,6 +121,7 @@ Api.addRoute("broadcasts/:_id/users/:_userId/signOut", {
   },
 });
 
+// 删除用户
 Api.addRoute("broadcasts/:_id/users/:_userId", {
   delete: function () {
     try {
@@ -127,6 +138,7 @@ Api.addRoute("broadcasts/:_id/users/:_userId", {
   },
 });
 
+// 发布广播
 Api.addRoute("broadcasts/:_id/publish", {
   post: function () {
     try {
@@ -140,6 +152,7 @@ Api.addRoute("broadcasts/:_id/publish", {
   },
 });
 
+// 取消发布广播
 Api.addRoute("broadcasts/:_id/unpublish", {
   post: function () {
     try {
@@ -152,6 +165,8 @@ Api.addRoute("broadcasts/:_id/unpublish", {
     }
   },
 });
+
+// 添加用户
 Api.addRoute("broadcasts/addUsers", {
   post: function () {
     try {
@@ -169,6 +184,7 @@ Api.addRoute("broadcasts/addUsers", {
   },
 });
 
+// 获取最近广播
 Api.addRoute("broadcasts/recent", {
   post: function () {
     try {
