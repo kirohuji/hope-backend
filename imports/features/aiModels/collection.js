@@ -1,5 +1,8 @@
 import { Class } from "meteor/jagi:astronomy";
 export const AiModelsCollection = new Mongo.Collection("ai_models");
+// AI模型用户关联集合
+export const AiModelsUsersCollection = new Mongo.Collection("ai_models_users");
+
 export default Class.create({
   name: "AiModels",
   collection: AiModelsCollection,
@@ -181,8 +184,6 @@ export default Class.create({
     },
   },
 });
-// AI模型用户关联集合
-export const AiModelsUsersCollection = new Mongo.Collection("ai_models_users");
 
 export const AiModelsUsers = Class.create({
   name: "AiModelsUsers",
