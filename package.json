@@ -13,6 +13,7 @@
     "body-parser": "^1.20.2",
     "bpmn-engine": "^24.0.0",
     "bull": "^4.16.5",
+    "bullmq": "^5.52.2",
     "camunda-bpmn-moddle": "^7.0.1",
     "crypto-js": "^4.2.0",
     "firebase-admin": "^12.6.0",

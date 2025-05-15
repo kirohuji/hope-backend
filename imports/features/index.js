@@ -22,3 +22,4 @@ import "./posts";
 import "./services";
 import "./memberships";
 import "./orders";
+import "./tasks";
