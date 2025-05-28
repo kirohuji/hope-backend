@@ -148,15 +148,15 @@ export function info(_id) {
 export function getUserOrders(userId) {
   const orders = OrderCollection.find({
     userId,
+  }, {
+    sort: {
+      createdAt: -1,
+    },
   }).fetch();
 
   const orderIds = orders.map(order => order._id);
   const orderItems = OrderItemCollection.find({
     orderId: { $in: orderIds },
-  }, {
-    sort: {
-      createdAt: -1,
-    },
   }).fetch();
 
   // 将订单项按 orderId 分组
