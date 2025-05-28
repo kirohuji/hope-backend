@@ -82,6 +82,20 @@ export default Class.create({
       type: String,
       optional: true,
     },
+    previousMembershipId: {
+      type: String,
+      optional: true,
+    },
+    previousMembershipType: {
+      type: String,
+      optional: true,
+    },
+    isYearly: {
+      type: Boolean,
+      default: false,
+      optional: true,
+      label: "是否年付"
+    }
   },
   behaviors: {
     timestamp: {

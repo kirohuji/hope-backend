@@ -58,7 +58,7 @@ Api.addRoute("tasks/add", {
         ...taskData,
         createdBy: this.userId,
         group: this.userId,
-        data: new Date(),
+        createdAt: new Date(),
       });
     } catch (e) {
       return serverError500({

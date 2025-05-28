@@ -25,7 +25,11 @@ export default Class.create({
       default: "",
     },
     data: {
-      type: String,
+      type: Object,
+      default: {},
+    },
+    result: {
+      type: Object,
       default: {},
     },
     group: {

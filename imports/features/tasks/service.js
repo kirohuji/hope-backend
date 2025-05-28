@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import { TaskFactory } from './modules/task-factory';
+import moment from 'moment';
 
 // BullMQ queue configuration
 const connection = {
@@ -57,8 +58,7 @@ export const initializeTaskRecovery = async () => {
 
 // Add a new task
 export const addTask = async taskData => {
-  const { type, data, group, createdBy, delay } = taskData;
-
+  const { type, data, createdAt, group, createdBy, delay } = taskData;
   const job = await taskQueue.add(
     type,
     {
@@ -78,6 +78,7 @@ export const addTask = async taskData => {
     jobId: job.id,
     type,
     data,
+    createdAt: createdAt,
     group,
     createdBy,
     status: TaskStatus.PENDING,

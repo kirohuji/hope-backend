@@ -7,12 +7,13 @@ export class TaskStateMachine {
     this.jobId = job.id.toString();
   }
 
-  async transitionTo(status) {
+  async transitionTo(status, result) {
     await TaskCollection.update(
       { jobId: this.jobId },
       {
         $set: {
           status,
+          result,
           updatedAt: new Date(),
         },
       },
@@ -36,9 +37,9 @@ export class TaskStateMachine {
   async execute() {
     try {
       await this.transitionTo(TaskStatus.ACTIVE);
-      await this.process();
-      await this.transitionTo(TaskStatus.COMPLETED);
-      return { success: true };
+      const result = await this.process();
+      await this.transitionTo(TaskStatus.COMPLETED, result);
+      return { success: true, result };
     } catch (error) {
       await this.handleError(error);
     }
