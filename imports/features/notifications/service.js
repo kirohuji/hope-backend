@@ -6,7 +6,7 @@ import { PushNotificationTokenCollection } from '../messaging/collection';
 import apn from 'apn';
 import Bull from 'bull';
 const CryptoJS = require("crypto-js");
-const secretKey = "future";
+const SECRET_KEY = "future";
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -164,7 +164,7 @@ const createNotification = ({
     const notification = new apn.Notification();
     const decryptedMessage = CryptoJS.AES.decrypt(
       body,
-      secretKey
+      SECRET_KEY
     ).toString(CryptoJS.enc.Utf8);
     notification.alert = contentType === 'text' ? decryptedMessage : '对方发送了一张图片给你';
     notification.title = profile.displayName;

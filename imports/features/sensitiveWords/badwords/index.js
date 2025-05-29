@@ -1,6 +1,7 @@
 const fs = require("fs");
 const { SensitiveWordTool } = require("sensitive-word-tool");
 import politics from "sensitive-word-tool/src/words/politics";
+import { SensitiveWordsCollection } from "../collection";
 // 读取敏感词文件
 function loadBadWords(filePath) {
   const data = fs.readFileSync(filePath, "utf8");
@@ -16,6 +17,5 @@ export function createFilter(filePath) {
     useDefaultWords: false,
   });
   sensitiveWordTool.addWords([...loadBadWords(filePath), ...politics]);
-
   return sensitiveWordTool;
 }
