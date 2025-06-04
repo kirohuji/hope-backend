@@ -23,3 +23,4 @@ import "./services";
 import "./memberships";
 import "./orders";
 import "./tasks";
+import './revenueCat'

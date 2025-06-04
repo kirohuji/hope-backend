@@ -5,7 +5,17 @@ import Model, {
   OrderItemCollection,
   OrderCollection,
 } from "./collection";
-import { pagination, paginationWithMembership, info, getUserOrders, handleMembershipChange, handleMembershipChangePayment, updateOrderStatus, generateOrderPDF, cancelOrder } from "./service";
+import { pagination, getOrderInfo, getUserOrders, updateOrderStatus, generateOrderPDF, cancelOrder } from "./service";
+import { 
+  createSubscription, 
+  completeSubscriptionPayment, 
+  upgradeSubscription, 
+  downgradeSubscription, 
+  cancelSubscription,
+  getUserSubscription,
+  processAutoRenewal,
+  processPendingChanges
+} from "../memberships/service";
 import _ from "lodash";
 
 Api.addCollection(OrderCollection, {
@@ -33,23 +43,10 @@ Api.addRoute("orders/pagination", {
   },
 });
 
-Api.addRoute("orders/pagination-with-membership", {
-  post: function () {
-    try {
-      return paginationWithMembership(this.bodyParams);
-    } catch (e) {
-      return serverError500({
-        code: 500,
-        message: e.message,
-      });
-    }
-  },
-});
-
 Api.addRoute("orders/:_id", {
   get: function () {
     try {
-      return info(this.urlParams.id || this.urlParams._id);
+      return getOrderInfo(this.urlParams.id || this.urlParams._id);
     } catch (e) {
       return serverError500({
         code: 500,
@@ -59,7 +56,7 @@ Api.addRoute("orders/:_id", {
   },
 });
 
-Api.addRoute("orders/info", {
+Api.addRoute("orders/my", {
   get: {
     authRequired: true,
     action: function () {
@@ -75,22 +72,24 @@ Api.addRoute("orders/info", {
   },
 });
 
-Api.addRoute("orders/change-membership", {
+Api.addRoute("subscriptions/create", {
   post: {
     authRequired: true,
     action: function () {
       try {
-        const { planId, isYearly } = this.bodyParams;
-        if (!planId) {
+        const { membershipTypeId, billingCycle, paymentMethod } = this.bodyParams;
+        
+        if (!membershipTypeId || !billingCycle) {
           return {
             statusCode: 400,
             body: {
               code: 400,
-              message: "planId is required"
+              message: "membershipTypeId and billingCycle are required"
             }
           };
         }
-        return handleMembershipChange(this.userId, planId, isYearly);
+        
+        return createSubscription(this.userId, membershipTypeId, billingCycle, paymentMethod);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -101,14 +100,14 @@ Api.addRoute("orders/change-membership", {
   },
 });
 
-Api.addRoute("orders/complete-membership-change", {
+Api.addRoute("subscriptions/complete-payment", {
   post: {
     authRequired: true,
     action: function () {
       try {
         const { orderId, transactionId } = this.bodyParams;
-        console.log(this.bodyParams);
-        if (!orderId) {
+        
+        if (!orderId || !transactionId) {
           return {
             statusCode: 400,
             body: {
@@ -117,17 +116,166 @@ Api.addRoute("orders/complete-membership-change", {
             }
           };
         }
-
-        // 更新订单状态为已完成
-        updateOrderStatus(orderId, "completed", transactionId);
         
-        // 处理会员变更
-        handleMembershipChangePayment(orderId);
+        return completeSubscriptionPayment(orderId, transactionId);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
 
+Api.addRoute("subscriptions/current", {
+  get: {
+    authRequired: true,
+    action: function () {
+      try {
+        return getUserSubscription(this.userId);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("subscriptions/upgrade", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        const { membershipId, newMembershipTypeId } = this.bodyParams;
+        
+        if (!membershipId || !newMembershipTypeId) {
+          return {
+            statusCode: 400,
+            body: {
+              code: 400,
+              message: "membershipId and newMembershipTypeId are required"
+            }
+          };
+        }
+        
+        return upgradeSubscription(membershipId, newMembershipTypeId);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("subscriptions/downgrade", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        const { membershipId, newMembershipTypeId } = this.bodyParams;
+        
+        if (!membershipId || !newMembershipTypeId) {
+          return {
+            statusCode: 400,
+            body: {
+              code: 400,
+              message: "membershipId and newMembershipTypeId are required"
+            }
+          };
+        }
+        
+        return downgradeSubscription(membershipId, newMembershipTypeId);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("subscriptions/cancel", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        const { membershipId, reason } = this.bodyParams;
+        
+        if (!membershipId) {
+          return {
+            statusCode: 400,
+            body: {
+              code: 400,
+              message: "membershipId is required"
+            }
+          };
+        }
+        
+        return cancelSubscription(membershipId, reason);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("subscriptions/process-renewals", {
+  post: {
+    authRequired: false,
+    action: function () {
+      try {
+        const renewalsProcessed = processAutoRenewal();
         return {
           success: true,
-          message: "Membership change completed successfully"
+          renewalsProcessed
         };
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("subscriptions/process-pending-changes", {
+  post: {
+    authRequired: false,
+    action: function () {
+      try {
+        const changesProcessed = processPendingChanges();
+        return {
+          success: true,
+          changesProcessed
+        };
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("orders/:_id/cancel", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        const orderId = this.urlParams.id || this.urlParams._id;
+        const { reason } = this.bodyParams;
+        return cancelOrder(orderId, this.userId, reason);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -161,22 +309,5 @@ Api.addRoute("orders/:_id/pdf", {
         message: e.message,
       });
     }
-  },
-});
-
-Api.addRoute("orders/:_id/cancel", {
-  post: {
-    authRequired: true,
-    action: async function () {
-      try {
-        const orderId = this.urlParams.id || this.urlParams._id;
-        return await cancelOrder(orderId, this.userId);
-      } catch (e) {
-        return serverError500({
-          code: 500,
-          message: e.message,
-        });
-      }
-    },
   },
 });

@@ -8,7 +8,7 @@ import _ from "lodash";
 import moment from "moment";
 
 // 分页查询数据
-export function pagination(bodyParams) {
+export async function pagination(bodyParams) {
   let book_id = bodyParams.selector.book_id;
   if (book_id) {
     let match = {
@@ -18,7 +18,7 @@ export function pagination(bodyParams) {
     if (bodyParams.selector && bodyParams.selector.published === "") {
       delete match["article.published"];
     }
-    let bookArticles = BookArticleCollection.rawCollection()
+    let bookArticles = await BookArticleCollection.rawCollection()
       .aggregate([
         { $match: { book_id: bodyParams.selector.book_id } },
         {
@@ -50,7 +50,7 @@ export function pagination(bodyParams) {
         { $limit: bodyParams.options.limit },
       ])
       .toArray();
-    let total = BookArticleCollection.rawCollection()
+    let total = await BookArticleCollection.rawCollection()
       .aggregate([
         { $match: { book_id: bodyParams.selector.book_id } },
         {
@@ -75,6 +75,7 @@ export function pagination(bodyParams) {
         { $count: "total" },
       ])
       .toArray();
+    console.log('bookArticles', bookArticles);
     return {
       data: bookArticles,
       total: total.length > 0 ? total[0].total : 0,

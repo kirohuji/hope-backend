@@ -394,6 +394,7 @@ export function updateDeviceStatus({ userId, status, deviceId }) {
       },
     );
   }
+  return true;
 }
 
 /** firebase */

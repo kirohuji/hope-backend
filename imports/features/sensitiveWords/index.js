@@ -43,9 +43,18 @@ const replaceSensitiveWords = (text) => {
   const sensitiveWords = SensitiveWordsCollection.find({ status: "active" }).fetch();
   let processedText = text;
   
-  sensitiveWords.forEach(({ label, replacement }) => {
-    const regex = new RegExp(label, 'gi');
-    processedText = processedText.replace(regex, replacement || "**");
+  sensitiveWords.forEach((word) => {
+    const regex = new RegExp(word.label, 'gi');
+    const originalText = processedText;
+    processedText = processedText.replace(regex, word.replacement || "**");
+    
+    // If the text was changed, increment the count
+    if (originalText !== processedText) {
+      SensitiveWordsCollection.update(
+        { _id: word._id },
+        { $inc: { count: 1 } }
+      );
+    }
   });
   
   return processedText;

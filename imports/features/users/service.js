@@ -151,7 +151,7 @@ export function info(_id) {
   if (!user) {
     throw new Error("用户不存在");
   }
-  const membership = MembershipCollection.findOne({ _id: _id });
+  const membership = MembershipCollection.findOne({ userId: _id });
   const roles = Meteor.roles
     .find(
       {

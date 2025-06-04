@@ -23,6 +23,10 @@ export default Class.create({
       allowedValues: ["active", "inactive"],
       default: "active", // 默认启用
     },
+    count: {
+      type: Number,
+      default: 0,
+    },  
     category: {
       type: String,
       // allowedValues: ["2", "3", "4", "5", "6", "7", "8"],
