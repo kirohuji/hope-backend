@@ -41,15 +41,15 @@ export function pagination(bodyParams) {
   const enhancedData = orders.map(order => {
     const membershipType = membershipTypeMap[order.membershipTypeId];
     return {
-      ...order,
+    ...order,
       items: orderItemsMap[order._id] || [],
-      customer: userMap[order.userId] || null,
+    customer: userMap[order.userId] || null,
       membershipType: membershipType ? {
         name: membershipType.name,
         identifier: membershipType.identifier
       } : null,
-      createdAt: moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss'),
-      updatedAt: moment(order.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+    createdAt: moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+    updatedAt: moment(order.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
     };
   });
 
@@ -208,7 +208,7 @@ export async function generateOrderPDF(orderId) {
     items: orderItems.map(item => ({
       name: membershipType ? membershipType.name : '未知项目',
       price: (item.unitPrice || 0).toFixed(2),
-      quantity: item.quantity || 1,
+        quantity: item.quantity || 1,
       subtotal: ((item.unitPrice || 0) * (item.quantity || 1)).toFixed(2),
       billingCycle: item.billingCycle === 'yearly' ? '年付' : '月付'
     }))

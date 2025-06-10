@@ -129,7 +129,7 @@ export function infoByCurrent({ userId, user }) {
     )
     .fetch();
   const permissions = roles.filter((item) => item.type === "permission");
-  const membership = MembershipCollection.findOne({ userId: userId }) || {};
+  const membership = MembershipCollection.findOne({ userId: userId, status: "active" }) || {};
   const membershipType = MembershipTypeCollection.findOne({
     _id: membership.membershipTypeId,
   }) || {};

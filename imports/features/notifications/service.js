@@ -173,7 +173,7 @@ const createNotification = ({
       conversationId,
       readedIds: { $nin: [userToken.userId] },
     }).count();
-    notification.topic = 'lourd.hope.app';
+    notification.topic = 'lourd.jiamai.app';
     return {
       message: notification,
       profile,
@@ -212,7 +212,7 @@ export const handleSendPushNotification = ({ contentType, body, conversationId, 
             apnProvider
               .send(notification.message, notification.token)
               .then(result => {
-                console.log('APNs result:', result);
+                console.log('APNs result:', JSON.stringify(result));
               })
               .catch(error => {
                 console.error('Error sending APNs notification:', error);

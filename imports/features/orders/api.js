@@ -8,13 +8,16 @@ import Model, {
 import { pagination, getOrderInfo, getUserOrders, updateOrderStatus, generateOrderPDF, cancelOrder } from "./service";
 import { 
   createSubscription, 
-  completeSubscriptionPayment, 
+  completeSubscriptionPayment,
+  cancelSubscriptionPayment,
   upgradeSubscription, 
   downgradeSubscription, 
   cancelSubscription,
   getUserSubscription,
   processAutoRenewal,
-  processPendingChanges
+  processPendingChanges,
+  changeSubscription,
+  previewSubscriptionChange
 } from "../memberships/service";
 import _ from "lodash";
 
@@ -56,7 +59,7 @@ Api.addRoute("orders/:_id", {
   },
 });
 
-Api.addRoute("orders/my", {
+Api.addRoute("orders/info", {
   get: {
     authRequired: true,
     action: function () {
@@ -72,7 +75,7 @@ Api.addRoute("orders/my", {
   },
 });
 
-Api.addRoute("subscriptions/create", {
+Api.addRoute("orders/subscriptions", {
   post: {
     authRequired: true,
     action: function () {
@@ -100,14 +103,82 @@ Api.addRoute("subscriptions/create", {
   },
 });
 
-Api.addRoute("subscriptions/complete-payment", {
+Api.addRoute("orders/subscriptions/change", {
   post: {
     authRequired: true,
     action: function () {
       try {
-        const { orderId, transactionId } = this.bodyParams;
+        const { membershipTypeId, billingCycle, paymentMethod } = this.bodyParams;
         
-        if (!orderId || !transactionId) {
+        if (!membershipTypeId || !billingCycle) {
+          return {
+            statusCode: 400,
+            body: {
+              code: 400,
+              message: "membershipTypeId and billingCycle are required"
+            }
+          };
+        }
+
+        // 查找用户未支付的订单
+        const pendingOrder = OrderCollection.findOne({
+          userId: this.userId,
+          status: "pending",
+          // type: "subscription"
+        });
+
+        // 如果存在未支付订单，先取消它
+        if (pendingOrder) {
+          cancelSubscriptionPayment(pendingOrder._id, "用户重新下单");
+        }
+        
+        return changeSubscription(this.userId, membershipTypeId, billingCycle, paymentMethod);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("subscriptions/preview-change", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        const { membershipTypeId, billingCycle } = this.bodyParams;
+        
+        if (!membershipTypeId || !billingCycle) {
+          return {
+            statusCode: 400,
+            body: {
+              code: 400,
+              message: "membershipTypeId and billingCycle are required"
+            }
+          };
+        }
+        
+        return previewSubscriptionChange(this.userId, membershipTypeId, billingCycle);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("orders/:_id/subscriptions/complete-payment", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        const { transactionId } = this.bodyParams;
+        
+        if (!this.urlParams._id) {
           return {
             statusCode: 400,
             body: {
@@ -117,7 +188,7 @@ Api.addRoute("subscriptions/complete-payment", {
           };
         }
         
-        return completeSubscriptionPayment(orderId, transactionId);
+        return completeSubscriptionPayment(this.urlParams._id, transactionId);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -128,86 +199,14 @@ Api.addRoute("subscriptions/complete-payment", {
   },
 });
 
-Api.addRoute("subscriptions/current", {
-  get: {
-    authRequired: true,
-    action: function () {
-      try {
-        return getUserSubscription(this.userId);
-      } catch (e) {
-        return serverError500({
-          code: 500,
-          message: e.message,
-        });
-      }
-    },
-  },
-});
-
-Api.addRoute("subscriptions/upgrade", {
+Api.addRoute("orders/subscriptions/:_id/cancel", {
   post: {
     authRequired: true,
     action: function () {
       try {
-        const { membershipId, newMembershipTypeId } = this.bodyParams;
+        const { reason } = this.bodyParams;
         
-        if (!membershipId || !newMembershipTypeId) {
-          return {
-            statusCode: 400,
-            body: {
-              code: 400,
-              message: "membershipId and newMembershipTypeId are required"
-            }
-          };
-        }
-        
-        return upgradeSubscription(membershipId, newMembershipTypeId);
-      } catch (e) {
-        return serverError500({
-          code: 500,
-          message: e.message,
-        });
-      }
-    },
-  },
-});
-
-Api.addRoute("subscriptions/downgrade", {
-  post: {
-    authRequired: true,
-    action: function () {
-      try {
-        const { membershipId, newMembershipTypeId } = this.bodyParams;
-        
-        if (!membershipId || !newMembershipTypeId) {
-          return {
-            statusCode: 400,
-            body: {
-              code: 400,
-              message: "membershipId and newMembershipTypeId are required"
-            }
-          };
-        }
-        
-        return downgradeSubscription(membershipId, newMembershipTypeId);
-      } catch (e) {
-        return serverError500({
-          code: 500,
-          message: e.message,
-        });
-      }
-    },
-  },
-});
-
-Api.addRoute("subscriptions/cancel", {
-  post: {
-    authRequired: true,
-    action: function () {
-      try {
-        const { membershipId, reason } = this.bodyParams;
-        
-        if (!membershipId) {
+        if (!this.urlParams._id) {
           return {
             statusCode: 400,
             body: {
@@ -217,7 +216,7 @@ Api.addRoute("subscriptions/cancel", {
           };
         }
         
-        return cancelSubscription(membershipId, reason);
+        return cancelSubscription(this.urlParams._id, this.userId, reason);
       } catch (e) {
         return serverError500({
           code: 500,
@@ -310,4 +309,73 @@ Api.addRoute("orders/:_id/pdf", {
       });
     }
   },
+});
+
+Api.addRoute("orders/:_id/subscriptions/cancel-payment", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        const { reason } = this.bodyParams;
+        
+        if (!this.urlParams._id) {
+          return {
+            statusCode: 400,
+            body: {
+              code: 400,
+              message: "orderId is required"
+            }
+          };
+        }
+        
+        return cancelSubscriptionPayment(this.urlParams._id, reason);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute('orders/subscriptions/sync', {
+  post: {
+    authRequired: true,
+    action: async function() {
+      const { platform, platformSubscriptionId, status, event } = this.bodyParams;
+      
+      // 查找用户现有的会员记录
+      const membership = MembershipCollection.findOne({
+        userId: this.userId,
+        status: { $in: ["active", "past_due"] }
+      });
+
+      if (membership) {
+        // 更新现有会员记录
+        MembershipCollection.update(membership._id, {
+          $set: {
+            status: status,
+            platform: platform,
+            platformSubscriptionId: platformSubscriptionId,
+            updatedAt: new Date()
+          }
+        });
+      } else {
+        // 创建新的会员记录
+        MembershipCollection.insert({
+          userId: this.userId,
+          platform: platform,
+          platformSubscriptionId: platformSubscriptionId,
+          status: status,
+          createdAt: new Date()
+        });
+      }
+
+      return {
+        code: 200,
+        message: 'Subscription synced successfully'
+      };
+    }
+  }
 });

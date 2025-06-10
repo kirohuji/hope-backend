@@ -26,7 +26,6 @@ export function isNotExistingFile({ collection, user, req, res }) {
     );
     return true;
   }
-  console.log('existingFileWithName', existingFileWithName);
   if (existingFileWithName) {
     res.writeHead(400, { 'Content-Type': 'application/json' });
     res.end(

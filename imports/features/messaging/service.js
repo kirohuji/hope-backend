@@ -374,6 +374,8 @@ export function savePushNotificationToken({ userId, token, device, deviceId }) {
       device,
       deviceId,
     });
+  } else {
+    return false;
   }
 }
 export function updateDeviceStatus({ userId, status, deviceId }) {

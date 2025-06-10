@@ -61,7 +61,7 @@ const handleInitialPurchase = async (webhookData) => {
 const handleRenewal = async (webhookData) => {
   const { event } = webhookData;
   const { transaction_id, product_id, app_user_id } = event;
-  const user = RevenueCatUserCollection.findOne({ appUserId: app_user_id });
+  const user = Meteor.users.findOne({ _id: app_user_id });
   if (!user) {
     throw new Error('User not found');
   }
@@ -103,8 +103,8 @@ const handleRenewal = async (webhookData) => {
       createdAt: new Date(),
       transactionId: transaction_id,
       // 新会员的开始和结束时间
-      newMembershipStartDate: startDate.toISOString(),
-      newMembershipEndDate: endDate.toISOString()
+      newMembershipStartDate: startDate,
+      newMembershipEndDate: endDate
     };
     
     const orderId = await OrderCollection.insert(orderData);

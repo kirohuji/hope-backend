@@ -24,3 +24,4 @@ import "./memberships";
 import "./orders";
 import "./tasks";
 import './revenueCat'
+import './alipay'

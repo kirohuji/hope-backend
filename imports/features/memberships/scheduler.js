@@ -1,6 +1,7 @@
 import { SyncedCron } from 'meteor/littledata:synced-cron';
 import { processAutoRenewal, processPendingChanges } from './service';
 import { MembershipCollection } from './collection';
+import { OrderCollection } from '../orders/collection';
 
 // 自动续订定时任务 - 每小时执行一次
 SyncedCron.add({
@@ -37,8 +38,7 @@ SyncedCron.add({
           failedCount++;
           console.error(`会员 ${membership._id} 续订失败:`, error.message);
           
-          // 可以在这里添加失败处理逻辑，比如发送通知邮件
-          // 或者更新会员状态为 past_due
+          // 更新会员状态为 past_due
           MembershipCollection.update(membership._id, {
             $set: {
               status: "past_due",
@@ -112,7 +112,6 @@ SyncedCron.add({
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       
       // 清理7天前的待支付订单
-      const { OrderCollection } = require('./orders/collection');
       const result = OrderCollection.update(
         {
           status: "pending",
@@ -186,15 +185,12 @@ SyncedCron.add({
       console.log(`找到 ${membershipsExpiringSoon.length} 个即将到期的会员`);
       console.log(`找到 ${membershipsNeedingRenewal.length} 个需要续订提醒的会员`);
       
-      // 这里可以集成邮件服务发送提醒邮件
-      // 比如使用 Meteor 的 Email 包或第三方邮件服务
-      
       let remindersSent = 0;
       
       // 发送到期提醒
       for (const membership of membershipsExpiringSoon) {
         try {
-          // 发送到期提醒邮件的逻辑
+          // TODO: 实现邮件提醒功能
           // await sendExpiryReminderEmail(membership);
           remindersSent++;
         } catch (error) {
@@ -205,7 +201,7 @@ SyncedCron.add({
       // 发送续订提醒
       for (const membership of membershipsNeedingRenewal) {
         try {
-          // 发送续订提醒邮件的逻辑
+          // TODO: 实现邮件提醒功能
           // await sendRenewalReminderEmail(membership);
           remindersSent++;
         } catch (error) {
