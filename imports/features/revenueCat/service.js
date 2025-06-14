@@ -1,6 +1,7 @@
 import { MembershipCollection } from '../memberships/collection';
 import { OrderCollection,OrderItemCollection } from '../orders/collection';
 import { RevenueCatUserCollection } from './collection';
+import { updateOrderStatus } from '../orders/service';
 
 // Handle different types of RevenueCat webhook events
 export const handleRevenueCatWebhook = async (webhookData) => {

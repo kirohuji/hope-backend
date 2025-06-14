@@ -3,14 +3,14 @@
   "private": true,
   "scripts": {
     "start": "MONGO_URL=mongodb://meteor:meteor@115.159.95.166:27017/meteor meteor run --port=3030",
-    "dev": "MONGO_URL=mongodb://dev:dev@124.221.67.248:27017/dev meteor run --port=3030"
+    "dev": "MONGO_URL=mongodb://dev:dev@localhost:27017/dev meteor run --port=3030"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^0.2.14",
     "@babel/runtime": "^7.15.4",
     "@deepgram/sdk": "^4.1.1",
     "@jsdevtools/rehype-toc": "^3.0.2",
-    "ai": "^4.3.15",
+    "ai": "^4.3.16",
     "alipay-sdk": "^3.6.2",
     "apn": "^2.2.0",
     "bcryptjs": "^3.0.2",
