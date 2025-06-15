@@ -15,6 +15,13 @@ export function pagination(bodyParams) {
   if (bodyParams.selector && bodyParams.selector.available == "all") {
     bodyParams.selector = _.pickBy(_.omit(bodyParams.selector, ["available"]));
   }
+  if (bodyParams.selector && bodyParams.selector.isPersona) {
+    delete bodyParams.selector.isPersona;
+    bodyParams.selector = {
+      ...bodyParams.selector,
+      persona:{ "$exists": true }
+    }
+  }
   if (bodyParams.selector && bodyParams.selector.username) {
     let regex = bodyParams.selector.username;
     delete bodyParams.selector.username;

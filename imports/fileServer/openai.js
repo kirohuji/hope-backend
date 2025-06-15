@@ -1,5 +1,8 @@
+import 'web-streams-polyfill';
 import { Picker } from "meteor/communitypackages:picker";
 import https from "https";
+import { createDeepSeek } from '@ai-sdk/deepseek';
+import { streamText } from 'ai';
 import {
   sendMessage,
   updateConversations,
@@ -13,7 +16,7 @@ const CONFIG = {
   API: {
     BASE_URL: "api.deepseek.com",
     PATH: "/chat/completions",
-    KEY: process.env.DEEPSEEK_API_KEY || "sk-d14a278795e34f41b9fe18d2ccd21e10",
+    KEY: process.env.DEEPSEEK_API_KEY || "sk-d3be485b07de4e789cd98d091f9b0a06",
   },
   MODEL: {
     NAME: "deepseek-chat",
@@ -21,6 +24,11 @@ const CONFIG = {
     TEMPERATURE: 0.7,
   },
 };
+
+const deepseek = createDeepSeek({
+  apiKey: CONFIG.API.KEY,
+});
+
 
 // 工具函数
 export const generateUUID = () => {
@@ -38,7 +46,7 @@ const wrappedUpdateMessage = wrapMeteorFunction(updateMessage);
 const wrappedUpdateConversation = wrapMeteorFunction(updateConversations);
 const wrappedUpdateConversationTitle = wrapMeteorFunction(async ({ text, conversationId }) => {
   if (!messageCountByConverstionId(conversationId)) return;
-  
+
   try {
     const title = await generateTitle(text);
     await wrappedUpdateConversation({
@@ -53,7 +61,7 @@ const wrappedUpdateConversationTitle = wrapMeteorFunction(async ({ text, convers
 // API 请求处理函数
 const handleApiRequest = async (req, res, options) => {
   const { requestData, onSuccess, onError } = options;
-  
+
   return new Promise((resolve, reject) => {
     const sseRequest = https.request(
       {
@@ -67,12 +75,12 @@ const handleApiRequest = async (req, res, options) => {
       },
       (response) => {
         let responseData = "";
-        
+
         response.on("data", (chunk) => {
           responseData += chunk;
-          if (onSuccess) onSuccess(chunk);
+          if (onSuccess) onSuccess(chunk.toString('utf8'));
         });
-        
+
         response.on("end", () => {
           if (response.statusCode === 200) {
             resolve(responseData);
@@ -104,7 +112,7 @@ const generateTitle = async (article) => {
         content: `根据以下文章内容生成一个合适的标题,只返回内容:\n\n${article}\n\n:`,
       },
     ],
-    stream: false,
+    stream: true,
     max_tokens: CONFIG.MODEL.MAX_TOKENS,
     temperature: CONFIG.MODEL.TEMPERATURE,
   };
@@ -135,24 +143,12 @@ export default function createOpenai() {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
+    const { prompt, conversationId } = req.body;
 
-    let text = "";
-    const requestData = {
-      model: CONFIG.MODEL.NAME,
-      messages: [
-        {
-          role: "user",
-          content: req.body.prompt,
-        },
-      ],
-      stream: true,
-    };
-
-    // 处理消息ID
     let messageId = "...";
-    if (req.body.conversationId) {
+    if (conversationId) {
       messageId = sendMessage({
-        conversationId: req.body.conversationId,
+        conversationId,
         userId: "a5u9kNTzKAdghpr55",
         bodyParams: {
           isGenerate: true,
@@ -164,42 +160,28 @@ export default function createOpenai() {
         },
       });
     }
-    res.write(`data: ${JSON.stringify({ messageId })}\n\n`);
 
     try {
-      await handleApiRequest(req, res, {
-        requestData,
-        onSuccess: (chunk) => {
-          res.write(chunk);
-          if (chunk && !chunk.includes("data: [DONE]")) {
-            try {
-              const data = JSON.parse(chunk.replace(/^data: /, ""));
-              if (data.choices?.[0]) {
-                text += data.choices[0].delta?.content || "";
-              }
-            } catch (e) {
-              console.error("Chunk parsing error:", e);
-            }
+      const response = await streamText({
+        model: deepseek.chat('deepseek-chat'),
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        onFinish: async ({ text }) => {
+          if (conversationId) {
+            await wrappedUpdateMessage({
+              messageId,
+              text,
+            });
           }
-        },
-        onError: (error) => {
-          res.write(`data: ${JSON.stringify({ error: "Internal server error" })}\n\n`);
           res.end();
         },
       });
 
-      // 处理完成后的操作
-      if (req.body.conversationId) {
-        await wrappedUpdateMessage({
-          messageId,
-          text,
-        });
-        await wrappedUpdateConversationTitle({ 
-          text, 
-          conversationId: req.body.conversationId 
-        });
-      }
-      res.end();
+      response.pipeDataStreamToResponse(res);
     } catch (error) {
       console.error("OpenAI processing error:", error);
       res.write(`data: ${JSON.stringify({ error: "Internal server error" })}\n\n`);
@@ -207,3 +189,4 @@ export default function createOpenai() {
     }
   });
 }
+

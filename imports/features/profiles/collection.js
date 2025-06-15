@@ -74,9 +74,32 @@ Profile.attachSchema({
     type: String,
     required: false,
   },
-  personal: {
+  persona: {
     type: Object,
     required: false,
+    blackbox: true,
+    optional: true,
+    custom() {
+      if (this.value) {
+        const schema = new SimpleSchema({
+          about: { type: String, optional: true },
+          capabilities: { type: String, optional: true },
+          introduction: { type: String, optional: true },
+          knowledgeBase: { type: String, optional: true },
+          llm: { type: String, optional: true },
+          personality: { type: String, optional: true },
+          stt: { type: String, optional: true },
+          topics: { type: Array, optional: true },
+          'topics.$': { type: String },
+          tts: { type: String, optional: true }
+        });
+        const context = schema.newContext();
+        context.validate(this.value);
+        if (!context.isValid()) {
+          return context.validationErrors();
+        }
+      }
+    }
   },
 });
 export default Class.create({
@@ -150,7 +173,7 @@ export default Class.create({
       type: String,
       required: false,
     },
-    personal: {
+    persona: {
       type: Object,
       required: false,
     },
