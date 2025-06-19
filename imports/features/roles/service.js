@@ -3,6 +3,7 @@ import { ScopeCollection } from "../scopes/collection";
 import { Roles } from "meteor/alanning:roles";
 import _ from "lodash";
 import { RuleRole, RuleAssignment } from './collection';
+import { _getInheritedRoleNames } from './api'
 
 // Error handling utilities
 export class RoleError extends Error {
@@ -439,14 +440,14 @@ export function getRolesTreeByCurrentUser({ selector, options, userId }) {
 
 export function permissionTree({ selector, options }) {
   try {
-    if (!selector) {
-      throw new RoleError('Selector is required', 400);
-    }
+    // if (!selector) {
+    //   throw new RoleError('Selector is required', 400);
+    // }
 
     let permissions = Meteor.roles
       .find(
         {
-          ...selector,
+          // ...selector,
           type: "permission",
         } || {},
         options

@@ -805,6 +805,7 @@ Meteor.publish("newMessagesConversations", function (date) {
     return ConversationsCollection.find(
       {
         $or: [{ isRemove: false }, { isRemove: { $exists: false } }],
+        $or: [{ sessionId: { $exists: false } }],
         _id: updatedConversationId,
         _participants: {
           $in: [this.userId],
@@ -816,6 +817,7 @@ Meteor.publish("newMessagesConversations", function (date) {
     return ConversationsCollection.find(
       {
         $or: [{ isRemove: false }, { isRemove: { $exists: false } }],
+        $or: [{ sessionId: { $exists: false } }],
         _participants: {
           $in: [this.userId],
         },

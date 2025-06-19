@@ -11,7 +11,8 @@ export const handleRevenueCatWebhook = async (webhookData) => {
       // case 'INITIAL_PURCHASE':
       //   return handleInitialPurchase(webhookData);
       case 'RENEWAL':
-        return handleRenewal(webhookData);
+        // return handleRenewal(webhookData);
+        break;
       // case 'NON_RENEWING_PURCHASE':
       //   return handleNonRenewingPurchase(webhookData);
       case 'CANCELLATION':

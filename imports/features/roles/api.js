@@ -273,7 +273,7 @@ Api.addRoute('roles/getInheritedRoleNames', {
   },
 });
 
-function _getInheritedRoleNames(role) {
+export function _getInheritedRoleNames(role) {
   const inheritedRoles = new Set();
   const nestedRoles = new Set([]);
   const _init_roles = Meteor.roles
