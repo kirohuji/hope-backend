@@ -1,4 +1,3 @@
-import 'web-streams-polyfill';
 import { Picker } from "meteor/communitypackages:picker";
 import https from "https";
 import { createDeepSeek } from '@ai-sdk/deepseek';
