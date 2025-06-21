@@ -46,7 +46,7 @@ Api.addRoute("posts/:_id", {
     action: function () {
       try {
         return detail({
-          postId: this.urlParams._id,
+          postId: this.urlParams._id || this.urlParams.id,
         });
       } catch (e) {
         return serverError500({
@@ -61,7 +61,7 @@ Api.addRoute("posts/:_id", {
     action: function () {
       try {
         return updatePost({
-          postId: this.urlParams._id,
+          postId: this.urlParams._id || this.urlParams.id,
           bodyParams: this.bodyParams,
         });
       } catch (e) {
@@ -76,7 +76,7 @@ Api.addRoute("posts/:_id", {
     authRequired: true,
     action: function () {
       try {
-        return deletePost(this.urlParams._id);
+        return deletePost(this.urlParams._id || this.urlParams.id);
       } catch (e) {
         return serverError500({
           code: 500,
