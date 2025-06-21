@@ -184,8 +184,9 @@ const createNotification = ({
   }
 };
 
-export const handleSendPushNotification = ({ contentType, body, conversationId, excludeIds }) => {
+export const handleSendPushNotification = ({ contentType, body, conversationId, excludeIds, sendUserId }) => {
   try {
+    const sendUserProfile = ProfilesCollection.findOne({ _id: sendUserId });
     let userIds = ConversationsCollection.findOne({ _id: conversationId })
       .participantsAsUsers()
       .map(item => item._id);
@@ -200,12 +201,12 @@ export const handleSendPushNotification = ({ contentType, body, conversationId, 
     if (userTokens && userTokens.length > 0) {
       userTokens.forEach(userToken => {
         if (Meteor.users.findOne({ _id: userToken.userId })) {
-          const profile = ProfilesCollection.findOne({ _id: userToken.userId });
+          // const profile = ProfilesCollection.findOne({ _id: userToken.userId });
           if (userToken.device.platform === 'ios') {
             const notification = createNotification({
               contentType,
               body,
-              profile,
+              profile: sendUserProfile,
               conversationId,
               userToken,
             });
