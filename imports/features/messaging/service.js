@@ -443,6 +443,7 @@ export function sendMessage({ conversationId, userId, bodyParams }) {
       contentType: bodyParams.contentType,
       conversationId,
       excludeIds: [userId],
+      sendUserId: userId
     });
   }
   return message;
