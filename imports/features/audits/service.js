@@ -1,6 +1,7 @@
 import { AuditCollection } from "./collection";
 import { ProfilesCollection } from "meteor/socialize:user-profile";
 import { PostsCollection } from "meteor/socialize:postable";
+import { handleCreateNotification } from "../notifications/service";
 import _ from "lodash";
 import moment from "moment";
 
@@ -59,6 +60,15 @@ export function moderation(bodyParams) {
         status: "published",
         publishedAt: moment(new Date()).toISOString()
       },
+    })
+    handleCreateNotification({
+      message: "你的内容分享已通过审核",
+      sourceId: bodyParams.sourceId,
+      reviewerId: bodyParams.reviewerId,
+      createdBy: bodyParams.createdBy,
+      title: "你的内容分享已通过审核",
+      type: "delivery",
+      category: "post",
     })
   }
   return AuditCollection.update(

@@ -74,11 +74,23 @@ export default Class.create({
       type: String,
       default: "<p>打卡成功</p>",
     },
+    isBroadcast: {
+      type: Boolean,
+      default: false,
+    },
     isRemove: {
       type: Boolean,
       default: "<p>打卡成功</p>",
     },
     fileId: {
+      type: String,
+      default: "",
+    },
+    sourceId: {
+      type: String,
+      default: "",
+    },
+    sourceType: {
       type: String,
       default: "",
     },

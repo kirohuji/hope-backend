@@ -5,6 +5,7 @@ import { ConversationsCollection, MessagesCollection } from 'meteor/socialize:me
 import { PushNotificationTokenCollection } from '../messaging/collection';
 import apn from 'apn';
 import Bull from 'bull';
+import moment from "moment";
 const CryptoJS = require("crypto-js");
 const SECRET_KEY = "future";
 
@@ -67,6 +68,7 @@ export const handlePagination = (bodyParams) => {
 
 export const handleCurrentPagination = ({ userId, selector, options }) => {
   try {
+    const user = ProfilesCollection.findOne({ _id: userId });
     const notificationUsers = NotificationUserCollection.find(
       {
         userId,
@@ -82,6 +84,10 @@ export const handleCurrentPagination = ({ userId, selector, options }) => {
     const notificationIds = notificationUsers.map(
       item => item.notificationId,
     );
+    const createdByIds = _.map(notificationUsers, "createdBy");
+
+    // 创建 notificationId 到 notificationUser 的映射表，避免重复查找
+    const notificationUserMap = _.keyBy(notificationUsers, 'notificationId');
 
     const notifications = NotificationCollection.find(
       {
@@ -91,12 +97,19 @@ export const handleCurrentPagination = ({ userId, selector, options }) => {
         ...options,
       },
     ).map(notification => {
-      const notificationUser = notificationUsers.find(
-        item => item.notificationId === notification._id,
-      );
+      const notificationUser = notificationUserMap[notification._id];
       return {
         ...notification,
-        isUnRead: notificationUser.isUnRead,
+        photoURL: user.photoURL,
+        // createdUser: {
+        //   _id: user._id,
+        //   displayName: user.displayName,
+        //   username: user.username,
+        //   photoURL: user.photoURL,
+        //   email: user.email,
+        //   phoneNumber: user.phoneNumber,
+        // },
+        isUnRead: notificationUser ? notificationUser.isUnRead : false,
       };
     });
     return notifications;
@@ -197,7 +210,7 @@ export const handleSendPushNotification = ({ contentType, body, conversationId, 
       },
       status: 'deactive',
     }).fetch();
-    
+
     if (userTokens && userTokens.length > 0) {
       userTokens.forEach(userToken => {
         if (Meteor.users.findOne({ _id: userToken.userId })) {
@@ -245,3 +258,38 @@ Meteor.methods({
     }
   },
 });
+
+
+export const handleCreateNotification = ({
+  message,
+  sourceId,
+  reviewerId,
+  createdBy,
+  type,
+  category,
+  title
+}) => {
+  try {
+    const notificationId = NotificationCollection.insert({
+      message,
+      createdAt: moment(new Date()).toISOString(),
+      sourceId,
+      createdBy: reviewerId,
+      isBroadcast: false,
+      type,
+      title,
+      category,
+      isRemove: false,
+    })
+    if (notificationId) {
+      NotificationUserCollection.insert({
+        userId: createdBy,
+        notificationId: notificationId,
+        isUnRead: true,
+        isRemove: false,
+      })
+    }
+  } catch (error) {
+    throw new Error(`Failed to create notification: ${error.message}`);
+  }
+};    

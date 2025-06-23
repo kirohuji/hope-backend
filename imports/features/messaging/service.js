@@ -532,6 +532,8 @@ export function getConversationsByCurrentUser(user, ids) {
         $exists: false,
       },
       $or: [{ isRemove: false }, { isRemove: { $exists: false } }],
+    }, {
+      sort: { updatedAt: -1 }
     })
       .fetch()
       .map(item => {
@@ -573,6 +575,8 @@ export function getConversationsByCurrentUser(user, ids) {
     sessionId: {
       $exists: false,
     },
+  }, {
+    sort: { updatedAt: -1 }
   })
     .fetch()
     .map(item => {

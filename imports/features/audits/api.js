@@ -28,6 +28,7 @@ Api.addRoute("audits/:_id/moderation", {
     try {
       return moderation({
         _id: this.urlParams._id,
+        // createdBy: this.createdBy,
         ...this.bodyParams,
       });
     } catch (e) {
