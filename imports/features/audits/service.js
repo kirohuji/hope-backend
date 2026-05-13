@@ -61,15 +61,27 @@ export function moderation(bodyParams) {
         publishedAt: moment(new Date()).toISOString()
       },
     })
-    handleCreateNotification({
-      message: "你的内容分享已通过审核",
-      sourceId: bodyParams.sourceId,
-      reviewerId: bodyParams.reviewerId,
-      createdBy: bodyParams.createdBy,
-      title: "你的内容分享已通过审核",
-      type: "delivery",
-      category: "post",
-    })
+    if(bodyParams.status === "rejected"){
+      handleCreateNotification({
+        message: "你的内容分享已经被驳回",
+        sourceId: bodyParams.sourceId,
+        reviewerId: bodyParams.reviewerId,
+        createdBy: bodyParams.createdBy,
+        title: `你的内容分享已经被驳回: ${bodyParams.reason}`,
+        type: "delivery",
+        category: "post",
+      })
+    } else {
+      handleCreateNotification({
+        message: "你的内容分享已通过审核",
+        sourceId: bodyParams.sourceId,
+        reviewerId: bodyParams.reviewerId,
+        createdBy: bodyParams.createdBy,
+        title: "你的内容分享已通过审核",
+        type: "delivery",
+        category: "post",
+      })
+    }
   }
   return AuditCollection.update(
     {
