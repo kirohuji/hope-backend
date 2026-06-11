@@ -3,7 +3,7 @@ import { ProfilesCollection } from "meteor/socialize:user-profile";
 import { Storage } from "../../fileServer/avatar";
 import _ from "lodash";
 
-let TOTALLIMIT = 150000000;
+let TOTALLIMIT = 53687091200; // 50GB
 async function getUserTotalSize(userId) {
   let fileIds = FileUserCollection.find({
     user_id: userId,
@@ -203,7 +203,7 @@ export function denyShareFile({ userId, bodyParams }) {
       },
     }
   );
-  if (!!isUpdate) throw new Error("拒绝文件失败,请重试");
+  if (!isUpdate) throw new Error("拒绝文件失败,请重试");
   Meteor.notifications.insert({
     fileId: bodyParams.fileId || bodyParams.file_id,
     type: "chat",

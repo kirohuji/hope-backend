@@ -120,7 +120,7 @@ export function UUID() {
   });
 }
 
-export let TOTALLIMIT = 150000000;
+export let TOTALLIMIT = 53687091200; // 50GB
 
 export async function getUserTotalSize(userId) {
   let fileIds = FileUserCollection.find({

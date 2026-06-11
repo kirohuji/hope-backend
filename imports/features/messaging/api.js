@@ -40,6 +40,7 @@ import {
   handleIsParticipatingInByCurrentUser,
   handleIsParticipatingIn,
   handleSoftRemoveConversation,
+  handleSoftRemoveMessage,
   sendHuaweiPush
 } from "./service";
 import { serverError500 } from "../base/api";
@@ -701,6 +702,25 @@ Api.addRoute("messaging/conversations/delete/:_id", {
     action: function () {
       try {
         return handleSoftRemoveConversation(this.urlParams._id, this.userId);
+      } catch (e) {
+        return serverError500({
+          code: 500,
+          message: e.message,
+        });
+      }
+    },
+  },
+});
+
+Api.addRoute("messaging/messages/:_id/delete", {
+  post: {
+    authRequired: true,
+    action: function () {
+      try {
+        return handleSoftRemoveMessage({
+          messageId: this.urlParams._id,
+          userId: this.userId,
+        });
       } catch (e) {
         return serverError500({
           code: 500,

@@ -1165,3 +1165,37 @@ export const handleSoftRemoveConversation = (conversationId, userId) => {
     throw new Error(`Failed to soft remove conversation: ${error.message}`);
   }
 };
+
+// 软删除单条消息
+function softRemoveMessage({ messageId, userId }) {
+  const message = MessagesCollection.findOne({ _id: messageId });
+  if (!message) {
+    throw new Error('消息不存在');
+  }
+
+  // 检查用户是否是会话参与者
+  const conversation = ConversationsCollection.findOne({ _id: message.conversationId });
+  if (!conversation) {
+    throw new Error('会话不存在');
+  }
+  if (!conversation._participants.includes(userId)) {
+    throw new Error('无权删除此消息');
+  }
+
+  return MessagesCollection.update(
+    { _id: messageId },
+    {
+      $addToSet: {
+        deleteIds: userId,
+      },
+    },
+  );
+}
+
+export const handleSoftRemoveMessage = ({ messageId, userId }) => {
+  try {
+    return softRemoveMessage({ messageId, userId });
+  } catch (error) {
+    throw new Error(`Failed to soft remove message: ${error.message}`);
+  }
+};
