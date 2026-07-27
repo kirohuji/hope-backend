@@ -276,7 +276,7 @@ export function messagesWithDate({ date, conversationId, bodyParams }) {
 }
 
 // 获取会话的消息
-export function attachments({ conversationId }) {
+export function attachments(conversationId) {
   return MessagesCollection.find({
     conversationId,
     attachments: { $exists: true, $elemMatch: { $exists: true } },
@@ -1182,11 +1182,13 @@ function softRemoveMessage({ messageId, userId }) {
     throw new Error('无权删除此消息');
   }
 
+  const deleteIds = message.userId === userId ? conversation._participants : [userId];
+
   return MessagesCollection.update(
     { _id: messageId },
     {
       $addToSet: {
-        deleteIds: userId,
+        deleteIds: { $each: deleteIds },
       },
     },
   );

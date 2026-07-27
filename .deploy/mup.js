@@ -12,8 +12,8 @@ module.exports = {
     },
     nginxServerConfig: './server.conf',
     shared: {
-      httpPort: 80,
-      httpsPort: 443,
+      httpPort: 9081,
+      httpsPort: 9443,
       nginxConfig: './nginx.conf',
       env: {
         DEFAULT_HOST: 'hope.lourd.top'
@@ -49,7 +49,7 @@ module.exports = {
       serverOnly: true,
     },
     env: {
-      ROOT_URL: 'https://hope.lourd.top',
+      ROOT_URL: 'https://hope.lourd.top:9443',
       MONGO_URL: 'mongodb://meteor:meteor@115.159.95.166:27017/meteor',
     },
     docker: {
